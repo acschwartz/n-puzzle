@@ -3,7 +3,7 @@
 import sys
 import resource
 from time import perf_counter
-from npuzzle.visualizer import visualizer
+#from npuzzle.visualizer import visualizer
 from npuzzle.search import a_star_search, ida_star_search
 from npuzzle.is_solvable import is_solvable
 from npuzzle import colors
@@ -115,6 +115,6 @@ if __name__ == '__main__':
         print(color('red','solution not found'))
     print(color('magenta','space complexity:'), complexity['space'], 'nodes in memory')
     print(color('magenta','time complexity:'), complexity['time'], 'evaluated nodes')
-    if success and args.v:
-        visualizer(steps, size)
+#    if success and args.v:
+#        visualizer(steps, size)
 
