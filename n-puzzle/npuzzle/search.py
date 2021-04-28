@@ -12,7 +12,7 @@ def clone_and_swap(data,y0,y1):
     clone[y1] = tmp
     return tuple(clone)
 
-def possible_moves(data, size):     # returns CHILDREN
+def get_children(data, size):     # returns CHILDREN
     res = []
     y = data.index(EMPTY_TILE)
     if y % size > 0:
@@ -30,6 +30,7 @@ def possible_moves(data, size):     # returns CHILDREN
     return res      # PLEASE SHUFFLE LATER
 
 def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST):
+    
     def search(path, g, bound, evaluated):
         evaluated += 1
         node = path[0]
@@ -39,10 +40,10 @@ def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST):
         if node == goal_state:
             return True, evaluated
         ret = inf
-        moves = possible_moves(node, size)
-        for m in moves:
-            if m not in path:
-                path.appendleft(m)
+        children = get_children(node, size)
+        for child in children:
+            if child not in path:
+                path.appendleft(child)
                 t, evaluated = search(path, g + TRANSITION_COST, bound, evaluated)
                 if t is True:
                     return True, evaluated
@@ -86,7 +87,7 @@ def a_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST): # T
         closed_set[node] = parent # add node to explored set (dictionary) with a "pointer" to its paren
         del open_set[node]
         child_g_thispath = node_g + TRANSITION_COST
-        children = possible_moves(node, size)
+        children = get_children(node, size)
         for child in children:
             if child in closed_set:
                 continue # prune
