@@ -1,0 +1,9 @@
+ #puzzle type = zero first
+ # Korf's 100 random: # 2
+ # nodes generated: ~15.3 million
+ 4
+13 5 4 10
+ 9 12 8 14
+ 2 3 7 1
+ 0 15 11 6
+ 
