@@ -65,41 +65,62 @@ def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST):
         else:
             bound = t
 
-def a_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST): # TODO: do we really need to pass in size?
+
+def a_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST):
+    
     counter = count()
-    queue = [(0, next(counter), init_state, 0, None)]
-    #node:(f=0, count=next(counter), state=init_state, g=0, parent=None)
-    # 	(fcost, count (order of generation? tiebreaker?), curr node, g curr node, parent)   ? i think
-    open_set = {init_state:None}
-    # 'interesting' choice to have open set AND priority queue
-    closed_set = {}
-    while queue:
-        _, _, node, g_node, parent = heappop(queue)    # _ throws away value 
+    pqueue = [(0, next(counter), init_state, 0, None)]
+            # (f, gen_order,     node,       g, parent)
+    frontier = {init_state: (0, HEURISTIC(init_state, goal_state, size))}
+        # frontier = {node: (g, h)}
+    explored = {}
+        # explored = {node: parent}
+
+    '''
+    There is a frontier set AND a priority queue for this reason:
+    https://docs.python.org/3/library/heapq.html#priority-queue-implementation-notes
+    '''
+    
+    while pqueue:
+        _, _, node, g_node, parent = heappop(pqueue)
+        
         if node == goal_state:
             path = [node]
             while parent is not None:
                 path.append(parent)
-                parent = closed_set[parent]
+                parent = explored[parent]
             path.reverse()
-            nodes_generated = len(open_set) + len(closed_set)
+            nodes_generated = len(frontier) + len(explored)
             return (True, path, {'space':nodes_generated, 'time':nodes_generated})
-        if node in closed_set:
-            continue   # prune
-        closed_set[node] = parent # add node to explored set (dictionary) with a "pointer" to its paren
-        del open_set[node]
+        
+        if node in explored:
+            continue  #prune
+        
+        # (else:)
+        explored[node] = parent
+        # add node to explored set (dict.) with "pointer" to parent from which it was discovered
+        del frontier[node]
+        
         g_child_thispath = g_node + TRANSITION_COST
         children = get_children(node, size)
         for child in children:
-            if child in closed_set:
-                continue # prune
-            if child in open_set: # child in frontier --> check if this path is better
-                g_child_in_frontier, h_child = open_set[child] # get what's in the frontier
+            if child in explored:
+                #prune
+                continue
+            if child in frontier:
+                # check if this current path to it is better than what we've found so far
+                g_child_in_frontier, h_child = frontier[child]
                 if g_child_thispath >= g_child_in_frontier:
-                    continue
+                    continue #prune this path
+                else:
+                    pass
             else:
                 h_child = HEURISTIC(child, goal_state, size)
-            open_set[child] = g_child_thispath, h_child
-            heappush(queue, (h_child + g_child_thispath, next(counter), child, g_child_thispath, node))
-    nodes_generated = len(open_set) + len(closed_set)
+            
+            frontier[child] = g_child_thispath, h_child
+            heappush(pqueue, (h_child + g_child_thispath, next(counter), child, g_child_thispath, node))
+        #\endfor
+                
+    nodes_generated = len(frontier) + len(explored)
     return (False, [], {'space':nodes_generated, 'time':nodes_generated})
 
