@@ -29,7 +29,7 @@ def possible_moves(data, size):     # returns CHILDREN
         res.append(down)
     return res      # PLEASE SHUFFLE LATER
 
-def ida_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST):
+def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST):
     def search(path, g, bound, evaluated):
         evaluated += 1
         node = path[0]
@@ -51,8 +51,8 @@ def ida_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST):
                 path.popleft()
         return ret, evaluated
 
-    bound = HEURISTIC(puzzle, goal_state, size)
-    path = deque([puzzle])
+    bound = HEURISTIC(init_state, goal_state, size)
+    path = deque([init_state])
     evaluated = 0
     while path:
         t, evaluated = search(path, 0, bound, evaluated)
@@ -64,36 +64,39 @@ def ida_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST):
         else:
             bound = t
 
-def a_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST):
-    c = count()
-    queue = [(0, next(c), puzzle, 0, None)]
-    open_set = {puzzle:None}
+def a_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST): # TODO: do we really need to pass in size?
+    counter = count()
+    queue = [(0, next(counter), init_state, 0, None)]
+    # 	(fcost, count (order of expansion? tiebreaker?), curr node, g curr node, parent)   ? i think
+    open_set = {init_state:None}
+    # 'interesting' choice to have open set AND priority queue
     closed_set = {}
     while queue:
-        _, _, node, node_g, parent = heappop(queue)
+        _, _, node, node_g, parent = heappop(queue)    # _ throws away value 
         if node == goal_state:
-            steps = [node]
+            path = [node]
             while parent is not None:
-                steps.append(parent)
+                path.append(parent)
                 parent = closed_set[parent]
-            steps.reverse()
+            path.reverse()
             nodes_generated = len(open_set) + len(closed_set)
-            return (True, steps, {'space':nodes_generated, 'time':nodes_generated})
+            return (True, path, {'space':nodes_generated, 'time':nodes_generated})
         if node in closed_set:
-            continue
-        closed_set[node] = parent
+            continue   # prune
+        closed_set[node] = parent # add node to explored set (dictionary) with a "pointer" to its paren
         del open_set[node]
-        tentative_g = node_g + TRANSITION_COST
-        moves = possible_moves(node, size)
-        for m in moves:
-            if m in closed_set:
-                continue
-            if m in open_set:
-                move_g, move_h = open_set[m]
-                if move_g <= tentative_g:
+        child_g_thispath = node_g + TRANSITION_COST
+        children = possible_moves(node, size)
+        for child in children:
+            if child in closed_set:
+                continue # prune
+            if child in open_set: # child in frontier --> check if this path is better
+                child_g_in_frontier, child_h = open_set[child] # get what's in the frontier
+                if child_g_thispath >= child_g_in_frontier:
                     continue
             else:
-                move_h = HEURISTIC(m, goal_state, size)
-            open_set[m] = tentative_g, move_h
-            heappush(queue, (move_h + tentative_g, next(c), m, tentative_g, node))
-    return (False, [], {'space':len(open_set), 'time':len(closed_set)})
+                child_h = HEURISTIC(child, goal_state, size)
+            open_set[child] = child_g_thispath, child_h
+            heappush(queue, (child_h + child_g_thispath, next(counter), child, child_g_thispath, node))
+    nodes_generated = len(open_set) + len(closed_set)
+    return (False, [], {'space':nodes_generated, 'time':nodes_generated})
