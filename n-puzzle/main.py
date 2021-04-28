@@ -10,7 +10,7 @@ from npuzzle import colors
 from npuzzle.colors import color
 from npuzzle import parser
 from npuzzle import heuristics
-from npuzzle import solved_states
+from npuzzle import goal_states
 
 def pretty_print_steps(steps, size):
     width = len(str(size*size))
@@ -35,11 +35,11 @@ def pretty_print_steps(steps, size):
 def color_yes_no(v):
     return color('green', 'YES') if v else color('red', 'NO')
 
-def verbose_info(args, puzzle, solved, size):
+def verbose_info(args, puzzle, goal_state, size):
     opts1 = {'greedy search:': args.g,
             'uniform cost search:': args.u,
             'visualizer:': args.v,
-            'solvable:': is_solvable(puzzle, solved, size)
+            'solvable:': is_solvable(puzzle, goal_state, size)
             }
     opt_color = 'cyan2'
     for k,v in opts1.items():
@@ -49,13 +49,13 @@ def verbose_info(args, puzzle, solved, size):
             'puzzle size:': str(size),
             'solution type:': color('green2', args.s),
             'initial state:': str(puzzle),
-            'final state:': str(solved)}
+            'final state:': str(goal_state)}
     for k,v in opts2.items():
         print(color(opt_color, k), v)
    
     print(color('blue2', 'heuristic scores for initial state'))
     for k,v in heuristics.KV.items():
-        print(color('blue2', '  - ' + k + '\t:'), v(puzzle, solved, size))
+        print(color('blue2', '  - ' + k + '\t:'), v(puzzle, goal_state, size))
 
     print(color('red2', 'search algorithm:'), 'IDA*' if args.ida else 'A*')
 
@@ -80,9 +80,9 @@ if __name__ == '__main__':
     if args.u:
         HEURISTIC = heuristics.uniform_cost
 
-    solved = solved_states.KV[args.s](size)
-    verbose_info(args, puzzle, solved, size)
-    if not is_solvable(puzzle, solved, size):
+    goal_state = goal_states.KV[args.s](size)
+    verbose_info(args, puzzle, goal_state, size)
+    if not is_solvable(puzzle, goal_state, size):
         print(color('red','this puzzle is not solvable'))
         sys.exit(0)
 
@@ -91,9 +91,9 @@ if __name__ == '__main__':
 
     t_start = perf_counter()
     if args.ida:
-        res = ida_star_search(puzzle, solved, size, HEURISTIC, TRANSITION_COST)
+        res = ida_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST)
     else:
-        res = a_star_search(puzzle, solved, size, HEURISTIC, TRANSITION_COST)
+        res = a_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST)
     t_delta = perf_counter() - t_start
 
     maxrss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss

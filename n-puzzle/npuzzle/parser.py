@@ -1,6 +1,6 @@
 import argparse
 from npuzzle import heuristics
-from npuzzle import solved_states
+from npuzzle import goal_states
 
 def is_valid_input(data):
     if len(data[0]) != 1:
@@ -30,7 +30,7 @@ def get_input():
     parser.add_argument('-g', action='store_true', help='greedy search')
     parser.add_argument('-u', action='store_true', help='uniform-cost search')
     parser.add_argument('-f', help='heuristic function', choices=list(heuristics.KV.keys()), default='manhattan')
-    parser.add_argument('-s', help='solved state', choices=list(solved_states.KV.keys()), default='snail')
+    parser.add_argument('-s', help='goal state', choices=list(goal_states.KV.keys()), default='snail')
     parser.add_argument('-p', action='store_true', help='pretty print solution steps')
     parser.add_argument('-v', action='store_true', help='gui visualizer')
     parser.add_argument('file', help='input file', type=argparse.FileType('r'))
