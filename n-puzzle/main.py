@@ -31,6 +31,16 @@ def pretty_print_steps(steps, size):
         print()
     print('%s' % (20*decor,))
 
+def GetHumanReadableSize(size,precision=2):
+# SOURCE: https://stackoverflow.com/questions/5194057/better-way-to-convert-file-sizes-in-python/14822210
+# http://code.activestate.com/recipes/578019-bytes-to-human-human-to-bytes-converter/
+    suffixes=['B','KB','MB','GB','TB']
+    suffixIndex = 0
+    while size > 1024 and suffixIndex < 4:
+        suffixIndex += 1 #increment the index of the suffix
+        size = size/1024.0 #apply the division
+    return "%.*f%s"%(precision,size,suffixes[suffixIndex])
+
 
 def color_yes_no(v):
     return color('green', 'YES') if v else color('red', 'NO')
@@ -86,8 +96,8 @@ if __name__ == '__main__':
         print(color('red','this puzzle is not solvable'))
         sys.exit(0)
 
-    maxrss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-    print(color('red', 'max rss before search:'), maxrss)
+    maxrss_before_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    print(color('red', 'max rss before search:'), maxrss_before_search)
 
     t_start = perf_counter()
     if args.ida:
@@ -96,8 +106,11 @@ if __name__ == '__main__':
         res = a_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST)
     t_delta = perf_counter() - t_start
 
-    maxrss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-    print(color('red', 'max rss after search: '), maxrss)
+    maxrss_after_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    print(color('red', 'max rss after search: '), maxrss_after_search)
+
+    maxrss_delta = GetHumanReadableSize(maxrss_after_search-maxrss_before_search, 2)
+    print(color('red', 'max rss delta: '), maxrss_delta)
 
     print(color('yellow','search duration:') + ' %.4f second(s)' % (t_delta))
     success, steps, complexity = res
@@ -118,3 +131,4 @@ if __name__ == '__main__':
 #    if success and args.v:
 #        visualizer(steps, size)
 
+    
