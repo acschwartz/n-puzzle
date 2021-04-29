@@ -2,6 +2,7 @@ from itertools import count
 from heapq import heappush, heappop
 from collections import deque
 from math import inf
+from random import shuffle
 
 EMPTY_TILE = 0
 
@@ -27,7 +28,8 @@ def get_children(data, size):     # returns CHILDREN
     if y + size < len(data):
         down = clone_and_swap(data,y,y+size)
         res.append(down)
-    return res      # PLEASE SHUFFLE LATER
+#    shuffle(res)
+    return res
 
 #def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST):
 #    
@@ -231,42 +233,56 @@ def depth_limited_search(problem, limit=50):
 
 ###
 
+global ida_star_nodes_generated
+
 def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST):
     
-    def search(path, g, f_limit): #, generated_count):
-#            generated_count += 1
+    def DoSearch(path, g, f_limit):#, nodes_generated):
+        # this really counts nodes explored
+#        global nodes_generated
+#        nodes_generated += 1
+        
+        # THIS IS FOR A "LEAF" NODE
         node = path[0]
         f_node = g + HEURISTIC(node, goal_state, size)
         if f_node > f_limit:		# if this node's f-cost exceeds limit, "prune" it and return the f...
-            return False, f_node #, generated_count
+            return False, f_node#, nodes_generated
 #                return {'goal_found': False, 'min_fcost_over_limit': f}
             # I'm not sure that is correct
         if node == goal_state:
-            return True, g  #, generated_count				
-
+            return True, g#, nodes_generated
+        
+        # THIS IS FOR NODES THAT CAN BE EXPANDED
         min_fcost_exceeding_limit = inf
         children = get_children(node, size)
-#        nodes_generated += len(children)
+        global ida_star_nodes_generated
+        ida_star_nodes_generated += len(children)
+        shuffle(children)
         for child in children:
             if child not in path:
                 path.appendleft(child)   # add child to LIFO queue "try it on" in the path, so to speak
                 result = {}
-                result['goal_found'], result['fcost_over_limit'] = search(path, g + TRANSITION_COST, f_limit)#, generated_count)  # and then "try on" its children
+                #result['goal_found'], result['fcost_over_limit'], nodes_generated
+                
+                result['goal_found'], result['fcost_over_limit'] = DoSearch(path, g + TRANSITION_COST, f_limit)  # and then "try on" its children
                 if result['goal_found'] is True:			# different than " == True" btw
-                    return True, g+TRANSITION_COST #,generated_count
+                    return True, g+TRANSITION_COST#, nodes_generated
                 if result['fcost_over_limit'] < min_fcost_exceeding_limit:
                     min_fcost_exceeding_limit = result['fcost_over_limit']
                 # when that child's subtree is fully explored... pop it back off
                 path.popleft()
+#            else:
+#                nodes_generated -= 1
         
-        return False, min_fcost_exceeding_limit
+        return False, min_fcost_exceeding_limit#, nodes_generated
 #        return {'goal_found': False, 'min_fcost_over_limit': min_fcost_exceeding_limit}
 
         # searchresults = {'goal_found': True/False, 'min_fcost_over_limit': 5, 'nodes_generated_this_search':xx}
             
     
     
-    nodes_generated = 1
+    global ida_star_nodes_generated
+    ida_star_nodes_generated = 0
     max_nodes_in_memory = 0
     f_limit = HEURISTIC(init_state, goal_state, size)
     path = deque([init_state])
@@ -278,13 +294,14 @@ def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST):
         # searchresults = {'goal_found': True/False, 'min_fcost_over_limit': 5, 'nodes_generated_this_search':xx}
         
         searchresults = {}
-        searchresults['goal_found'], searchresults['min_fcost_over_limit']  = search(path, 0, f_limit)#, nodes_generated)
+        searchresults['goal_found'], searchresults['min_fcost_over_limit']  = DoSearch(path, 0, f_limit)#, nodes_generated)
+#        nodes_generated += searchresults['nodes_generated']
         
         if searchresults['goal_found'] is True:
             path.reverse()
-            return (True, path, {'space':len(path), 'time':nodes_generated})
+            return (True, path, {'space':len(path), 'time':ida_star_nodes_generated})
         elif searchresults['goal_found'] is False and searchresults['min_fcost_over_limit'] is inf:
-            return (False, [], {'space':len(path), 'time':nodes_generated}) 
+            return (False, [], {'space':len(path), 'time':ida_star_nodes_generated}) 
         else:
             f_limit = searchresults['min_fcost_over_limit']
             
