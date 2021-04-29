@@ -257,7 +257,7 @@ def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST):
         children = get_children(node, size)
         global ida_star_nodes_generated
         ida_star_nodes_generated += len(children)
-        shuffle(children)
+#        shuffle(children)
         for child in children:
             if child not in path:
                 path.appendleft(child)   # add child to LIFO queue "try it on" in the path, so to speak
