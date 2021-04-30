@@ -2,6 +2,7 @@ from itertools import count
 from heapq import heappush, heappop
 from collections import deque
 from math import inf
+from random import shuffle
 
 EMPTY_TILE = 0
 
@@ -27,43 +28,8 @@ def get_children(data, size):     # returns CHILDREN
     if y + size < len(data):
         down = clone_and_swap(data,y,y+size)
         res.append(down)
-    return res      # PLEASE SHUFFLE LATER
-
-def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST):
-    
-    def search(path, g, bound, evaluated):
-        evaluated += 1
-        node = path[0]
-        f = g + HEURISTIC(node, goal_state, size)
-        if f > bound:
-            return f, evaluated
-        if node == goal_state:
-            return True, evaluated
-        ret = inf
-        children = get_children(node, size)
-        for child in children:
-            if child not in path:
-                path.appendleft(child)
-                t, evaluated = search(path, g + TRANSITION_COST, bound, evaluated)
-                if t is True:
-                    return True, evaluated
-                if t < ret:
-                    ret = t
-                path.popleft()
-        return ret, evaluated
-
-    bound = HEURISTIC(init_state, goal_state, size)
-    path = deque([init_state])
-    evaluated = 0
-    while path:
-        t, evaluated = search(path, 0, bound, evaluated)
-        if t is True:
-            path.reverse()
-            return (True, path, {'space':len(path), 'time':evaluated})
-        elif t is inf:
-            return (False, [], {'space':len(path), 'time':evaluated})
-        else:
-            bound = t
+#    shuffle(res)
+    return res
 
 
 def a_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST):
@@ -123,4 +89,63 @@ def a_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST):
                 
     nodes_generated = len(frontier) + len(explored)
     return (False, [], {'space':nodes_generated, 'time':nodes_generated})
+                    
+
+
+'''
+Each iteration of IDA* is a complete depth-first search that keeps track of the cost, f(n) = g(n)+h(n), of each node generated. As soon as this cost exceeds some threshold, that branch is cut off, and the search BACKTRACKS to the most recently generated node. The cost threshold starts with the heuristic estimate of the initial state and in each successive iteration is increased to the minimum value that exceeded the previous threshold.
+Since at any point IDA* is performing a depth-first search, the memory requirement of the algorithm is linear in the solution depth.
+'''
+global ida_star_nodes_generated
+def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST):
+    
+    def DFS(path, g, f_limit):
+        global ida_star_nodes_generated
+        ida_star_nodes_generated += 1
+        # Note: while I would normally consider the above to count "nodes expanded", since the line of code is executed when a node is expanded. However, after some research, it looks that this implementation features backtracking, where only one node is generated at a time (and uses O(m) memory instead of O(bm). Therefore the above count is correct.
+        
+        
+        # THIS IS FOR A "LEAF" NODE (i.e. nodes that cannot be expanded)
+        node = path[0]
+        f_node = g + HEURISTIC(node, goal_state, size)
+        if f_node > f_limit:
+            return False, f_node
+        if node == goal_state:
+            return True, g
+        
+        # THIS IS FOR NODES THAT CAN BE EXPANDED
+        min_fcost_exceeding_limit = inf
+        children = get_children(node, size)
+#        shuffle(children)
+        for child in children:
+            if child not in path:
+                path.appendleft(child)   # add child to LIFO queue "try it on" in the path, so to speak
+                result = {}
+                result['goal_found'], result['fcost_over_limit'] = DFS(path, g + TRANSITION_COST, f_limit)  # and then "try on" its children
+                if result['goal_found'] is True:			# different than " == True" btw
+                    return True, g + TRANSITION_COST
+                if result['fcost_over_limit'] < min_fcost_exceeding_limit:
+                    min_fcost_exceeding_limit = result['fcost_over_limit']
+                path.popleft()  # when that child's subtree is fully explored... pop it back off to backtrack up the path
+        return False, min_fcost_exceeding_limit
+            
+    
+    global ida_star_nodes_generated
+    ida_star_nodes_generated = 0
+    f_limit = HEURISTIC(init_state, goal_state, size)
+    
+    path = deque([init_state])
+    
+    while path:
+        searchresults = {}
+        searchresults['goal_found'], searchresults['min_fcost_over_limit']  = DFS(path, 0, f_limit)
+        
+        if searchresults['goal_found'] is True:
+            path.reverse()
+            return (True, path, {'space':len(path), 'time':ida_star_nodes_generated})
+        
+        elif searchresults['goal_found'] is False and searchresults['min_fcost_over_limit'] is inf:
+            return (False, [], {'space':len(path), 'time':ida_star_nodes_generated}) 
+        else:
+            f_limit = searchresults['min_fcost_over_limit']
 
