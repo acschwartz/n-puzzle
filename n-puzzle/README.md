@@ -1,7 +1,7 @@
 # n-puzzle @ 42 fremont
 
 ```
-usage: solver.py [-h] [-c] [-ida] [-g] [-u]
+usage: solver.py [-h] [-c] [-ida] [-r] [-g] [-u]
                  [-f {hamming,gaschnig,manhattan,conflicts}]
                  [-s {zero_first,zero_last,snail}] [-p] [-v]
                  file
@@ -15,6 +15,7 @@ optional arguments:
   -h, --help            show this help message and exit
   -c                    colors
   -ida                  ida* search
+  -ida -r               ida* search with random node ordering
   -g                    greedy search
   -u                    uniform-cost search
   -f {hamming,gaschnig,manhattan,conflicts}
@@ -35,6 +36,10 @@ or use `-ida` for **IDA\***
 - light on memory
 - slower than a\*
 
+use `-ida -r` for **IDA\* with randomized node ordering**
+- generates child nodes in randomized order insted of hard-coded order every time
+- peformance improvement over regular IDA\*
+- `-r` does nothing if passed without `-ida`
 
 
 #### input puzzle configurations:

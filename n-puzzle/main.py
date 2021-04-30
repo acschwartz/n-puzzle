@@ -46,7 +46,8 @@ def color_yes_no(v):
     return color('green', 'YES') if v else color('red', 'NO')
 
 def verbose_info(args, puzzle, goal_state, size):
-    opts1 = {'greedy search:': args.g,
+    opts1 = {
+            'greedy search:': args.g,
             'uniform cost search:': args.u,
             'visualizer:': args.v,
             'solvable:': is_solvable(puzzle, goal_state, size)
@@ -67,7 +68,7 @@ def verbose_info(args, puzzle, goal_state, size):
     for k,v in heuristics.KV.items():
         print(color('blue2', '  - ' + k + '\t:'), v(puzzle, goal_state, size))
 
-    print(color('red2', 'search algorithm:'), 'IDA*' if args.ida else 'A*')
+    print(color('red2', 'search algorithm:'), ('IDA* w/ random node ordering' if args.r else 'IDA*') if args.ida else 'A*')
 
 #########################################################################################
 
@@ -81,6 +82,8 @@ if __name__ == '__main__':
 
     if args.ida:
         args.g = False
+    
+    RANDOM_NODE_ORDER = args.r
 
     TRANSITION_COST = 1
     if args.g:
@@ -101,7 +104,7 @@ if __name__ == '__main__':
 
     t_start = perf_counter()
     if args.ida:
-        res = ida_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST)
+        res = ida_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST, RANDOM_NODE_ORDER)
     else:
         res = a_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST)
     t_delta = perf_counter() - t_start

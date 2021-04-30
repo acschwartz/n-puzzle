@@ -97,7 +97,7 @@ Each iteration of IDA* is a complete depth-first search that keeps track of the 
 Since at any point IDA* is performing a depth-first search, the memory requirement of the algorithm is linear in the solution depth.
 '''
 global ida_star_nodes_generated
-def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST):
+def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST, RANDOM_NODE_ORDER):
     
     def DFS(path, g, f_limit):
         global ida_star_nodes_generated
@@ -116,7 +116,7 @@ def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST):
         # THIS IS FOR NODES THAT CAN BE EXPANDED
         min_fcost_exceeding_limit = inf
         children = get_children(node, size)
-#        shuffle(children)
+        if RANDOM_NODE_ORDER: shuffle(children)
         for child in children:
             if child not in path:
                 path.appendleft(child)   # add child to LIFO queue "try it on" in the path, so to speak
