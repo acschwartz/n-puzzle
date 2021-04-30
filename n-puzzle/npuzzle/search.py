@@ -93,7 +93,7 @@ def a_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST):
 
 
 '''
-Each iteration of IDA* is a complete depth-first search that keeps track of the cost, f(n) = g(n)+h(n), of each node generated. As soon as this cost exceeds some threshold, that branch is cut off, and the search BACKTRACKS to the most recently generated node. The cost threshold starts with the heuristic esti­mate of the initial state and in each successive iteration is increased to the minimum value that exceeded the previous threshold.
+Each iteration of IDA* is a complete depth-first search that keeps track of the cost, f(n) = g(n)+h(n), of each node generated. As soon as this cost exceeds some threshold, that branch is cut off, and the search BACKTRACKS to the most recently generated node. The cost threshold starts with the heuristic estimate of the initial state and in each successive iteration is increased to the minimum value that exceeded the previous threshold.
 Since at any point IDA* is performing a depth-first search, the memory requirement of the algorithm is linear in the solution depth.
 '''
 global ida_star_nodes_generated
@@ -126,7 +126,7 @@ def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST):
                     return True, g + TRANSITION_COST
                 if result['fcost_over_limit'] < min_fcost_exceeding_limit:
                     min_fcost_exceeding_limit = result['fcost_over_limit']
-                path.popleft() # when that child's subtree is fully explored... pop it back off to backtrack up the path
+                path.popleft()  # when that child's subtree is fully explored... pop it back off to backtrack up the path
         return False, min_fcost_exceeding_limit
             
     
@@ -148,8 +148,4 @@ def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST):
             return (False, [], {'space':len(path), 'time':ida_star_nodes_generated}) 
         else:
             f_limit = searchresults['min_fcost_over_limit']
-            
-            
-            
-            
-            
+
