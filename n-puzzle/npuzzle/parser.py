@@ -34,14 +34,18 @@ def get_input():
     parser.add_argument('-f', help='heuristic function', choices=list(heuristics.KV.keys()), default='manhattan')
     parser.add_argument('-s', help='goal state', choices=list(goal_states.KV.keys()), default='snail')
     parser.add_argument('-p', action='store_true', help='pretty print solution steps')
-    parser.add_argument('-v', action='store_true', help='gui visualizer')
-    parser.add_argument( '--commas', action = 'store', type = str, help = 'input represented as string in form: \(1,2,3..\), \"(1,2,3,..)\", 1,2,3,.., \"1,2,3,..\"' )
-    parser.add_argument('--file', help='input file', nargs='?', type=argparse.FileType('r'))
+#    parser.add_argument('-v', action='store_true', help='gui visualizer')
+    parser.add_argument( '--str', dest='commas', action = 'store', type = str, help = 'input passed as string in form: \(1,2,3..\), \"(1,2,3,..)\", 1,2,3,.., \"1,2,3,..\" (commas required)' )
+    parser.add_argument('--file', help='input file', type=argparse.FileType('r'))
+    parser.add_argument( '--ints', metavar='N', action = 'store', nargs='*', type = int, help = 'input passed as cli args: 0 1 2 3 ...' )
     args = parser.parse_args()
     
+
+    if not (args.file or args.commas or args.ints):
+        print('parser: no input')
+        print('for help: main.py --help')
+        return None
     
-    print('file?', args.file)
-    print('commas?', args.commas)
     
     if args.file: 
         data = args.file.read().splitlines()
@@ -65,6 +69,11 @@ def get_input():
         print(puzzle_as_string)
         puzzle = eval(puzzle_as_string)
         puzzle1d = puzzle
+    if args.ints:
+        puzzle = args.ints
+        puzzle1d = args.ints
+    
+    if args.commas or args.ints:
         size = sqrt(len(puzzle))
         if size.is_integer():
             size = int(size)
@@ -74,8 +83,8 @@ def get_input():
         # TODO : could use more input validation for 'commas' at some point (works fine)
         
     if args.file:
-        v = is_valid_input(puzzle)
-        if v is not 'ok':
+        validator = is_valid_input(puzzle)
+        if validator != 'ok':
             print('parser: invalid input,',v)
             return None
         puzzle1d = []                   #convert 2d matrix into list

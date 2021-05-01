@@ -48,7 +48,7 @@ def color_yes_no(v):
 def verbose_info(args, puzzle, goal_state, size):
     opts1 = {'greedy search:': args.g,
             'uniform cost search:': args.u,
-            'visualizer:': args.v,
+#            'visualizer:': args.v,
             'solvable:': is_solvable(puzzle, goal_state, size)
             }
     opt_color = 'cyan2'
