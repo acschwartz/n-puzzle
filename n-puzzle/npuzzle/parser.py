@@ -1,6 +1,7 @@
 import argparse
 from npuzzle import heuristics
 from npuzzle import goal_states
+from math import sqrt
 
 def is_valid_input(data):
     if len(data[0]) != 1:
@@ -33,30 +34,61 @@ def get_input():
     parser.add_argument('-f', help='heuristic function', choices=list(heuristics.KV.keys()), default='manhattan')
     parser.add_argument('-s', help='goal state', choices=list(goal_states.KV.keys()), default='snail')
     parser.add_argument('-p', action='store_true', help='pretty print solution steps')
-    parser.add_argument('-v', action='store_true', help='gui visualizer')
-    parser.add_argument('file', help='input file', type=argparse.FileType('r'))
+#    parser.add_argument('-v', action='store_true', help='gui visualizer')
+    parser.add_argument( '--str', dest='commas', action = 'store', type = str, help = 'input passed as string in form: \(1,2,3..\), \"(1,2,3,..)\", 1,2,3,.., \"1,2,3,..\" (commas required)' )
+    parser.add_argument('--file', help='input file', type=argparse.FileType('r'))
+    parser.add_argument( '--ints', metavar='N', action = 'store', nargs='*', type = int, help = 'input passed as cli args: 0 1 2 3 ...' )
     args = parser.parse_args()
-    data = args.file.read().splitlines()
-    args.file.close()
-    data = [line.strip().split('#')[0] for line in data]      #remove comments
-    data = [line for line in data if len(line) > 0]           #remove empty lines
-    puzzle = []
-    for line in data:
-        row = []
-        for x in line.split(' '):
-            if len(x) > 0:
-                if not x.isdigit():
-                    print('parser: invalid input, must be all numeric')
-                    return None
-                row.append(int(x))
-        puzzle.append(row)
-    size = puzzle[0][0]
-    v = is_valid_input(puzzle)
-    if v is not 'ok':
-        print('parser: invalid input,',v)
+    
+
+    if not (args.file or args.commas or args.ints):
+        print('parser: no input')
+        print('for help: main.py --help')
         return None
-    puzzle1d = []                   #convert 2d matrix into list
-    for row in puzzle:
-        for item in row:
-            puzzle1d.append(item)
+    
+    
+    if args.file: 
+        data = args.file.read().splitlines()
+        args.file.close()
+        data = [line.strip().split('#')[0] for line in data]      #remove comments
+        data = [line for line in data if len(line) > 0]           #remove empty lines
+        puzzle = []
+        for line in data:
+            row = []
+            for x in line.split(' '):
+                if len(x) > 0:
+                    if not x.isdigit():
+                        print('parser: invalid input, must be all numeric')
+                        return None
+                    row.append(int(x))
+            puzzle.append(row)
+        size = puzzle[0][0]
+    
+    if args.commas:
+        puzzle_as_string = args.commas
+        print(puzzle_as_string)
+        puzzle = eval(puzzle_as_string)
+        puzzle1d = puzzle
+    if args.ints:
+        puzzle = args.ints
+        puzzle1d = args.ints
+    
+    if args.commas or args.ints:
+        size = sqrt(len(puzzle))
+        if size.is_integer():
+            size = int(size)
+        else:
+            print('parser: invalid input, puzzle is not square:', puzzle)
+            return None
+        # TODO : could use more input validation for 'commas' at some point (works fine)
+        
+    if args.file:
+        validator = is_valid_input(puzzle)
+        if validator != 'ok':
+            print('parser: invalid input,',v)
+            return None
+        puzzle1d = []                   #convert 2d matrix into list
+        for row in puzzle:
+            for item in row:
+                puzzle1d.append(item)
     return (tuple(puzzle1d), size, args)
