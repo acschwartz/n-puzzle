@@ -32,17 +32,10 @@ def pretty_print_steps(steps, size):
         print()
     print('%s' % (20*decor,))
 
-def GetHumanReadableSize(size,precision=2):
+
+def bytes_to_human_readable_string(size,precision=2):
 # SOURCE: https://stackoverflow.com/questions/5194057/better-way-to-convert-file-sizes-in-python/14822210
 # http://code.activestate.com/recipes/578019-bytes-to-human-human-to-bytes-converter/
-# modified
-    
-    # on macOS, max_rss reported in bytes
-    # on linux, in kB
-    
-#    if sys.platform == 'linux':
-#        size *= 1024.0
-        
     suffixes=['B','KB','MB','GB','TB']
     suffixIndex = 0
     while size > 1024 and suffixIndex < 4:
@@ -124,11 +117,15 @@ if __name__ == '__main__':
     if args.tracemalloc:
         peak = tracemalloc.get_traced_memory()[1]
         tracemalloc.stop()
-        print(color('red', 'peak memory use (tracemalloc): '), GetHumanReadableSize(peak))
+        print(color('red', 'peak memory use (tracemalloc): '), bytes_to_human_readable_string(peak))
     else:
         maxrss_after_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         print(color('red', 'max rss after search: '), maxrss_after_search)
-        maxrss_delta = GetHumanReadableSize(maxrss_after_search-maxrss_before_search, 2)
+        
+        # on macOS ('darwin'), max_rss reported in bytes
+        # on linux, in kB
+        MAXRSS_UNIT_COEFFICIENT = 1024 if sys.platform != 'darwin' else 1
+        maxrss_delta = bytes_to_human_readable_string((maxrss_after_search-maxrss_before_search) * MAXRSS_UNIT_COEFFICIENT, 2)
         print(color('red', 'max rss delta: '), maxrss_delta)
 
     print(color('yellow','search duration:') + ' %.4f second(s)' % (t_delta))
