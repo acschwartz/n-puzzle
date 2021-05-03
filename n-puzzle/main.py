@@ -34,6 +34,14 @@ def pretty_print_steps(steps, size):
 def GetHumanReadableSize(size,precision=2):
 # SOURCE: https://stackoverflow.com/questions/5194057/better-way-to-convert-file-sizes-in-python/14822210
 # http://code.activestate.com/recipes/578019-bytes-to-human-human-to-bytes-converter/
+# modified
+    
+    # on macOS, max_rss reported in bytes
+    # on linux, in kB
+    
+    if sys.platform == 'linux':
+        size *= 1024.0
+        
     suffixes=['B','KB','MB','GB','TB']
     suffixIndex = 0
     while size > 1024 and suffixIndex < 4:
