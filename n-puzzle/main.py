@@ -2,6 +2,7 @@
 
 import sys
 import resource
+import tracemalloc
 from time import perf_counter
 #from npuzzle.visualizer import visualizer
 from npuzzle.search import a_star_search, ida_star_search
@@ -81,6 +82,8 @@ def verbose_info(args, puzzle, goal_state, size):
 #########################################################################################
 
 if __name__ == '__main__':
+    tracemalloc.start()
+    
     data = parser.get_input()
     if not data:
         sys.exit()        
@@ -109,13 +112,19 @@ if __name__ == '__main__':
 
     maxrss_before_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     print(color('red', 'max rss before search:'), maxrss_before_search)
-
+    
+    print(tracemalloc.get_traced_memory())
+    tracemalloc.clear_traces()
+    
     t_start = perf_counter()
     if args.ida:
         res = ida_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST, RANDOM_NODE_ORDER)
     else:
         res = a_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST)
     t_delta = perf_counter() - t_start
+    
+    print(tracemalloc.get_traced_memory())
+    tracemalloc.stop()
 
     maxrss_after_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     print(color('red', 'max rss after search: '), maxrss_after_search)
