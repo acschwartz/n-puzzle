@@ -38,7 +38,7 @@ def get_input():
     parser.add_argument( '--str', dest='commas', action = 'store', type = str, help = 'input passed as string in form: \(1,2,3..\), \"(1,2,3,..)\", 1,2,3,.., \"1,2,3,..\" (commas required)' )
     parser.add_argument('--file', help='input file', type=argparse.FileType('r'))
     parser.add_argument( '--ints', metavar='N', action = 'store', nargs='*', type = int, help = 'input passed as cli args: 0 1 2 3 ...' )
-    parser.add_argument('-tracemalloc', '--tracemalloc', action='store_true', help='use tracemalloc to profile memory (default: resource module maxrss)')
+    parser.add_argument('-tracemalloc', '--tracemalloc', '-tm', '--tm', dest='tracemalloc', action='store_true', help='use tracemalloc to profile memory (default: resource module maxrss)')
     args = parser.parse_args()
     
 
