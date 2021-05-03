@@ -40,8 +40,8 @@ def GetHumanReadableSize(size,precision=2):
     # on macOS, max_rss reported in bytes
     # on linux, in kB
     
-    if sys.platform == 'linux':
-        size *= 1024.0
+#    if sys.platform == 'linux':
+#        size *= 1024.0
         
     suffixes=['B','KB','MB','GB','TB']
     suffixIndex = 0
@@ -81,9 +81,7 @@ def verbose_info(args, puzzle, goal_state, size):
 
 #########################################################################################
 
-if __name__ == '__main__':
-    tracemalloc.start()
-    
+if __name__ == '__main__':    
     data = parser.get_input()
     if not data:
         sys.exit()        
@@ -110,11 +108,11 @@ if __name__ == '__main__':
         print(color('red','this puzzle is not solvable'))
         sys.exit(0)
 
-    maxrss_before_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-    print(color('red', 'max rss before search:'), maxrss_before_search)
-    
-    print(tracemalloc.get_traced_memory())
-    tracemalloc.clear_traces()
+    if args.tracemalloc:
+        tracemalloc.start()
+    else:
+        maxrss_before_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        print(color('red', 'max rss before search:'), maxrss_before_search)
     
     t_start = perf_counter()
     if args.ida:
@@ -123,14 +121,15 @@ if __name__ == '__main__':
         res = a_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST)
     t_delta = perf_counter() - t_start
     
-    print(tracemalloc.get_traced_memory())
-    tracemalloc.stop()
-
-    maxrss_after_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-    print(color('red', 'max rss after search: '), maxrss_after_search)
-
-    maxrss_delta = GetHumanReadableSize(maxrss_after_search-maxrss_before_search, 2)
-    print(color('red', 'max rss delta: '), maxrss_delta)
+    if args.tracemalloc:
+        peak = tracemalloc.get_traced_memory()[1]
+        tracemalloc.stop()
+        print(color('red', 'peak memory use (tracemalloc): '), GetHumanReadableSize(peak))
+    else:
+        maxrss_after_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        print(color('red', 'max rss after search: '), maxrss_after_search)
+        maxrss_delta = GetHumanReadableSize(maxrss_after_search-maxrss_before_search, 2)
+        print(color('red', 'max rss delta: '), maxrss_delta)
 
     print(color('yellow','search duration:') + ' %.4f second(s)' % (t_delta))
     success, steps, complexity = res
