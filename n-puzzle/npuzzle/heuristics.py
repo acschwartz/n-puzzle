@@ -81,8 +81,5 @@ KV = {
         'hamming':      hamming,
         'gaschnig':     gaschnig,
         'manhattan':    manhattan,
-        'man':          manhattan,
-        'conflicts':    linear_conflicts,
-        'lc':           linear_conflicts,
-        'LC':           linear_conflicts
+        'lc':    linear_conflicts,
 }
