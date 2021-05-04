@@ -59,7 +59,8 @@ def move(puzzle, direction):
 	return new_puzzle
 
 def flattenToString(lst):
-	return "".join(str(i) for i in lst)
+#	return "".join(str(i) for i in lst)
+	return str(tuple(lst))
 
 
 # Creates the database.
@@ -89,7 +90,7 @@ def create_database():
 			else:
 				next_state_cost = [next_state, cost]
 				
-			if not "".join(str(t) for t in next_state) in visited:
+			if not flattenToString(next_state) in visited:
 				queue.append(next_state_cost)
 			
 			state_as_string = flattenToString(state)
