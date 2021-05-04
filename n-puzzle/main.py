@@ -111,7 +111,7 @@ if __name__ == '__main__':
             tracemalloc.start()
         else:
             maxrss_before_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            print(color('red', 'max rss before search:'), maxrss_before_search)
+#            print(color('red', 'max rss before search:'), maxrss_before_search)
     
     t_start = perf_counter()
     if args.ida:
@@ -129,13 +129,13 @@ if __name__ == '__main__':
             print(color('red', 'peak memory use (tracemalloc): '), bytes_to_human_readable_string(peak))
         else:
             maxrss_after_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-            print(color('red', 'max rss after search: '), maxrss_after_search)
+#            print(color('red', 'max rss after search: '), maxrss_after_search)
             
             # on macOS ('darwin'), max_rss reported in bytes
             # on linux, in kB
             MAXRSS_UNIT_COEFFICIENT = 1024 if sys.platform != 'darwin' else 1
             maxrss_delta = bytes_to_human_readable_string((maxrss_after_search-maxrss_before_search) * MAXRSS_UNIT_COEFFICIENT, 2)
-            print(color('red', 'max rss delta: '), maxrss_delta)
+            print(color('red', 'peak memory use (Δ maxrss): '), maxrss_delta)
     else:
         # NOTE: !!! only implemented for manhattan and LC heuristics
         peak = complexity['space']  # nodes in memory
@@ -146,7 +146,7 @@ if __name__ == '__main__':
         else:
             print('main: linux memory workaround not implemented')
             nodesize = 0
-            # should prob throw exception butthis is thrown together
+            # should prob throw exception but this is thrown together ¯\_(ツ)_/¯
         peak *= nodesize
         print(color('red', 'peak memory use (calculated): '), bytes_to_human_readable_string(peak))
 
@@ -155,12 +155,13 @@ if __name__ == '__main__':
     print(fmt % (complexity['time'], t_delta / max(complexity['time'],1) ))
     if success:
         print(color('green','length of solution:'), max(len(steps) - 1, 0))
-        print(color('green', 'initial state and solution steps:'))
-        if args.p:
-            pretty_print_steps(steps, size)
-        else:
-            for s in steps:
-                print(s)
+        if args.showsteps or args.p:
+            print(color('green', 'initial state and solution steps:'))
+            if args.p:
+                pretty_print_steps(steps, size)
+            else:
+                for s in steps:
+                    print(s)
     else:
         print(color('red','solution not found'))
     print(color('magenta','space complexity:'), complexity['space'], 'nodes in memory')
