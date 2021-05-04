@@ -1,4 +1,12 @@
 from npuzzle import goal_states
+from npuzzle.pdb import pdb_lookup
+
+def pdb_8puz_perfect(puzzle, goal_state, size):
+    if size != 3 or len(puzzle) != 9:
+        print('heuristics: puzzle / pdb mismatch')
+        exit(1)
+    else:
+        return pdb_lookup(puzzle)
 
 def uniform_cost(puzzle, goal_state, size):
     return 0
@@ -82,4 +90,5 @@ KV = {
         'gaschnig':     gaschnig,
         'manhattan':    manhattan,
         'lc':    linear_conflicts,
+        'pdb_8puz_perfect': pdb_8puz_perfect,
 }

@@ -12,6 +12,7 @@ from npuzzle.colors import color
 from npuzzle import parser
 from npuzzle import heuristics
 from npuzzle import goal_states
+from npuzzle import pdb
 
 def pretty_print_steps(steps, size):
     width = len(str(size*size))
@@ -72,6 +73,7 @@ def verbose_info(args, puzzle, goal_state, size):
 
     print(color('red2', 'search algorithm:'), ('IDA* w/ random node ordering' if args.r else 'IDA*') if args.ida else 'A*')
 
+
 #########################################################################################
 
 if __name__ == '__main__':    
@@ -114,6 +116,9 @@ if __name__ == '__main__':
 #            print(color('red', 'max rss before search:'), maxrss_before_search)
     
     t_start = perf_counter()
+    if args.f == 'pdb_8puz_perfect':
+        # TODO: implement this elsewhere, prob in another file like K/V
+        pdb.load_pdb('npuzzle/pdb/8puzzle/zerofirst_perfect.json')
     if args.ida:
         res = ida_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST, RANDOM_NODE_ORDER)
     else:
