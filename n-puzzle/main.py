@@ -120,6 +120,8 @@ if __name__ == '__main__':
         res = a_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST)
     t_delta = perf_counter() - t_start
     
+    success, steps, complexity = res
+    
     if not USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE:
         if args.tracemalloc:
             peak = tracemalloc.get_traced_memory()[1]
@@ -149,7 +151,6 @@ if __name__ == '__main__':
         print(color('red', 'peak memory use (calculated): '), bytes_to_human_readable_string(peak))
 
     print(color('yellow','search duration:') + ' %.4f second(s)' % (t_delta))
-    success, steps, complexity = res
     fmt = '%d' + color('yellow',' nodes generated, ') + '%.8f' + color('yellow',' second(s) per node')
     print(fmt % (complexity['time'], t_delta / max(complexity['time'],1) ))
     if success:
