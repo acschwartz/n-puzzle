@@ -139,13 +139,13 @@ if __name__ == '__main__':
     else:
         # NOTE: !!! only implemented for manhattan and LC heuristics
         peak = complexity['space']  # nodes in memory
-        if HEURISTIC == 'manhattan':
+        if args.f == 'manhattan':
             nodesize = 1.4 * 1024  #kB to bytes
-        elif HEURISTIC == 'lc':
+        elif args.f == 'conflicts' or args.f == 'lc':
             nodesize = 3.0 * 1024  #kB to bytes
         else:
             print('main: linux memory workaround not implemented')
-            nodesize = -1
+            nodesize = 0
             # should prob throw exception butthis is thrown together
         peak *= nodesize
         print(color('red', 'peak memory use (calculated): '), bytes_to_human_readable_string(peak))
