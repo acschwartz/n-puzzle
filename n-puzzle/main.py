@@ -100,12 +100,18 @@ if __name__ == '__main__':
     if not is_solvable(puzzle, goal_state, size):
         print(color('red','this puzzle is not solvable'))
         sys.exit(0)
-
-    if args.tracemalloc:
-        tracemalloc.start()
-    else:
-        maxrss_before_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        print(color('red', 'max rss before search:'), maxrss_before_search)
+    
+    # code snippet for making IDA* memory profiling work on linux
+    # problem: tracemalloc prohibitively slow, and maxrss doesn't capture it
+    # NOTE: !!!!!! only implemented for 15-puzzle
+    USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE = (size == 4) and (sys.platform == 'linux') and (args.ida)
+    
+    if not USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE:
+        if args.tracemalloc:
+            tracemalloc.start()
+        else:
+            maxrss_before_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            print(color('red', 'max rss before search:'), maxrss_before_search)
     
     t_start = perf_counter()
     if args.ida:
@@ -114,19 +120,33 @@ if __name__ == '__main__':
         res = a_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST)
     t_delta = perf_counter() - t_start
     
-    if args.tracemalloc:
-        peak = tracemalloc.get_traced_memory()[1]
-        tracemalloc.stop()
-        print(color('red', 'peak memory use (tracemalloc): '), bytes_to_human_readable_string(peak))
+    if not USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE:
+        if args.tracemalloc:
+            peak = tracemalloc.get_traced_memory()[1]
+            tracemalloc.stop()
+            print(color('red', 'peak memory use (tracemalloc): '), bytes_to_human_readable_string(peak))
+        else:
+            maxrss_after_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            print(color('red', 'max rss after search: '), maxrss_after_search)
+            
+            # on macOS ('darwin'), max_rss reported in bytes
+            # on linux, in kB
+            MAXRSS_UNIT_COEFFICIENT = 1024 if sys.platform != 'darwin' else 1
+            maxrss_delta = bytes_to_human_readable_string((maxrss_after_search-maxrss_before_search) * MAXRSS_UNIT_COEFFICIENT, 2)
+            print(color('red', 'max rss delta: '), maxrss_delta)
     else:
-        maxrss_after_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-        print(color('red', 'max rss after search: '), maxrss_after_search)
-        
-        # on macOS ('darwin'), max_rss reported in bytes
-        # on linux, in kB
-        MAXRSS_UNIT_COEFFICIENT = 1024 if sys.platform != 'darwin' else 1
-        maxrss_delta = bytes_to_human_readable_string((maxrss_after_search-maxrss_before_search) * MAXRSS_UNIT_COEFFICIENT, 2)
-        print(color('red', 'max rss delta: '), maxrss_delta)
+        # NOTE: !!! only implemented for manhattan and LC heuristics
+        peak = complexity['space']  # nodes in memory
+        if HEURISTIC == 'manhattan':
+            nodesize = 1.4 * 1024  #kB to bytes
+        elif HEURISTIC == 'lc':
+            nodesize = 3.0 * 1024  #kB to bytes
+        else:
+            print('main: linux memory workaround not implemented')
+            nodesize = -1
+            # should prob throw exception butthis is thrown together
+        peak *= nodesize
+        print(color('red', 'peak memory use (calculated): '), bytes_to_human_readable_string(peak))
 
     print(color('yellow','search duration:') + ' %.4f second(s)' % (t_delta))
     success, steps, complexity = res
