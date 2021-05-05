@@ -117,9 +117,9 @@ if __name__ == '__main__':
 #            print(color('red', 'max rss before search:'), maxrss_before_search)
     
     t_start = perf_counter()
-    if args.f == 'pdb_8puz_perfect':
+    if args.f == 'pdb_8puz':
         # TODO: implement this elsewhere, prob in another file like K/V
-        pdb.load_pdb('npuzzle/pdb/8puzzle/zerofirst_perfect.json')
+        pdb.load_pdb('npuzzle/pdb/8puzzle/zerofirst_full_board.json')
     if args.ida:
         res = ida_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST, RANDOM_NODE_ORDER)
     else:
