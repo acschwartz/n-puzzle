@@ -60,6 +60,7 @@ def verbose_info(args, puzzle, goal_state, size):
         print(color(opt_color, k), color_yes_no(v))
 
     opts2 = {'heuristic function:': color('green2', args.f),
+            'pdb:': color('green2', args.pdb if args.pdb else 'None'),
             'puzzle size:': str(size),
             'solution type:': color('green2', args.s),
             'initial state:': str(puzzle),
