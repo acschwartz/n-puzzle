@@ -14,3 +14,8 @@ def pdb_lookup(state):
 #	except NameError:
 #		return None
 	return PDB_DICT[str(state)] if PDB_DICT else None
+
+
+KV = {
+		'8puz':      'npuzzle/pdb/8puzzle/zerofirst_full_board.json',
+}
