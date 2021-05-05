@@ -1,14 +1,5 @@
 #!/usr/bin/env python3
 
-'''
-AUTHOR:
-https://stackoverflow.com/questions/59770840/8-puzzle-pattern-database-in-python
-'''
-
-'''
-TODO: MODIFY TO YSE DICTIONARY
-'''
-
 import json
 import math
 from collections import deque
