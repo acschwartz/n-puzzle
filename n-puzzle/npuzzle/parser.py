@@ -1,5 +1,6 @@
 import argparse
 from npuzzle import heuristics
+from npuzzle import pdb
 from npuzzle import goal_states
 from math import sqrt
 
@@ -22,7 +23,14 @@ def is_valid_input(data):
     difference = [x for x in generated if x not in expanded]
     if len(difference) != 0:
         return 'puzzle tiles must be in range from 0 to SIZE**2-1'
-    return 'ok'
+    return True
+
+def is_valid_pdb(pdb_name, goal_state, size):
+    if size != pdb.PDBINFO[pdb_name]['size']:
+        return 'mismatched sizes'
+    if goal_state != pdb.PDBINFO[pdb_name]['goal_state']:
+        return 'mismatched goal states'
+    return True
 
 def get_input():
     parser = argparse.ArgumentParser(description='n-puzzle @ 42 fremont')
@@ -31,7 +39,8 @@ def get_input():
     parser.add_argument('-r', action='store_true', help='random node ordering (for IDA*)')
     parser.add_argument('-g', action='store_true', help='greedy search')
     parser.add_argument('-u', action='store_true', help='uniform-cost search')
-    parser.add_argument('-f', help='heuristic function', choices=list(heuristics.KV.keys()), default='manhattan')
+    parser.add_argument('-f', help='heuristic function', choices=list(heuristics.KV.keys()), default='pdb')
+    parser.add_argument('-pdb', help='pattern database as heuristic function', choices=list(pdb.PDBINFO.keys()))
     parser.add_argument('-s', help='goal state', choices=list(goal_states.KV.keys()), default='zero_first')
     parser.add_argument('-steps', dest='showsteps', action='store_true', help='show solution steps')
     parser.add_argument('-p', action='store_true', help='pretty print solution steps')
@@ -48,6 +57,13 @@ def get_input():
         print('for help: main.py --help')
         return None
     
+    if args.f == 'pdb' and not args.pdb:
+        print('parser: please specify heuristic function or pattern database to use')
+        return None
+    
+    if args.pdb and args.f != 'pdb':
+        print('parser: choose EITHER a heuristic function (-f) OR a pattern database (-pdb)')
+        return None
     
     if args.file: 
         data = args.file.read().splitlines()
@@ -86,11 +102,18 @@ def get_input():
         
     if args.file:
         validator = is_valid_input(puzzle)
-        if validator != 'ok':
-            print('parser: invalid input,',v)
+        if validator is not True:
+            print('parser: invalid input,', validator)
             return None
         puzzle1d = []                   #convert 2d matrix into list
         for row in puzzle:
             for item in row:
                 puzzle1d.append(item)
+    
+    if args.pdb:
+        validator = is_valid_pdb(args.pdb, args.s, size)
+        if validator is not True:
+            print('parser: invalid pdb/puzzle combo,', validator)
+            return None
+        
     return (tuple(puzzle1d), size, args)
