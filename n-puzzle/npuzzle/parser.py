@@ -24,7 +24,7 @@ def is_valid_input(data):
         return 'puzzle tiles must be in range from 0 to SIZE**2-1'
     return 'ok'
 
-def get_input():
+def setup_parser():
     parser = argparse.ArgumentParser(description='n-puzzle @ 42 fremont')
     parser.add_argument('-c', action='store_false', help='no colors', default=True)
     parser.add_argument('-ida', action='store_true', help='ida* search')
@@ -40,7 +40,15 @@ def get_input():
     parser.add_argument('--file', help='input file', type=argparse.FileType('r'))
     parser.add_argument( '--ints', metavar='N', action = 'store', nargs='*', type = int, help = 'input passed as cli args: 0 1 2 3 ...' )
     parser.add_argument('-tracemalloc', '--tracemalloc', '-tm', '--tm', dest='tracemalloc', action='store_true', help='use tracemalloc to profile memory (default: resource module maxrss)')
-    args = parser.parse_args()
+    return parser
+    
+
+def get_input(altargs=None):
+    parser = setup_parser()
+    if altargs:
+        args = parser.parse_args(altargs)
+    else:
+        args = parser.parse_args()
     
 
     if not (args.file or args.commas or args.ints):

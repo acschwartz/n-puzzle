@@ -74,8 +74,15 @@ def verbose_info(args, puzzle, goal_state, size):
 
 #########################################################################################
 
-if __name__ == '__main__':    
-    data = parser.get_input()
+def main(arglist=None):
+    # if None passed, uses sys.argv[1:], else use custom args
+    print('arglist passed into main()', arglist)
+    
+    if arglist:
+        data = parser.get_input(arglist)
+    else:
+        data = parser.get_input()
+        
     if not data:
         sys.exit()        
     puzzle, size, args = data
@@ -169,4 +176,7 @@ if __name__ == '__main__':
 #    if success and args.v:
 #        visualizer(steps, size)
 
+    
+if __name__ == '__main__':    
+    main(sys.argv[1:])
     
