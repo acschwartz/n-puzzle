@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import main
 
 '''
 SET UP EACH EXPERIMENT:
@@ -8,3 +9,7 @@ SET UP EACH EXPERIMENT:
 4. RECORD RESULTS TO JSON FILE
 5. name file meaninfully (w datetime?)
 '''
+
+if __name__ == '__main__':
+	args = ['--str', "(6, 3, 8, 7, 1, 2, 4, 0, 5)", '-f', 'manhattan']
+	main.main(args)
