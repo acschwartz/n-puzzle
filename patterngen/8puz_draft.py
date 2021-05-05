@@ -6,36 +6,12 @@ from collections import deque
 from copy import deepcopy
 from timeit import default_timer
 
-# Goal state of the puzzle
+ Goal state of the puzzle
 
 
-'''
+
 EMPTY_TILE = 0
 
-def clone_and_swap(data,y0,y1):
-	clone = list(data)
-	tmp = clone[y0]
-	clone[y0] = clone[y1]
-	clone[y1] = tmp
-	return tuple(clone)
-
-def get_children(data, size):     # returns CHILDREN
-	res = []
-	y = data.index(EMPTY_TILE)
-	if y % size > 0:
-		left = clone_and_swap(data,y,y-1)
-t)
-	if y % size + 1 < size:
-		right = clone_and_swap(data,y,y+1)
-		res.append(right)
-	if y - size >= 0:
-		up = clone_and_swap(data,y,y-size)
-		res.append(up)
-	if y + size < len(data):
-		down = clone_and_swap(data,y,y+size)
-		res.append(down)
-#    shuffle(res)
-	return res
 
 
 # Calculates the possible moves of the blank tile.
