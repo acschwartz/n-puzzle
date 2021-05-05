@@ -11,5 +11,6 @@ SET UP EACH EXPERIMENT:
 '''
 
 if __name__ == '__main__':
-	args = ['--str', "(6, 3, 8, 7, 1, 2, 4, 0, 5)", '-f', 'manhattan']
+#	args = ['--str', "(6, 3, 8, 7, 1, 2, 4, 0, 5)", '-f', 'manhattan']
+	args = ['--str', "(1,2,3,4,5,6,7,8,0)", '-pdb', '8puz']
 	main.main(args)

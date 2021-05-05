@@ -80,8 +80,6 @@ def verbose_info(args, puzzle, goal_state, size):
 
 def main(arglist=None):
     # if None passed, uses sys.argv[1:], else use custom args
-    print('arglist passed into main()', arglist)
-    
     if arglist:
         data = parser.get_input(arglist)
     else:
