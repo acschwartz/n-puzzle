@@ -107,7 +107,8 @@ if __name__ == '__main__':
     # problem: tracemalloc prohibitively slow, and maxrss doesn't capture it
     # NOTE: !!!!!! only implemented for 15-puzzle
     USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE = (size == 4) and (sys.platform == 'linux') and (args.ida)
-    USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE = False
+#    USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE = False
+    
     if not USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE:
         if args.tracemalloc:
             tracemalloc.start()
