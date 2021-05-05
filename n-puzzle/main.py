@@ -12,6 +12,7 @@ from npuzzle.colors import color
 from npuzzle import parser
 from npuzzle import heuristics
 from npuzzle import goal_states
+from npuzzle import pdb
 
 def pretty_print_steps(steps, size):
     width = len(str(size*size))
@@ -66,11 +67,13 @@ def verbose_info(args, puzzle, goal_state, size):
     for k,v in opts2.items():
         print(color(opt_color, k), v)
    
-    print(color('blue2', 'heuristic scores for initial state'))
-    for k,v in heuristics.KV.items():
-        print(color('blue2', '  - ' + k + '\t:'), v(puzzle, goal_state, size))
+    # NOTE: removed because it wasn't vibing with my handling of the pdb's.. worry bout it later (TODO)
+#    print(color('blue2', 'heuristic scores for initial state'))
+#    for k,v in heuristics.KV.items():
+#        print(color('blue2', '  - ' + k + '\t:'), v(puzzle, goal_state, size))
 
-    print(color('red2', 'search algorithm:'), ('IDA* w/ random node ordering' if args.r else 'IDA*') if args.ida else 'A*')
+    print(color('red2', 'search algorithm:'), ('IDA* w/ random node ordering (IDA*_R)' if args.r else 'IDA*') if args.ida else 'A*')
+
 
 #########################################################################################
 
@@ -105,6 +108,7 @@ if __name__ == '__main__':
     # problem: tracemalloc prohibitively slow, and maxrss doesn't capture it
     # NOTE: !!!!!! only implemented for 15-puzzle
     USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE = (size == 4) and (sys.platform == 'linux') and (args.ida)
+#    USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE = False
     
     if not USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE:
         if args.tracemalloc:
@@ -114,6 +118,8 @@ if __name__ == '__main__':
 #            print(color('red', 'max rss before search:'), maxrss_before_search)
     
     t_start = perf_counter()
+    if args.pdb:
+        pdb.load_pdb(args.pdb)
     if args.ida:
         res = ida_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST, RANDOM_NODE_ORDER)
     else:

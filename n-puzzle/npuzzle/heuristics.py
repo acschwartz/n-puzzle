@@ -1,4 +1,5 @@
 from npuzzle import goal_states
+from npuzzle.pdb import pdb_lookup
 
 def uniform_cost(puzzle, goal_state, size):
     return 0
@@ -82,4 +83,5 @@ KV = {
         'gaschnig':     gaschnig,
         'manhattan':    manhattan,
         'lc':    linear_conflicts,
+        'pdb': pdb_lookup,
 }
