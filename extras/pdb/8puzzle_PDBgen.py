@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+'''
+AUTHOR:
+https://stackoverflow.com/questions/59770840/8-puzzle-pattern-database-in-python
+'''
+
+
 import json
 import math
 from collections import deque
@@ -83,7 +89,7 @@ def create_database():
 				
 			if not flattenToString(next_state) in visited:
 				queue.append(next_state_cost)
-			
+				
 			state_as_string = flattenToString(state)
 			entries[state_as_string] = cost
 			visited.add(state_as_string)
@@ -100,7 +106,7 @@ def create_database():
 	# Writes entries to the text file, sorted by cost in ascending order .
 	with open("database.json", "w") as f:
 		json.dump(entries, f)
-			
+		
 	end = default_timer()
 	minutes = math.floor((end-begin)/60)
 	seconds = math.floor((end-begin) % 60)
