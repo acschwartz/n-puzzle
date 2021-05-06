@@ -35,3 +35,6 @@ for tile in ptiles:
 	pattern3[tile] = state.index(tile)
 p3 = str(tuple(pattern3))
 
+
+class State():
+	
