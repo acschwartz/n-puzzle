@@ -2,6 +2,10 @@
 
 def load_pdb(pdb):
 	global PDB_DICT
+	if PDB_DICT:
+		print("load_pdb: PDB already loaded. Will not re-load.")
+		return
+		
 	filename = PDBINFO[pdb]['file']
 	
 	if '.json' in filename:
