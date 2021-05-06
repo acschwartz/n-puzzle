@@ -1,26 +1,34 @@
 #!/usr/bin/env python3
+from time import perf_counter
+
+PATTERN_DATABASE = None
+# PDB implemented as dictionary
 
 def load_pdb(pdb):
-	global PDB_DICT
-	if PDB_DICT:
+	global PATTERN_DATABASE
+	if PATTERN_DATABASE:
 		print("load_pdb: PDB already loaded. Will not re-load.")
 		return
 		
 	filename = PDBINFO[pdb]['file']
 	
+	t_start = perf_counter()
 	if '.json' in filename:
-		import json
+		from json import load
 		with open(filename, 'r') as f:
-			PDB_DICT = json.load(f)
+			PATTERN_DATABASE = load(f)
 	
 	if '.pickle' in filename:
-		import pickle
+		from pickle import load
 		with open(filename, "rb") as f:
-			PDB_DICT = pickle.load(f)
+			PATTERN_DATABASE = load(f)
+			
+	t_delta = perf_counter() - t_start
+	return t_delta
 
 def pdb_lookup(state, goal_state=None, size=None):
 	try:
-		return PDB_DICT[state]
+		return PATTERN_DATABASE[state]
 	except NameError:
 		print('pdb.pdb_lookup: attempted lookup but pattern database not loaded')
 		exit(1)
@@ -34,5 +42,3 @@ PDBINFO = {
 			'goal_state': 'zero_first',
 		}
 }
-
-PDB_DICT = None
