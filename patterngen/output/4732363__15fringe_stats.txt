@@ -1,0 +1,6 @@
+_PDB file : 4732363__15fringe_database.json
+db entries (nodes explored) : 57657600
+memory (w/ units) : 11.64GB
+memory : 12200912
+time (mins) : 423.26
+time (seconds) : 25395.83
