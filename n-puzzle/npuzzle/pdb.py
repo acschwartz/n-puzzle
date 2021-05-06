@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
-import json
-#import npuzzle.goal_states
 
 def load_pdb(pdb):
+	global PDB_DICT
 	filename = PDBINFO[pdb]['file']
-	with open(filename, 'r') as JSON:
-		global PDB_DICT
-		PDB_DICT = json.load(JSON)
+	
+	if '.json' in filename:
+		import json
+		with open(filename, 'r') as f:
+			PDB_DICT = json.load(f)
+	
+	if '.pickle' in filename:
+		import pickle
+		with open(filename, "rb") as f:
+			PDB_DICT = pickle.load(f)
 
 def pdb_lookup(state, goal_state=None, size=None):
 	try:
-		return PDB_DICT[str(state)]
+		return PDB_DICT[state]
 	except NameError:
 		print('pdb.pdb_lookup: attempted lookup but pattern database not loaded')
 		exit(1)
@@ -19,8 +25,10 @@ def pdb_lookup(state, goal_state=None, size=None):
 
 PDBINFO = {
 	'8puz': {
-			'file': 	'npuzzle/pdb/8puzzle/zerofirst_full_board.json',
+			'file': 	'npuzzle/pdb/8puzzle/zerofirst_full_board.pickle',
 			'size':		3,
 			'goal_state': 'zero_first',
 		}
 }
+
+PDB_DICT = None
