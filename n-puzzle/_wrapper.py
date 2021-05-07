@@ -25,9 +25,11 @@ if __name__ == '__main__':
 	if args.pdb:
 		time_to_load_pdb = pdb.load_pdb(args.pdb)
 		print(color('yellow','time to load PDB:') + ' %.4f second(s)' % (time_to_load_pdb))
+	else:
+		args.pdb = ''
 	
 	while 1:
-		print ('\nRUN SOLVER WITH PDB: ', color('red', args.pdb))
+		print ('\nRUN SOLVER WITH PDB: ', color('red', args.pdb if args.pdb else 'None'))
 		print('Enter each arg on separate line (press Return in between)')
 		print('Press Return twice to exit.')
 		print('For verbose help, type -help or -h. For short help, type help or h')
