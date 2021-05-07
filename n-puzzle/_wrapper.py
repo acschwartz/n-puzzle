@@ -5,6 +5,7 @@ from npuzzle import pdb
 from npuzzle import colors
 colors.enabled = True
 from npuzzle.colors import color
+from sys import exit
 
 '''
 SET UP EACH EXPERIMENT:
