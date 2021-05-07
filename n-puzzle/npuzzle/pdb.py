@@ -40,5 +40,10 @@ PDBINFO = {
 			'file': 	'npuzzle/pdb/8puzzle/zerofirst_full_board.pickle',
 			'size':		3,
 			'goal_state': 'zero_first',
-		}
+		},
+	'15fringe': {
+			'file': 	'npuzzle/pdb/15puzzle/4732363__15fringe_database.pickle',
+			'size':		4,
+			'goal_state': 'zero_first',
+		},
 }
