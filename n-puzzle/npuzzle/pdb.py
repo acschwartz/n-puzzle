@@ -41,19 +41,19 @@ def pdb_lookup(state, goal_state=None, size=None):
 		# just gonna hardcode this in to save lookup time
 		ptiles = (3, 7, 11, 12, 13, 14, 15)
 		empty_tile = 0
-                # I had the line below as pattern = [empty_tile] * 16 and I don't even think that works
-                # since empty_tile is a var... idk looks into it
+		# I had the line below as pattern = [empty_tile] * 16 and I don't even think that works
+		# since empty_tile is a var... idk looks into it
 		
 		# convert state to pattern
 		pattern = [0] * 16
 		for ptile in ptiles:
 			pattern[ptile] = state.index(ptile)
-	        	
-                pattern = tuple(pattern)
-                print('pdb_lookup: looking up pattern ', pattern)
+			
+		pattern = tuple(pattern)
+		print('pdb_lookup: looking up pattern ', pattern)
 		h = PATTERN_DATABASE[pattern]
-                print('pdb_lookup: h =', h)
-                return h
+		print('pdb_lookup: h =', h)
+		return h
 	
 		# TODO: !!!! so I realized that I should have had the entries be lists in my pdb,
 		# since the lookup keys are patterns and not keys, and patterns have to be built, therefore
