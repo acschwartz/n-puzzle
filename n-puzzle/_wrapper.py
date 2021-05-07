@@ -28,9 +28,9 @@ if __name__ == '__main__':
 		print(color('yellow','time to load PDB:') + ' %.4f second(s)' % (time_to_load_pdb))
 	else:
 		args.pdb = ''
-		print('\n', color('red', 'No pdb selected.'))
-		print('If you meant to select a PDB, your options are:')
-		print(tuple(pdb.PDBINFO.keys()))
+		print(color('red', '\nNo pdb selected.'))
+		print(color('yellow', 'If you meant to select a PDB, your options are:'))
+		print(color('yellow', str(tuple(pdb.PDBINFO.keys()))))
 	
 	while 1:
 		print ('\nRUN SOLVER WITH PDB: ', color('red', args.pdb if args.pdb else 'None'))
