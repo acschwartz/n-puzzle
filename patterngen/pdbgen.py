@@ -30,6 +30,8 @@ bytearray(b'\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f')
 >>> timeit(lambda:bytearray(ba))
 0.2905499839980621
 
+Comparing two bytearrays is also faster than comparing two arrays.
+
 ba2 = bytearray(ba) creates a new bytearray in ba2 that is distinct from and not a ref to ba
 
 '''
