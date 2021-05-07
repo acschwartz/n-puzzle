@@ -61,8 +61,8 @@ def get_input(altargs=None):
     
 
     if not (args.file or args.commas or args.ints):
-        print('parser: no input')
-        print('for help: main.py --help')
+        args = ['-h']
+        parser.parse_args(args)
         return None
     
     if args.f == 'pdb' and not args.pdb:
