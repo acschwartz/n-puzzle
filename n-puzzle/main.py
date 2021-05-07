@@ -86,7 +86,7 @@ def main(arglist=None):
         data = parser.get_input()
         
     if not data:
-        sys.exit()        
+        return None
     puzzle, size, args = data
     if args.c:
         colors.enabled = True

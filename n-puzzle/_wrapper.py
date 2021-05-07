@@ -68,10 +68,10 @@ if __name__ == '__main__':
 			if args.pdb:
 				argsList.extend(['-pdb', args.pdb])
 			print(argsList)
-			main.main(argsList)
 			try:
 				main.main(argsList)
-			except: pass
+			except:
+				continue
 		else:
 			break
 		
