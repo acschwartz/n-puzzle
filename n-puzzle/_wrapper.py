@@ -61,10 +61,14 @@ if __name__ == '__main__':
 			if nextArg == '--ints':
 				nextArg = input()
 				nextArg_list = nextArg.split()
+<<<<<<< HEAD
 				# above line works on Ubuntu
                                 # but not sure if it works on Mac, where below line may be needed:
                                 # TODO: investigate
                                 #nextArg_list = list(map(int, nextArg_list))
+=======
+				#nextArg_list = map(int, nextArg_list)
+>>>>>>> 00870d66cd210ea4b9c20f654b3d85cc0eca2dc4
 				argsList.extend(nextArg_list)
 		
 		
