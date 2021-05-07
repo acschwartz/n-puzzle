@@ -21,12 +21,38 @@ pz = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
 11.42695140199794
 
 YIKES.
-That's probably why this ran so incredibly slow.
+That's probably why this ran so incredibly slowly.
 
+P.S. bytearrays take up much less room and can be copied much quicker:
+>>> ba = bytearray(pz)
+>>> ba
+bytearray(b'\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f')
+>>> timeit(lambda:bytearray(ba))
+0.2905499839980621
+
+ba2 = bytearray(ba) creates a new bytearray in ba2 that is distinct from and not a ref to ba
+
+'''
+##==============================================================================================##
+'''
+ANOTHER NOTE:
+
+A dict with ints for keys and a dict with bytes for keys are apparently the same size.
+So that is not a legitimate way to save space.. oddly.
+
+for i in range(10000):
+	d_ints[i] = randint(0,255)
+	d_bytes[i] = bytes([int(randint(0,255)])
+
+>>> sizeof(d_ints)
+295000
+>>> sizeof(d_bytes)
+295000
 
 '''
 
 
+##==============================================================================================##
 MAXRSS_UNIT_COEFFICIENT = 1024 if sys.platform != 'darwin' else 1
 ##==============================================================================================##
 
