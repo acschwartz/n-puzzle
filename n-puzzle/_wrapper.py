@@ -35,7 +35,7 @@ if __name__ == '__main__':
 	while 1:
 		print ('\nRUN SOLVER WITH PDB: ', color('red', args.pdb if args.pdb else 'None'))
 		print('Enter each arg on separate line (press Return in between)')
-		print('To run: type run or ok, or Return twice.')
+		print('To run: press Space, type run or ok, or Return twice.')
 		print('To exit: type exit, or Return twice.')
 		print('For verbose help, type -help or -h. For concise help, type help or h')
 		print('')
@@ -43,11 +43,9 @@ if __name__ == '__main__':
 		argsList = []
 		while 1:
 			nextArg = input().strip()
-			if nextArg == '':
-				break
-			if nextArg == 'exit':
+			if nextArg in [' ', 'exit']:
 				exit()
-			if nextArg in ['run', 'ok']:
+			if nextArg in ['', 'run', 'ok']:
 				break
 			if nextArg in ['--help', '-h', 'help', 'h']:
 				try:
@@ -63,7 +61,10 @@ if __name__ == '__main__':
 			if nextArg == '--ints':
 				nextArg = input()
 				nextArg_list = nextArg.split()
-				nextArg_list = list(map(int, nextArg_list))
+				# above line works on Ubuntu
+                                # but not sure if it works on Mac, where below line may be needed:
+                                # TODO: investigate
+                                #nextArg_list = list(map(int, nextArg_list))
 				argsList.extend(nextArg_list)
 		
 		
@@ -71,7 +72,7 @@ if __name__ == '__main__':
 			if args.pdb:
 				argsList.extend(['-pdb', args.pdb])
 			print(argsList)
-			
+			main.main(argsList)
 			try:
 				main.main(argsList)
 			except: pass
