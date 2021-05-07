@@ -34,14 +34,19 @@ if __name__ == '__main__':
 	while 1:
 		print ('\nRUN SOLVER WITH PDB: ', color('red', args.pdb if args.pdb else 'None'))
 		print('Enter each arg on separate line (press Return in between)')
-		print('Press Return twice to exit.')
+		print('To run: type run or ok, or Return twice.')
+		print('To exit: type exit, or Return twice.')
 		print('For verbose help, type -help or -h. For concise help, type help or h')
 		print('')
 		
 		argsList = []
 		while 1:
-			nextArg = input()
+			nextArg = input().strip()
 			if nextArg == '':
+				break
+			if nextArg == 'exit':
+				exit()
+			if nextArg in ['run', 'ok']:
 				break
 			if nextArg in ['--help', '-h', 'help', 'h']:
 				try:
@@ -56,7 +61,9 @@ if __name__ == '__main__':
 				
 			if nextArg == '--ints':
 				nextArg = input()
-				argsList.append(nextArg)
+				nextArg_list = nextArg.split()
+				nextArg_list = map(int, nextArg_list)
+				argsList.extend(nextArg_list)
 		
 		
 		if len(argsList) > 0:
