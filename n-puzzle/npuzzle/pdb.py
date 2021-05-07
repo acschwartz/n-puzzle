@@ -8,6 +8,8 @@ PDB_TYPE = None
 def load_pdb(pdb):
 	def printLoading():
 		print ('Loading pattern database into memory ... ')
+	def printLoaded():
+		print('PDB', pdb, 'loaded from', filename)
 	
 	global PATTERN_DATABASE, PDB_TYPE
 	if PATTERN_DATABASE:

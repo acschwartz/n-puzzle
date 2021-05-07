@@ -8,6 +8,25 @@ import time
 from collections import deque
 from copy import deepcopy
 
+'''
+
+
+TODO: HUGE !!!!!!! H U G E discovery...
+deepcopy is slow asf, compared to converting between lists and tuples
+
+pz = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+>>> timeit(lambda:list(tuple(pz)))
+0.31665251099911984
+>>> timeit(lambda:deepcopy(pz))
+11.42695140199794
+
+YIKES.
+That's probably why this ran so incredibly slow.
+
+
+'''
+
+
 MAXRSS_UNIT_COEFFICIENT = 1024 if sys.platform != 'darwin' else 1
 ##==============================================================================================##
 
