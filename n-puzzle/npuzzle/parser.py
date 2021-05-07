@@ -104,7 +104,7 @@ def get_input(altargs=None):
         if size.is_integer():
             size = int(size)
         else:
-            print('parser: invalid input, puzzle is not square:', puzzle)
+            print('parser: invalid input, puzzle is not square:', puzzle, ";  size:", size)
             return None
         # TODO : could use more input validation for 'commas' at some point (works fine)
         
