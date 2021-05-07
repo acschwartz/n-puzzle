@@ -63,7 +63,7 @@ if __name__ == '__main__':
 			if nextArg == '--ints':
 				nextArg = input()
 				nextArg_list = nextArg.split()
-				nextArg_list = map(int, nextArg_list)
+				#nextArg_list = map(int, nextArg_list)
 				argsList.extend(nextArg_list)
 		
 		
