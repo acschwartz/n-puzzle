@@ -52,8 +52,20 @@ for i in range(10000):
 295000
 
 '''
+'''
+ANOTHER NOTE:
 
+Math on ints is much faster than math on bytes
 
+>>> a = bytes([3])
+>>> b= bytes([15])
+>>> from timeit import timeit
+>>> timeit(lambda:a+b)
+0.17650921399996378
+>>> timeit(lambda:3+15)
+0.0963714110000069
+
+'''
 ##==============================================================================================##
 MAXRSS_UNIT_COEFFICIENT = 1024 if sys.platform != 'darwin' else 1
 ##==============================================================================================##
