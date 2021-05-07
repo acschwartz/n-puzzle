@@ -47,7 +47,7 @@ def pdb_lookup(state, goal_state=None, size=None):
 		for ptile in ptiles:
 			pattern[ptile] = state.index(ptile)
 		
-		return(PATTERN_DATABASE[tuple(pattern]))
+		return(PATTERN_DATABASE[tuple(pattern)])
 	
 		# TODO: !!!! so I realized that I should have had the entries be lists in my pdb,
 		# since the lookup keys are patterns and not keys, and patterns have to be built, therefore
