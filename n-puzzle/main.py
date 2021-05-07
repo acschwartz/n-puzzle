@@ -86,7 +86,7 @@ def main(arglist=None):
         data = parser.get_input()
         
     if not data:
-        sys.exit()        
+        return None
     puzzle, size, args = data
     if args.c:
         colors.enabled = True
@@ -123,14 +123,16 @@ def main(arglist=None):
             maxrss_before_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 #            print(color('red', 'max rss before search:'), maxrss_before_search)
     
-    t_start = perf_counter()
-    if args.pdb:
-        pdb.load_pdb(args.pdb)
+#    t_start = perf_counter()
+    if args.pdb and not pdb.PATTERN_DATABASE:
+        time_to_load_pdb = pdb.load_pdb(args.pdb)
+        print(color('yellow','time to load PDB:') + ' %.4f second(s)' % (time_to_load_pdb))
+    t_before_search = perf_counter()
     if args.ida:
         res = ida_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST, RANDOM_NODE_ORDER)
     else:
         res = a_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST)
-    t_delta = perf_counter() - t_start
+    t_search = perf_counter() - t_before_search
     
     success, steps, complexity = res
     
@@ -162,9 +164,9 @@ def main(arglist=None):
         peak *= nodesize
         print(color('red', 'peak memory use (calculated): '), bytes_to_human_readable_string(peak))
 
-    print(color('yellow','search duration:') + ' %.4f second(s)' % (t_delta))
+    print(color('yellow','search duration:') + ' %.4f second(s)' % (t_search))
     fmt = '%d' + color('yellow',' nodes generated, ') + '%.8f' + color('yellow',' second(s) per node')
-    print(fmt % (complexity['time'], t_delta / max(complexity['time'],1) ))
+    print(fmt % (complexity['time'], t_search / max(complexity['time'],1) ))
     if success:
         print(color('green','length of solution:'), max(len(steps) - 1, 0))
         if args.showsteps or args.p:

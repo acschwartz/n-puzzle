@@ -78,6 +78,8 @@ def linear_conflicts(candidate, goal_state, size):
             res += count_conflicts(candidate_columns[i], goal_columns[i], size)
     return res
 
+
+
 KV = {
         'hamming':      hamming,
         'gaschnig':     gaschnig,

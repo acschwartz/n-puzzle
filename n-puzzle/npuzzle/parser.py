@@ -61,8 +61,8 @@ def get_input(altargs=None):
     
 
     if not (args.file or args.commas or args.ints):
-        print('parser: no input')
-        print('for help: main.py --help')
+        args = ['-h']
+        parser.parse_args(args)
         return None
     
     if args.f == 'pdb' and not args.pdb:
@@ -104,7 +104,7 @@ def get_input(altargs=None):
         if size.is_integer():
             size = int(size)
         else:
-            print('parser: invalid input, puzzle is not square:', puzzle)
+            print('parser: invalid input, puzzle is not square:', puzzle, ";  size:", size)
             return None
         # TODO : could use more input validation for 'commas' at some point (works fine)
         
