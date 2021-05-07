@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from argparse import ArgumentParser
+from sys import platform
 
 '''
 
@@ -60,7 +61,7 @@ Math on ints is much faster than math on bytes
 '''
 
 ##==============================================================================================##
-MAXRSS_UNIT_COEFFICIENT = 1024 if sys.platform != 'darwin' else 1
+
 ##==============================================================================================##
 PATTERNS = {
 	'15fringe': {
@@ -68,6 +69,8 @@ PATTERNS = {
 				'pattern tiles': (0, 3, 7, 11, 12, 13, 14, 15),
 				},
 }
+
+EMPTY_TILE = 255	# represents tiles which are not included in the pattern
 
 DIRECTIONS = ('left', 'right', 'up', 'down')
 
@@ -79,14 +82,12 @@ MOVE_XY = {
 		}
 ##==============================================================================================##
 
-EMPTY_TILE = 255	# represents tiles which are not included in the pattern
-DIM = None				# TODO: remoev
-PATTERN_TILES = None	# want all this as local vars
-
 OUTPUTFILE_IDENTIFIER = ""
 OUTPUT_DIRECTORY = 'output/'
+MAXRSS_UNIT_COEFFICIENT = 1024 if platform != 'darwin' else 1
 
 ##==============================================================================================##
+# Functions to convert between 1d-arary indec and coordinates on the puzzle grid
 
 def index_1d_to_xy(i, dim):
 	x = i // dim
@@ -102,7 +103,17 @@ def index_coords_to_1d(coords, dim):
 
 
 ##==============================================================================================##
+def parseArgs():
+	parser = ArgumentParser(description='n-puzzle pattern database generator')
+	parser.add_argument('pattern_name', help='choose a pattern', choices=list(PATTERNS.keys()))
+	args = parser.parse_args()
+	return args.pattern_name
+
 def init(patternName='15fringe'):
+	global OUTPUTFILE_IDENTIFIER
+	OUTPUTFILE_IDENTIFIER = "".join([str(math.floor(time.time()*1000)-(1619863801*1000)-372000000), '__', pname, '_'])
+	print(OUTPUTFILE_IDENTIFIER)
+	
 	# global vars copied to local for speed
 	directions = DIRECTIONS
 	move_xy = MOVE_XY
@@ -124,3 +135,5 @@ def generateTargetPattern(ptiles, dim):
 	for tile in ptiles:
 		pattern[tile] = tile
 	return pattern
+
+print(parseArgs())
