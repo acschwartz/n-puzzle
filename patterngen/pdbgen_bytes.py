@@ -254,34 +254,35 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves, BASE_OUTPUT_FILENA
 			
 			if visitedCount % 10000 == 0:
 				print("Entries collected:", visitedCount)
-		
-		
-		# Save database / write to file.
-		outfile = OUTPUT_DIRECTORY+BASE_OUTPUT_FILENAME
-		logger.info("".join(["\nWriting entries to database file:", outfile, " ....."]))
-		tryAgain = 'y'
-		while tryAgain == 'y':
-			try:
-				f = open(outfile, "wb")
-				pickle.dump(visited, f, pickle.HIGHEST_PROTOCOL)
-				logger.info('Done!')
-				f.close()
-				tryAgain = False
-			except OSError as err:
-				f.close()
-				logger.exception(err)
-				maxrss = getMaxRSS()
-				logger.info("".join(['(', str(visitedCount), ' entries in memory, using ', rawMaxRSStoPrettyString(maxrss) ,')\n']))
 				
-				tryAgain = input('\nPress y to retry ')
-				if tryAgain == 'y':
-					logger.info('\nRetrying ....')
-				else:
-					logger.info('User aborted.')
-	
 	except KeyboardInterrupt as e:
-		logger.info('\nKeyboardInterrupt: Aborted search. No database file created.')
+			logger.info('\nKeyboardInterrupt: Aborted search. No database file created.')
+			return visitedCount
+	
+	
+	# Save database / write to file.
+	outfile = OUTPUT_DIRECTORY+BASE_OUTPUT_FILENAME
+	logger.info("".join(["\nWriting entries to database file:", outfile, " ....."]))
+	tryAgain = 'y'
+	while tryAgain == 'y':
+		try:
+			f = open(outfile, "wb")
+			pickle.dump(visited, f, pickle.HIGHEST_PROTOCOL)
+			logger.info('Done!')
+			f.close()
+			tryAgain = False
+		except OSError as err:
+			f.close()
+			logger.exception(err)
+			maxrss = getMaxRSS()
+			logger.info("".join(['(', str(visitedCount), ' entries in memory, using ', rawMaxRSStoPrettyString(maxrss) ,')\n']))
 			
+			tryAgain = input('\nPress y to retry ')
+			if tryAgain == 'y':
+				logger.info('\nRetrying ....')
+			else:
+				logger.info('User aborted.')
+	
 	return visitedCount
 
 ##==============================================================================================##
