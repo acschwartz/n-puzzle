@@ -80,6 +80,42 @@ MOVE_XY = {
 	'up': lambda x,y: (x-1, y),
 	'down': lambda x,y: (x+1, y),
 		}
+
+##==============================================================================================##
+def move_index_left(i, dim):
+	if i % dim > 0:
+		return i-1
+	else:
+		return None
+
+def move_index_right(i, dim):
+	if i % dim + 1 < dim:
+		return i+1
+	else:
+		return None
+
+def move_index_up(i, dim):
+	if i-dim >= 0:
+		return i-dim
+	else:
+		return None
+
+def move_index_down(i, dim):
+	if i+dim < dim**2:	# assumes square puzzle
+		return i+dim
+	else:
+		return None
+
+MOVE_INDEX = {
+	'left': move_index_left,
+	'right': move_index_right,
+	'up': move_index_up,
+	'down': move_index_down,
+		}
+
+MOVE_INDEX_DIRECTIONS = (move_index_left, move_index_right, move_index_up, move_index_down)
+# having the functions in a list saves dictionary lookups in MOVE_INDEX
+
 ##==============================================================================================##
 
 OUTPUTFILE_IDENTIFIER = ""
@@ -98,8 +134,9 @@ def index_xy_to_1d(x, y, dim):
 	return x*dim + y
 
 def index_coords_to_1d(coords, dim):
+	# coords = (x,y)
 	x, y = coords
-	return x*dim + y
+	return index_xy_to_1d(x, y, dim)
 
 
 ##==============================================================================================##
@@ -121,8 +158,7 @@ def init(patternName='15fringe'):
 	ptiles = PATTERNS[patternName]['pattern tiles']
 	goalPattern = generateTargetPattern(ptiles, dim)
 
-
-
+'''
 def generateTargetPattern(ptiles, dim):
 	# generate pattern representation of puzzle goal state = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
 	# which will be the initial state for the backwards BFS used to generate the PDB
@@ -135,5 +171,38 @@ def generateTargetPattern(ptiles, dim):
 	for tile in ptiles:
 		pattern[tile] = tile
 	return pattern
+'''
 
-print(parseArgs())
+##==============================================================================================##
+#print(parseArgs())
+
+# NOTES: 
+'''
+>>> sizeof((1,2))
+56
+>>> sizeof(Coords(1,2))
+48
+
+class Coords:
+	__slots__: ['x', 'y']
+	def __init__(self, x, y):
+		self.x = x
+		self.y = y
+'''
+'''
+As far s PDB lookups go...
+>>> timeit(lambda:bytes(bytearray([1,2,3,4,7,8,9])))
+0.6865901119999762
+>>> timeit(lambda:tuple([1,2,3,4,7,8,9]))
+0.23621258300045156
+>>> timeit(lambda:bytes([1,2,3,4,7,8,9]))
+0.4075702660011302
+
+Recall dictionary keys have to be IMMUTABLE TYPE - so lists, bytearrays not allowed
+tuples, bytes, allowed
+
+
+>>> 
+
+
+'''
