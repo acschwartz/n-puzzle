@@ -201,8 +201,40 @@ As far s PDB lookups go...
 Recall dictionary keys have to be IMMUTABLE TYPE - so lists, bytearrays not allowed
 tuples, bytes, allowed
 
+......
+Regarding representations of states:
 
->>> 
+>>> pat_list = [0, 255, 255, 4, 255, 255, 255, 13, 255, 255, 255, 14, 2, 10, 3, 6]
+>>> timeit(lambda:str(tuple(pat_list)))
+2.4628033119988686
+>>> timeit(lambda:str(bytes(pat_list))b')
+0.7033650670000497
+timeit(lambda:bytes(pat_list))
+0.4218067380006687
+
+Comparing values stored as bytes vs as ints
+>>> timeit(lambda: b'\x01' == b'\x02')
+0.11794590199860977
+>>> timeit(lambda: 1 == 2)
+0.11735898000006273
+
+retrieving a val from bytestring or list
+>>> timeit(lambda: pat_list[3])
+0.12938051099990844
+>>> timeit(lambda: pat_list_as_bytes[3])
+0.13401093900029082
+>>> timeit(lambda: pat_list[15])
+0.1675721989995509
+>>> timeit(lambda: pat_list_as_bytes[15])
+0.1338116719998652
 
 
+>>> timeit(lambda: pat_list_as_bytes[15]+1)
+0.15390037799988932
+>>> pat_list_as_bytes[15]+1
+7
+>>> pat_list[15]+1
+7
+>>> timeit(lambda: pat_list[15]+1)
+0.14973862400074722
 '''
