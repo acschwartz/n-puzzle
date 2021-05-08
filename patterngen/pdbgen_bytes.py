@@ -158,6 +158,24 @@ def init(patternName='15fringe'):
 	ptiles = PATTERNS[patternName]['pattern tiles']
 	goalPattern = generateTargetPattern(ptiles, dim)
 
+def generateTargetPatternAsBytes(ptiles):
+	# generate pattern representation of puzzle goal state = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+	# which will be the initial state for the backwards BFS used to generate the PDB
+	
+	# returns: pattern as bytestring where pattern[i] is the index of pattern tile i within the puzzle state
+	# e.g. if ptiles = (0,3,7,11,12,13,14,15)
+	# pattern = b'\x00\x03\x07\x0b\x0c\r\x0e\x0f'
+	# so pattern[i] will change when square i moves on the board.
+	# "empty" squares which are not part of the pattern are omitted to save space
+	# (although this only saves ~8 bytes per state, this is amortized over the millions of states we must store).
+	# notes: bytestrings are like a 'tuple' compared to a bytearray - immutable but elements can be accessed by index
+	
+	pattern = []
+	for tile in ptiles:
+		pattern.append(tile)
+	return bytes(pattern)
+	
+
 '''
 def generateTargetPattern(ptiles, dim):
 	# generate pattern representation of puzzle goal state = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
@@ -211,6 +229,8 @@ Regarding representations of states:
 0.7033650670000497
 timeit(lambda:bytes(pat_list))
 0.4218067380006687
+>>> timeit(lambda:list(pat_list_as_bytes))
+0.39167072900090716
 
 Comparing values stored as bytes vs as ints
 >>> timeit(lambda: b'\x01' == b'\x02')
