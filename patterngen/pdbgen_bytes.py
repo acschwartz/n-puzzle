@@ -70,6 +70,7 @@ OPP_MOVES = tuple(map(lambda d: DIRECTIONS.index(MOVE_INDEX[DIRECTIONS[d]]['opp'
 ##==============================================================================================##
 
 MAXRSS_UNIT_COEFFICIENT = 1024 if sys.platform.startswith('darwin') else 1
+SECTION_SEPARATOR = '=========================================================================='
 RUN_ID = time.strftime(f'%y%m%d-%H%M%S')
 OUTPUT_DIRECTORY = 'output/'
 
@@ -232,16 +233,25 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves, BASE_OUTPUT_FILENA
 		if not frontier:
 			break
 	
+	# WRITE TO DATABASE FILE
 	outfile = OUTPUT_DIRECTORY+BASE_OUTPUT_FILENAME
-	with open(outfile, "wb") as f:
+	tryAgain = 'y'
+	while tryAgain == 'y':
 		try:
-			print("\nAttempting to write entries to database file:", outfile, ".....")
+			actionMessage = "".join(["\nWriting entries to database file:", outfile, "....."])
+			f = open(outfile, "wb")
+			logger.info(actionMessage)
+#			raise OSError
 			pickle.dump(visited, f, pickle.HIGHEST_PROTOCOL)
-			raise OSError
-			print('Done!')
+			logger.info('Done!')
+			f.close()
+			tryAgain = False
 		except OSError as err:
+			f.close()
 			logger.exception(err)
-			logger.info('\n')
+			tryAgain = input('\nPress y to retry ')
+			if tryAgain == 'y':
+				logger.info('\nUser directive: retry')
 			
 	return visitedCount
 
@@ -266,10 +276,11 @@ if __name__ == '__main__':
 	output_file_handler.setLevel(logging.INFO)	# don't ever want debug stuff in the logfile
 	logger.addHandler(output_file_handler)
 	
+	logger.info(SECTION_SEPARATOR)
 	logger.info('Run ID: '+str(RUN_ID))
 	logger.info('DB name: '+BASE_OUTPUT_FILENAME)
 	logger.info('Pattern type: '+str(pname))
-	logger.info('\n')
+	logger.info("".join([SECTION_SEPARATOR, '\n']))
 
 	stats = dict()
 	t_start = time.perf_counter()
@@ -280,16 +291,17 @@ if __name__ == '__main__':
 	
 	stats['entries collected'] = len_db
 	stats['platform'] = sys.platform
-	stats['time (seconds)'] = float("{:.2f}".format( time.perf_counter() - t_start))
+	stats['time (s)'] = float("{:.2f}".format( time.perf_counter() - t_start))
 	stats['memory (raw)'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss - maxrss_start
-	stats['time (mins)'] = float("{:.2f}".format(stats['time (seconds)'] /60))
-	stats['memory (w/ units)'] = bytes_to_human_readable_string(stats['memory (raw)'] * MAXRSS_UNIT_COEFFICIENT, 2)
+	stats['time (min)'] = float("{:.2f}".format(stats['time (s)'] /60))
+	stats['memory (units)'] = bytes_to_human_readable_string(stats['memory (raw)'] * MAXRSS_UNIT_COEFFICIENT, 2)
 	
 	stats_as_strings = sorted([ f'{key} : {stats[key]}' for key in stats ])
-#	logger.info('\n')
+	logger.info("".join(['\n', SECTION_SEPARATOR]))
+	
 	for stat in stats_as_strings:
 		logger.info(stat) 
-	
+	logger.info(SECTION_SEPARATOR)
 
 ##==============================================================================================##
 
