@@ -70,8 +70,6 @@ PATTERNS = {
 				},
 }
 
-EMPTY_TILE = 255	# represents tiles which are not included in the pattern
-
 DIRECTIONS = ('left', 'right', 'up', 'down')
 
 MOVE_XY = {
@@ -153,10 +151,10 @@ def init(patternName='15fringe'):
 	
 	# global vars copied to local for speed
 	directions = DIRECTIONS
-	move_xy = MOVE_XY
+	moveFuncs = MOVE_INDEX
 	dim = PATTERNS[patternName]['dim']
 	ptiles = PATTERNS[patternName]['pattern tiles']
-	goalPattern = generateTargetPattern(ptiles, dim)
+	initialPatternTileLocations = generateTargetPattern(ptiles, dim)
 
 def generateTargetPatternAsBytes(ptiles):
 	# generate pattern representation of puzzle goal state = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
@@ -174,25 +172,37 @@ def generateTargetPatternAsBytes(ptiles):
 	for tile in ptiles:
 		pattern.append(tile)
 	return bytes(pattern)
-	
 
-'''
-def generateTargetPattern(ptiles, dim):
-	# generate pattern representation of puzzle goal state = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
-	# which will be the initial state for the backwards BFS used to generate the PDB
+def repr(pattern):
+	# get representation of each pattern - used as keys for storage, etc.
+	return bytes(pattern)
+
+def doAction(startState, action, startStateDepth, moveSet, dim):
+	# action e.g. (0, 'up') 
+	i, dir = action
+	newState = list(startState)
+	newState[i] = moveSet[dir](startState[i], dim)
 	
-	# returns: pattern as bytearray where pattern[i] is the index of pattern tile i within the puzzle state
-	# e.g. if ptiles = (0,3,7,11,12,13,14,15)
-	# pattern = bytearray(b'\x00\xff\xff\x03\xff\xff\xff\x07\xff\xff\xff\x0b\x0c\r\x0e\x0f')
+	# directions order: ('left', 'right', 'up', 'down')
+	undoMoves = {
+		'left': 1,
+		'right': 0,
+		'up': 3,
+		'down': 2
+	}
+	'''
+	undoMoves = {
+		'left': MOVE_INDEX_DIRECTIONS.index(move_index_right),
+		'right': MOVE_INDEX_DIRECTIONS.index(move_index_left),
+		'up': MOVE_INDEX_DIRECTIONS.index(move_index_down),
+		'down': MOVE_INDEX_DIRECTIONS.index(move_index_up)
+	}
+	'''
 	
-	pattern = bytearray([EMPTY_TILE]*(dim**2))
-	for tile in ptiles:
-		pattern[tile] = tile
-	return pattern
-'''
+	info = [startStateDepth+1, i, undoMoves[dir]]
+	return repr(newState), bytes(info)
 
 ##==============================================================================================##
-#print(parseArgs())
 
 # NOTES: 
 '''
