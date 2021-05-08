@@ -88,14 +88,16 @@ def move_index_right(i, dim):
 		return None
 
 def move_index_up(i, dim):
-	if i-dim >= 0:
-		return i-dim
+	x = i-dim
+	if x >= 0:
+		return x
 	else:
 		return None
 
 def move_index_down(i, dim):
-	if i+dim < dim**2:	# assumes square puzzle
-		return i+dim
+	x = i+dim
+	if x < dim*dim:	# assumes square puzzle
+		return x
 	else:
 		return None
 
@@ -178,7 +180,7 @@ def generateInitialSearchNode(ptiles):
 def generateChildren(state, state_info, dim, moveSetAsTuple, undoMoves):
 	state_depth = state_info[0]
 	children_depth = state_depth + 1
-	action_generate_parent = (int(state_info[1]), int(state_info[2]))
+	action_generate_parent = (state_info[1], state_info[2])
 	# the above action would generate the parent from which this state originated
 	
 	children = []
@@ -218,7 +220,7 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves):
 		visitedCount += 1
 		frontier.remove(state_repr)
 		
-		if visitedCount == 10**6:
+		if visitedCount == 2000000:
 			print(visited)
 			break
 		
@@ -234,6 +236,7 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves):
 		pickle.dump(visited, f)
 		
 	return filename, visitedCount
+
 		
 ##==============================================================================================##
 ##==============================================================================================##
