@@ -104,10 +104,10 @@ def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST, RA
         ida_star_nodes_generated += 1
         # Note: while I would normally consider the above to count "nodes expanded", since the line of code is executed when a node is expanded. However, after some research, it looks that this implementation features backtracking, where only one node is generated at a time (and uses O(m) memory instead of O(bm). Therefore the above count is correct.
         
-        
-        # THIS IS FOR A "LEAF" NODE (i.e. nodes that cannot be expanded)
         node = path[0]
         f_node = g + HEURISTIC(node, goal_state, size)
+        
+        # THIS IS FOR A "LEAF" NODE (i.e. nodes that cannot be expanded)
         if f_node > f_limit:
             return False, f_node
         if node == goal_state:
@@ -149,3 +149,4 @@ def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST, RA
         else:
             f_limit = searchresults['min_fcost_over_limit']
 
+            
