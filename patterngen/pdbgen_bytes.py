@@ -7,6 +7,7 @@ import time
 import resource
 import pickle
 import traceback
+import logging
 import pprint
 
 ##==============================================================================================##
@@ -71,17 +72,12 @@ OPP_MOVES = tuple(map(lambda d: DIRECTIONS.index(MOVE_INDEX[DIRECTIONS[d]]['opp'
 MAXRSS_UNIT_COEFFICIENT = 1024 if sys.platform.startswith('darwin') else 1
 RUN_ID = time.strftime(f'%y%m%d-%H%M%S')
 OUTPUT_DIRECTORY = 'output/'
-OUTPUT_FILENAME_PREFIX = ''		# initialized in initOutputFileID
-OUTPUT_FILENAME_SUFFIX= ''		# initialized in initOutputFileID
 
-def initOutputFileID(pname):
-	#Doesn't actually initialize the RUN_ID, that's done at top of tile
-	global OUTPUT_FILENAME_PREFIX, OUTPUT_FILENAME_SUFFIX
+def getBaseOutputfileName(pname):
 	OUTPUT_FILENAME_PREFIX = "".join([pname, '_'])
 	OUTPUT_FILENAME_SUFFIX = "".join(['_', RUN_ID])
-	print('Run ID:', RUN_ID)
-	print('Pattern type:', pname)
-	return RUN_ID
+	base_output_filename = "".join([OUTPUT_FILENAME_PREFIX, 'pdb', OUTPUT_FILENAME_SUFFIX])
+	return base_output_filename
 
 ##==============================================================================================##
 
@@ -185,8 +181,23 @@ def generateChildrenOptimized(state, state_info, dim, moveSetAsTuple, undoMoves)
 		ptileID += 1
 	return children
 
+##==============================================================================================##
+def handle_exception(exc_type, exc_value, exc_traceback):
+# Source: https://stackoverflow.com/questions/6234405/logging-uncaught-exceptions-in-python
+	if issubclass(exc_type, KeyboardInterrupt):
+		sys.__excepthook__(exc_type, exc_value, exc_traceback)
+		return
+	
+	logger.critical("\nUncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+	logger.info('\n')
+	
+sys.excepthook = handle_exception
 
-def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves):
+##==============================================================================================##
+#	 G E N E R A T E   P A T T E R N   D A T A B A S E
+##==============================================================================================##
+
+def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves, BASE_OUTPUT_FILENAME, logger):
 	queue = deque([initNode])
 	frontier = set()
 	frontier.add(initNode[:num_ptiles])
@@ -195,7 +206,7 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves):
 	
 	while queue:
 		#DEBUG
-		break
+#		break
 		
 		node = queue.popleft()
 		state_repr = node[:num_ptiles]
@@ -211,9 +222,9 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves):
 		frontier.remove(state_repr)
 		
 #		DEBUG
-#		if visitedCount == 2000000:
-#			print(visited)
-#			break
+		if visitedCount == 10000:
+			logger.debug(visited)
+			break
 		
 		if visitedCount % 10000 == 0:
 			print("Entries collected:", visitedCount)
@@ -221,53 +232,64 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves):
 		if not frontier:
 			break
 	
-	filename = "".join([OUTPUT_FILENAME_PREFIX, 'pdb', OUTPUT_FILENAME_SUFFIX])
-	with open(OUTPUT_DIRECTORY+filename, "wb") as f:
+	outfile = OUTPUT_DIRECTORY+BASE_OUTPUT_FILENAME
+	with open(outfile, "wb") as f:
 		try:
-			print("Attempting to write entries to database file:", OUTPUT_DIRECTORY+filename)
-			print('........ .... .... ...')
+			print("\nAttempting to write entries to database file:", outfile, ".....")
 			pickle.dump(visited, f, pickle.HIGHEST_PROTOCOL)
-			raise OSError('test')
+			raise OSError
 			print('Done!')
 		except OSError as err:
-			traceback.print_exc()
+			logger.exception(err)
+			logger.info('\n')
 			
-	return filename, visitedCount
+	return visitedCount
 
-		
 ##==============================================================================================##
+#		M	A 	I	N
 ##==============================================================================================##
-		
 if __name__ == '__main__':
-	patternName = parseArgs()
-	initOutputFileID(patternName)
-	ptiles = PATTERNS[patternName]['pattern tiles']
+	pname = parseArgs()
+	ptiles = PATTERNS[pname]['pattern tiles']
+	dim = PATTERNS[pname]['dim']
+	BASE_OUTPUT_FILENAME = getBaseOutputfileName(pname)
+	logfile = "".join([OUTPUT_DIRECTORY, BASE_OUTPUT_FILENAME, '.log'])
 	
+	# create logger
+	logger = logging.getLogger(__name__)
+	logger.setLevel(logging.DEBUG)  	# CAN SET TO INFO / DEBUG
+	
+	# create handlers for logigng to both file and stdout
+	stdout_handler = logging.StreamHandler(stream=sys.stdout)
+	logger.addHandler(stdout_handler)
+	output_file_handler = logging.FileHandler(logfile)
+	output_file_handler.setLevel(logging.INFO)	# don't ever want debug stuff in the logfile
+	logger.addHandler(output_file_handler)
+	
+	logger.info('Run ID: '+str(RUN_ID))
+	logger.info('DB name: '+BASE_OUTPUT_FILENAME)
+	logger.info('Pattern type: '+str(pname))
+	logger.info('\n')
+
 	stats = dict()
-	
-	stats['time (seconds)'] = time.perf_counter()
-	stats['memory'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+	t_start = time.perf_counter()
+	maxrss_start = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
 	#GENERATE DATABASE
-	stats['_ Database file'], stats['db entries (nodes explored)'] = generatePDB(generateInitialSearchNode(ptiles), PATTERNS[patternName]['dim'], len(ptiles), MOVES, OPP_MOVES)
-	stats['_ Run ID'] = RUN_ID
-	stats['_ platform'] = sys.platform
+	len_db = generatePDB(generateInitialSearchNode(ptiles), dim, len(ptiles), MOVES, OPP_MOVES, BASE_OUTPUT_FILENAME, logger)
 	
-	stats['time (seconds)'] = float("{:.2f}".format( time.perf_counter() - stats['time (seconds)']))
-	stats['memory (raw)'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss - stats['memory']
+	stats['entries collected'] = len_db
+	stats['platform'] = sys.platform
+	stats['time (seconds)'] = float("{:.2f}".format( time.perf_counter() - t_start))
+	stats['memory (raw)'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss - maxrss_start
 	stats['time (mins)'] = float("{:.2f}".format(stats['time (seconds)'] /60))
 	stats['memory (w/ units)'] = bytes_to_human_readable_string(stats['memory (raw)'] * MAXRSS_UNIT_COEFFICIENT, 2)
 	
-	logfile = "".join([OUTPUT_DIRECTORY, OUTPUT_FILENAME_PREFIX, 'pdb', OUTPUT_FILENAME_SUFFIX, '_log','.txt'])
-	pp = pprint.PrettyPrinter(indent=3)
-	with open(logfile, "w") as f:
-		# create list of strings
-		stats_as_strings = sorted([ f'{key} : {stats[key]}' for key in stats ])
-		# write string one by one adding newline
-		[f.write(f'{st}\n') for st in stats_as_strings ]
-		
-	print('Stats written to log file:', logfile)
-	pp.pprint(stats_as_strings)
+	stats_as_strings = sorted([ f'{key} : {stats[key]}' for key in stats ])
+#	logger.info('\n')
+	for stat in stats_as_strings:
+		logger.info(stat) 
+	
 
 ##==============================================================================================##
 
