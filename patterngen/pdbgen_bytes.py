@@ -175,11 +175,6 @@ def generateInitialSearchNode(ptiles):
 	return generateTargetPatternAsBytes(ptiles)+bytes([0,255,255])
 
 
-def repr(pattern):
-	# get representation of each pattern - used as keys for storage, etc.
-	return bytes(pattern)
-
-
 def generateChildren(state, state_info, dim, moveSetAsTuple, undoMoves):
 	state_depth = state_info[0]
 	children_depth = state_depth + 1
@@ -198,7 +193,7 @@ def generateChildren(state, state_info, dim, moveSetAsTuple, undoMoves):
 				child = list(state)
 				child[ptileID] = new_tile_location
 				childInfo = [children_depth, ptileID, undoMoves[moveID]]
-				children.append((repr(child), bytes(childInfo)))
+				children.append((bytes(child), bytes(childInfo)))
 	return children
 
 
