@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 from argparse import ArgumentParser
 from sys import platform
+from math import floor
+from collections import deque
+import time
+import resource
+import pickle
 
 '''
 
@@ -124,24 +129,30 @@ OUTPUT_DIRECTORY = 'output/'
 MAXRSS_UNIT_COEFFICIENT = 1024 if platform != 'darwin' else 1
 
 ##==============================================================================================##
+
+def bytes_to_human_readable_string(size,precision=2):
+# SOURCE: https://stackoverflow.com/questions/5194057/better-way-to-convert-file-sizes-in-python/14822210
+# http://code.activestate.com/recipes/578019-bytes-to-human-human-to-bytes-converter/
+	suffixes=['B','KB','MB','GB','TB']
+	suffixIndex = 0
+	while size > 1024 and suffixIndex < 4:
+		suffixIndex += 1 #increment the index of the suffix
+		size = size/1024.0 #apply the division
+	return "%.*f%s"%(precision,size,suffixes[suffixIndex])
+
+##==============================================================================================##
+
 def parseArgs():
 	parser = ArgumentParser(description='n-puzzle pattern database generator')
 	parser.add_argument('pattern_name', help='choose a pattern', choices=list(PATTERNS.keys()))
 	args = parser.parse_args()
 	return args.pattern_name
 
-def init(patternName='15fringe'):
+def initOutputFileID(pname):
 	global OUTPUTFILE_IDENTIFIER
-	OUTPUTFILE_IDENTIFIER = "".join([str(math.floor(time.time()*1000)-(1619863801*1000)-372000000), '__', pname, '_'])
+	OUTPUTFILE_IDENTIFIER = "".join([str(floor(time.time()*1000)-(1619863801*1000)-372000000), '__', pname, '_'])
 	print(OUTPUTFILE_IDENTIFIER)
-	
-	# global vars copied to local for speed
-	dirs = DIRECTIONS
-	moves = MOVES
-	undo_moves = OPP_MOVES
-	dim = PATTERNS[patternName]['dim']
-	ptiles = PATTERNS[patternName]['pattern tiles']
-	initialPatternTileLocations = generateTargetPattern(ptiles, dim)
+	return OUTPUTFILE_IDENTIFIER
 
 def generateTargetPatternAsBytes(ptiles):
 	# generate pattern representation of puzzle goal state = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
@@ -154,11 +165,14 @@ def generateTargetPatternAsBytes(ptiles):
 	# "empty" squares which are not part of the pattern are omitted to save space
 	# (although this only saves ~8 bytes per state, this is amortized over the millions of states we must store).
 	# notes: bytestrings are like a 'tuple' compared to a bytearray - immutable but elements can be accessed by index
-	
 	pattern = []
 	for tile in ptiles:
 		pattern.append(tile)
 	return bytes(pattern)
+
+def generateInitialSearchNode(ptiles):
+#	return (generateTargetPatternAsBytes(ptiles), bytes([0, 255, 255]))
+	return generateTargetPatternAsBytes(ptiles)+bytes([0,255,255])
 
 
 def repr(pattern):
@@ -166,35 +180,7 @@ def repr(pattern):
 	return bytes(pattern)
 
 
-def getActions(state, stateInfo, dim, moveSetAsTuple):
-# Returns list of possible actions in the form action=(tileindex, direction)
-	allowedActions = []
-	undoAction = (int(stateInfo[1]), int(stateInfo[2]))
-	# disallowed bc it would just take you back to the state's parent from which it was generated
-	# and it's a waste of time to generate that parent state again
-	
-	for ptileID, tileLocationInPuzzle in enumerate(state):
-		for moveID, moveFunction in enumerate(moveSetAsTuple):
-			action = (ptileID, moveID)
-			if action == undoAction:
-				continue
-			tileLocationAfterMove = moveFunction(tileLocationInPuzzle, dim)
-			if tileLocationAfterMove and tileLocationAfterMove not in state:
-				allowedActions.append(action)
-	return allowedActions
-
-
-def doAction(startState, dim, action, startStateDepth, moveSetAsTuple, undoMoves=OPP_MOVES):
-	i, dir = action
-	newState = list(startState)
-	newState[i] = moveSetAsTuple[dir](startState[i], dim)
-	info = [startStateDepth+1, i, undoMoves[dir]]
-	return repr(newState), bytes(info)
-
-
-# combines getActions and doAction
-# getAction and doAction still useful for unit testing!
-def generateChildren(state, state_info, dim, moveSetAsTuple, undoMoves=OPP_MOVES):
+def generateChildren(state, state_info, dim, moveSetAsTuple, undoMoves):
 	state_depth = state_info[0]
 	children_depth = state_depth + 1
 	action_generate_parent = (int(state_info[1]), int(state_info[2]))
@@ -214,7 +200,78 @@ def generateChildren(state, state_info, dim, moveSetAsTuple, undoMoves=OPP_MOVES
 				childInfo = [children_depth, ptileID, undoMoves[moveID]]
 				children.append((repr(child), bytes(childInfo)))
 	return children
+
+
+def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves):
+	queue = deque([initNode])
+	frontier = set()
+	frontier.add(initNode[:num_ptiles])
+	visited = dict()
+	visitedCount = 0
 	
+	while queue:
+		node = queue.popleft()
+		state_repr = node[:num_ptiles]
+		state_info = node[num_ptiles:]
+		
+		for child_state, child_info in generateChildren(state_repr, state_info, dim, moveSet, oppMoves):
+			if (child_state not in visited) and (child_state not in frontier):
+				queue.append(child_state+child_info)
+				frontier.add(child_state)
+				
+		visited[state_repr] = bytes([state_info[0]])
+		visitedCount += 1
+		frontier.remove(state_repr)
+		
+		if visitedCount == 10**6:
+			print(visited)
+			break
+		
+		if visitedCount % 10000 == 0:
+			print("Entries collected:", visitedCount)
+			
+		if not frontier:
+			break
+	
+	print("Writing entries to database...")
+	filename = "".join([OUTPUTFILE_IDENTIFIER, "database.pickle"])
+	with open("".join([OUTPUT_DIRECTORY, filename]), "wb") as f:
+		pickle.dump(visited, f)
+		
+	return filename, visitedCount
+		
+##==============================================================================================##
+##==============================================================================================##
+		
+if __name__ == '__main__':
+	patternName = parseArgs()
+	initOutputFileID(patternName)
+	ptiles = PATTERNS[patternName]['pattern tiles']
+	
+	stats = dict()
+	
+	stats['time (seconds)'] = time.perf_counter()
+	stats['memory'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+
+	#GENERATE DATABASE
+	stats['_PDB file'], stats['db entries (nodes explored)'] = generatePDB(generateInitialSearchNode(ptiles), PATTERNS[patternName]['dim'], len(ptiles), MOVES, OPP_MOVES)
+	
+	
+	stats['time (seconds)'] = float("{:.2f}".format( time.perf_counter() - stats['time (seconds)']))
+	stats['memory'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss - stats['memory']
+	stats['time (mins)'] = float("{:.2f}".format(stats['time (seconds)'] /60))
+	stats['memory (w/ units)'] = bytes_to_human_readable_string(stats['memory'] * MAXRSS_UNIT_COEFFICIENT, 2)
+	
+	file = "".join([OUTPUTFILE_IDENTIFIER, "stats.txt"])
+	with open(OUTPUT_DIRECTORY+file, "w") as f:
+		# create list of strings
+		stringz = [ f'{key} : {stats[key]}' for key in stats ]
+		stringz.sort()
+		# write string one by one adding newline
+		[f.write(f'{st}\n') for st in stringz ]
+		
+	stats['_stats file:'] = OUTPUT_DIRECTORY+file
+	print(stats)
 
 ##==============================================================================================##
 

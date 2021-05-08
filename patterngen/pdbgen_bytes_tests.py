@@ -5,6 +5,10 @@ import unittest
 
 dim_15puzzle = 4
 
+##==============================================================================================##
+# Functions retired from main program but still used for testing
+##==============================================================================================##
+
 MOVE_XY = {
 	'left': lambda x,y: (x, y-1),
 	'right': lambda x,y: (x, y+1),
@@ -26,6 +30,38 @@ def index_coords_to_1d(coords, dim):
 	return i
 
 
+def getActions(state, stateInfo, dim, moveSetAsTuple):
+# Returns list of possible actions in the form action=(tileindex, direction)
+	allowedActions = []
+	undoAction = (int(stateInfo[1]), int(stateInfo[2]))
+	# disallowed bc it would just take you back to the state's parent from which it was generated
+	# and it's a waste of time to generate that parent state again
+	
+	for ptileID, tileLocationInPuzzle in enumerate(state):
+		for moveID, moveFunction in enumerate(moveSetAsTuple):
+			action = (ptileID, moveID)
+			if action == undoAction:
+				continue
+			tileLocationAfterMove = moveFunction(tileLocationInPuzzle, dim)
+			if tileLocationAfterMove and tileLocationAfterMove not in state:
+				allowedActions.append(action)
+	return allowedActions
+
+
+def doAction(startState, dim, action, startStateDepth, moveSetAsTuple, undoMoves):
+	i, dir = action
+	newState = list(startState)
+	newState[i] = moveSetAsTuple[dir](startState[i], dim)
+	info = [startStateDepth+1, i, undoMoves[dir]]
+	return repr(newState), bytes(info)
+
+
+
+##==============================================================================================##
+
+#  U N I T   T E S T S
+
+##==============================================================================================##
 
 class TestIndexConversions_1d_xy(unittest.TestCase):
 	
@@ -159,13 +195,13 @@ class TestUnitFunctions(unittest.TestCase):
 		self.assertEqual(set(returnedActions), set(allowedActions))
 		
 		
-	def test_generateChildren(self):
+	def test_generateChildrenUndoMoves(self):
 		dim = dim_15puzzle
 		moveSetTuple = MOVES
 		undoMoves = OPP_MOVES
 		dirs = DIRECTIONS
 		ptiles = PATTERNS['15fringe']['pattern tiles']
-		parent, parent_info = doAction(bytes([0, 3, 7, 11, 12, 13, 14, 15]), dim, (ptiles.index(3),dirs.index('left')), 0, moveSetTuple)
+		parent, parent_info = doAction(bytes([0, 3, 7, 11, 12, 13, 14, 15]), dim, (ptiles.index(3),dirs.index('left')), 0, moveSetTuple, undoMoves)
 		
 		children = generateChildren(parent, parent_info, dim, moveSetTuple, undoMoves)
 		
@@ -174,6 +210,17 @@ class TestUnitFunctions(unittest.TestCase):
 			action_to_generate_parent = (child_info[1],child_info[2])
 			result = doAction(child_state, dim, action_to_generate_parent, child_info[0], moveSetTuple, undoMoves)
 			self.assertEqual(result[0], parent)
+		
+#	def test_generateChildrenFromInitialState(self):
+#		dim = dim_15puzzle
+#		moveSetTuple = MOVES
+#		undoMoves = OPP_MOVES
+#		dirs = DIRECTIONS
+#		ptiles = PATTERNS['15fringe']['pattern tiles']
+#		
+#		initState, initState_info = generateInitialSearchNode(ptiles)
+#		children = generateChildren(initState, initState_info, dim, moveSetTuple, undoMoves)
+
 
 		
 if __name__ == '__main__':
