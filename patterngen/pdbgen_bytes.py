@@ -194,7 +194,7 @@ def initLogger(loggerName, BASE_OUTPUT_FILENAME):
 	logfile = "".join([OUTPUT_DIRECTORY, BASE_OUTPUT_FILENAME, '.log'])
 	
 	# create logger
-	logger = logging.getLogger(__name__)
+	logger = logging.getLogger(loggerName)
 	logger.setLevel(logging.DEBUG)  	# CAN SET TO INFO / DEBUG
 	
 	# create handlers for logigng to both file and stdout
@@ -203,7 +203,7 @@ def initLogger(loggerName, BASE_OUTPUT_FILENAME):
 	output_file_handler = logging.FileHandler(logfile)
 	output_file_handler.setLevel(logging.INFO)	# don't ever want debug stuff in the logfile
 	logger.addHandler(output_file_handler)
-	return logger
+	return logger, logfile
 
 def handle_exception(exc_type, exc_value, exc_traceback):
 # Source: https://stackoverflow.com/questions/6234405/logging-uncaught-exceptions-in-python
@@ -293,7 +293,7 @@ if __name__ == '__main__':
 	ptiles = PATTERNS[pname]['pattern tiles']
 	dim = PATTERNS[pname]['dim']
 	BASE_OUTPUT_FILENAME = getBaseOutputfileName(pname)
-	logger = initLogger(__name__, BASE_OUTPUT_FILENAME)
+	logger, logfile = initLogger(__name__, BASE_OUTPUT_FILENAME)
 	
 	logger.info(SECTION_SEPARATOR)
 	logger.info('Run ID: '+str(RUN_ID))
@@ -321,4 +321,5 @@ if __name__ == '__main__':
 	for stat in stats_as_strings:
 		logger.info(stat) 
 	logger.info(SECTION_SEPARATOR)
+	logger.info('logfile: '+logfile)
 	
