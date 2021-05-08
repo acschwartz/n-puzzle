@@ -199,6 +199,46 @@ def generateChildren(state, state_info, dim, moveSetAsTuple, undoMoves):
 	return children
 
 
+def generateChildrenOptimized(state, state_info, dim, moveSetAsTuple, undoMoves):
+# Apparently this is a legitimate optimization...
+#>>> def stepThruEnum():
+#...     for I, val in enumerate(p_bytes):
+#...             print(i, val)
+#timeit(stepThruEnum) = 33.80008150300273
+#
+#>>> def stepThruwithi():
+#...     i = 0
+#...     for tile in p_bytes:
+#...             print(i, tile)
+#...             i += 1
+#timeit(stepThruwithi) = 31.335610534995794
+
+	state_depth = state_info[0]
+	children_depth = state_depth + 1
+	action_generate_parent = (state_info[1], state_info[2])
+	# the above action would generate the parent from which this state originated
+	
+	children = []
+	ptileID = 0
+	for tileLocationInPuzzle in state:
+		moveID = 0
+		for moveFunction in moveSetAsTuple:
+			action = (ptileID, moveID)
+			if action == action_generate_parent:
+				moveID += 1
+				continue
+			new_tile_location = moveFunction(tileLocationInPuzzle, dim)
+			if new_tile_location and new_tile_location not in state:
+			# checks that new location is in bounds, and that the new square is not occupied by another pattern tile
+				child = list(state)
+				child[ptileID] = new_tile_location
+				childInfo = [children_depth, ptileID, undoMoves[moveID]]
+				children.append((bytes(child), bytes(childInfo)))
+			moveID += 1
+		ptileID += 1
+	return children
+
+
 def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves):
 	queue = deque([initNode])
 	frontier = set()
@@ -211,7 +251,7 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves):
 		state_repr = node[:num_ptiles]
 		state_info = node[num_ptiles:]
 		
-		for child_state, child_info in generateChildren(state_repr, state_info, dim, moveSet, oppMoves):
+		for child_state, child_info in generateChildrenOptimized(state_repr, state_info, dim, moveSet, oppMoves):
 			if (child_state not in visited) and (child_state not in frontier):
 				queue.append(child_state+child_info)
 				frontier.add(child_state)

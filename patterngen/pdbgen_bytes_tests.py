@@ -53,7 +53,7 @@ def doAction(startState, dim, action, startStateDepth, moveSetAsTuple, undoMoves
 	newState = list(startState)
 	newState[i] = moveSetAsTuple[dir](startState[i], dim)
 	info = [startStateDepth+1, i, undoMoves[dir]]
-	return repr(newState), bytes(info)
+	return bytes(newState), bytes(info)
 
 
 
@@ -210,17 +210,20 @@ class TestUnitFunctions(unittest.TestCase):
 			action_to_generate_parent = (child_info[1],child_info[2])
 			result = doAction(child_state, dim, action_to_generate_parent, child_info[0], moveSetTuple, undoMoves)
 			self.assertEqual(result[0], parent)
-		
-#	def test_generateChildrenFromInitialState(self):
-#		dim = dim_15puzzle
-#		moveSetTuple = MOVES
-#		undoMoves = OPP_MOVES
-#		dirs = DIRECTIONS
-#		ptiles = PATTERNS['15fringe']['pattern tiles']
-#		
-#		initState, initState_info = generateInitialSearchNode(ptiles)
-#		children = generateChildren(initState, initState_info, dim, moveSetTuple, undoMoves)
 
+
+#class TestOptimizationCorrectness(unittest.TestCase):
+#	
+#	def test_generateChildrenOptimized(self):
+#		import pickle
+#		file1 = 'output/223185784__15fringe_database.pickle'	# generated with generateChildren
+#		file2 = 'output/223328552__15fringe_database.pickle'	# generated with generateChildrenOptimized
+#		with open(file1, "rb") as f:
+#			db1 = pickle.load(f)
+#		with open(file2, "rb") as f:
+#			db2 = pickle.load(f)
+#		
+#		self.assertEqual(db1, db2)	# PASSED!
 
 		
 if __name__ == '__main__':
