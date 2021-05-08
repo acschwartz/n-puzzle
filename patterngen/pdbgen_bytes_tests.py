@@ -5,6 +5,28 @@ import unittest
 
 dim_15puzzle = 4
 
+MOVE_XY = {
+	'left': lambda x,y: (x, y-1),
+	'right': lambda x,y: (x, y+1),
+	'up': lambda x,y: (x-1, y),
+	'down': lambda x,y: (x+1, y),
+		}
+def index_1d_to_xy(i, dim):
+	x = i // dim
+	y = i % dim
+	return (x,y)
+
+def index_xy_to_1d(x, y, dim):
+	i = x*dim + y
+	return i
+
+def index_coords_to_1d(coords, dim):
+	x, y = coords
+	i = x*dim + y
+	return i
+
+
+
 class TestIndexConversions_1d_xy(unittest.TestCase):
 	
 	def test_index_1d_to_xy(self):
@@ -46,7 +68,7 @@ class TestMOVE_INDEX(unittest.TestCase):
 	
 	def compare_MOVE_XY_to_MOVE_INDEX(self, direction, i, dim):
 		x, y = index_1d_to_xy(i, dim)
-		self.assertEqual(index_1d_to_xy(MOVE_INDEX[direction](i,dim), dim), MOVE_XY[direction](x,y))
+		self.assertEqual(index_1d_to_xy(MOVE_INDEX[direction]['func'](i,dim), dim), MOVE_XY[direction](x,y))
 		
 	def test_15puzzle_MOVE_INDEX_left(self):
 		dir = 'left'
@@ -58,7 +80,7 @@ class TestMOVE_INDEX(unittest.TestCase):
 		for i in range(13,16):
 			self.compare_MOVE_XY_to_MOVE_INDEX(dir, i, dim)
 		for i in (0,4,8,12):
-			self.assertIsNone(MOVE_INDEX[dir](i,dim))
+			self.assertIsNone(MOVE_INDEX[dir]['func'](i,dim))
 		self.assertEqual(move_index_left(2, 4), 1, "Should be 1")
 	
 	def test_15puzzle_MOVE_INDEX_right(self):
@@ -71,7 +93,7 @@ class TestMOVE_INDEX(unittest.TestCase):
 		for i in range(8,11):
 			self.compare_MOVE_XY_to_MOVE_INDEX(dir, i, dim)
 		for i in (3,7,11,15):
-			self.assertIsNone(MOVE_INDEX[dir](i,dim))
+			self.assertIsNone(MOVE_INDEX[dir]['func'](i,dim))
 	
 	def test_15puzzle_MOVE_INDEX_up(self):
 		dir = 'up'
@@ -79,7 +101,7 @@ class TestMOVE_INDEX(unittest.TestCase):
 		for i in range(4,16):
 			self.compare_MOVE_XY_to_MOVE_INDEX(dir, i, dim)
 		for i in range(0,4):
-			self.assertIsNone(MOVE_INDEX[dir](i,dim))
+			self.assertIsNone(MOVE_INDEX[dir]['func'](i,dim))
 	
 	def test_15puzzle_MOVE_INDEX_down(self):
 		dir = 'down'
@@ -87,7 +109,7 @@ class TestMOVE_INDEX(unittest.TestCase):
 		for i in range(0,12):
 			self.compare_MOVE_XY_to_MOVE_INDEX(dir, i, dim)
 		for i in range(12,16):
-			self.assertIsNone(MOVE_INDEX[dir](i,dim))
+			self.assertIsNone(MOVE_INDEX[dir]['func'](i,dim))
 
 class TestUnitFunctions(unittest.TestCase):
 	
@@ -101,8 +123,7 @@ class TestUnitFunctions(unittest.TestCase):
 		state = bytes([0, 3, 7, 11, 12, 13, 14, 15])
 		action = (ptiles.index(14), DIRECTIONS.index('up'))
 		state_depth = 0
-		moveSetDict = MOVE_INDEX
-		moveSetTuple = MOVE_INDEX_DIRECTIONS
+		moveSetTuple = MOVES
 		undoMoves = OPP_MOVES
 		
 		resultState, info = doAction(state, dim, action, state_depth, moveSetTuple, undoMoves)
@@ -115,11 +136,11 @@ class TestUnitFunctions(unittest.TestCase):
 	
 	def test_getActions(self):
 		dim = dim_15puzzle
-		moveSetDict = MOVE_INDEX
-		moveSetTuple = MOVE_INDEX_DIRECTIONS
+		moveSetTuple = MOVES
+		undoMoves = OPP_MOVES
 		dirs = DIRECTIONS
 		ptiles = PATTERNS['15fringe']['pattern tiles']
-		state, info = doAction(bytes([0, 3, 7, 11, 12, 13, 14, 15]), dim, (ptiles.index(3),dirs.index('left')), 0, moveSetTuple)
+		state, info = doAction(bytes([0, 3, 7, 11, 12, 13, 14, 15]), dim, (ptiles.index(3),dirs.index('left')), 0, moveSetTuple, undoMoves)
 		
 		returnedActions = getActions(state, info, dim, moveSetTuple)
 		
@@ -142,7 +163,7 @@ class TestUnitFunctions(unittest.TestCase):
 		
 	def test_generateChildren(self):
 		dim = dim_15puzzle
-		moveSetTuple = MOVE_INDEX_DIRECTIONS
+		moveSetTuple = MOVES
 		undoMoves = OPP_MOVES
 		dirs = DIRECTIONS
 		ptiles = PATTERNS['15fringe']['pattern tiles']

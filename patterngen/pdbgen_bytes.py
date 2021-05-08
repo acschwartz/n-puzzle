@@ -69,14 +69,6 @@ PATTERNS = {
 				'pattern tiles': (0, 3, 7, 11, 12, 13, 14, 15),
 				},
 }
-
-MOVE_XY = {
-	'left': lambda x,y: (x, y-1),
-	'right': lambda x,y: (x, y+1),
-	'up': lambda x,y: (x-1, y),
-	'down': lambda x,y: (x+1, y),
-		}
-
 ##==============================================================================================##
 def move_index_left(i, dim):
 	if i % dim > 0:
@@ -103,39 +95,33 @@ def move_index_down(i, dim):
 		return None
 
 MOVE_INDEX = {
-	'left': move_index_left,
-	'right': move_index_right,
-	'up': move_index_up,
-	'down': move_index_down,
-		}
+	'left': {
+		'func': move_index_left,
+		'opp': 'right'
+	},
+	'right': {
+		'func': move_index_right,
+		'opp': 'left'
+	},
+	'up': {
+		'func': move_index_up,
+		'opp': 'down'
+	},
+	'down': {
+		'func': move_index_down,
+		'opp': 'up'
+	}
+}
 
-DIRECTIONS = ('left', 'right', 'up', 'down')
-OPP_MOVES = (DIRECTIONS.index('right'), DIRECTIONS.index('left'), DIRECTIONS.index('down'), DIRECTIONS.index('up'))
-MOVE_INDEX_DIRECTIONS = (MOVE_INDEX['left'], MOVE_INDEX['right'], MOVE_INDEX['up'], MOVE_INDEX['down'])
 # having the functions in a list saves dictionary lookups in MOVE_INDEX
-
+DIRECTIONS = ('left', 'right', 'up', 'down')
+MOVES = tuple(map(lambda d: MOVE_INDEX[DIRECTIONS[d]]['func'], range(len(DIRECTIONS))))
+OPP_MOVES = tuple(map(lambda d: DIRECTIONS.index(MOVE_INDEX[DIRECTIONS[d]]['opp']), range(len(DIRECTIONS))))
 ##==============================================================================================##
 
 OUTPUTFILE_IDENTIFIER = ""
 OUTPUT_DIRECTORY = 'output/'
 MAXRSS_UNIT_COEFFICIENT = 1024 if platform != 'darwin' else 1
-
-##==============================================================================================##
-# Functions to convert between 1d-arary indec and coordinates on the puzzle grid
-
-def index_1d_to_xy(i, dim):
-	x = i // dim
-	y = i % dim
-	return (x,y)
-
-def index_xy_to_1d(x, y, dim):
-	return x*dim + y
-
-def index_coords_to_1d(coords, dim):
-	# coords = (x,y)
-	x, y = coords
-	return index_xy_to_1d(x, y, dim)
-
 
 ##==============================================================================================##
 def parseArgs():
@@ -150,8 +136,9 @@ def init(patternName='15fringe'):
 	print(OUTPUTFILE_IDENTIFIER)
 	
 	# global vars copied to local for speed
-	directions = DIRECTIONS
-	moveFuncs = MOVE_INDEX
+	dirs = DIRECTIONS
+	moves = MOVES
+	undo_moves = OPP_MOVES
 	dim = PATTERNS[patternName]['dim']
 	ptiles = PATTERNS[patternName]['pattern tiles']
 	initialPatternTileLocations = generateTargetPattern(ptiles, dim)
@@ -172,6 +159,7 @@ def generateTargetPatternAsBytes(ptiles):
 	for tile in ptiles:
 		pattern.append(tile)
 	return bytes(pattern)
+
 
 def repr(pattern):
 	# get representation of each pattern - used as keys for storage, etc.
@@ -196,7 +184,7 @@ def getActions(state, stateInfo, dim, moveSetAsTuple):
 	return allowedActions
 
 
-def doAction(startState, dim, action, startStateDepth, moveSetAsTuple=MOVE_INDEX_DIRECTIONS, undoMoves=OPP_MOVES):
+def doAction(startState, dim, action, startStateDepth, moveSetAsTuple, undoMoves=OPP_MOVES):
 	i, dir = action
 	newState = list(startState)
 	newState[i] = moveSetAsTuple[dir](startState[i], dim)
@@ -206,7 +194,7 @@ def doAction(startState, dim, action, startStateDepth, moveSetAsTuple=MOVE_INDEX
 
 # combines getActions and doAction
 # getAction and doAction still useful for unit testing!
-def generateChildren(state, state_info, dim, moveSetAsTuple=MOVE_INDEX_DIRECTIONS, undoMoves=OPP_MOVES):
+def generateChildren(state, state_info, dim, moveSetAsTuple, undoMoves=OPP_MOVES):
 	state_depth = state_info[0]
 	children_depth = state_depth + 1
 	action_generate_parent = (int(state_info[1]), int(state_info[2]))
