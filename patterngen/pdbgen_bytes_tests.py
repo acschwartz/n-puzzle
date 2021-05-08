@@ -131,8 +131,6 @@ class TestUnitFunctions(unittest.TestCase):
 		self.assertEqual(info[0], state_depth+1, "Should be 1")
 		self.assertEqual(info[1], action[0], "Should be 6")
 		self.assertEqual(moveSetTuple[info[2]], move_index_down, "Should be move_index_down")
-
-# I WANT TO TEST ACTIONS UNDOING THEMSELVES
 	
 	def test_getActions(self):
 		dim = dim_15puzzle
