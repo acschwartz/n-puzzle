@@ -17,6 +17,12 @@ PATTERNS = {
 				},
 }
 ##==============================================================================================##
+
+RUN_ID = time.strftime(f'%y%m%d-%H%M%S')
+OUTPUT_DIRECTORY = 'output/'
+SECTION_SEPARATOR = '=========================================================================='
+
+##==============================================================================================##
 def move_index_left(i, dim):
 	if i % dim > 0:
 		return i-1
@@ -62,21 +68,86 @@ MOVE_INDEX = {
 	}
 }
 
-# having the functions in a list saves dictionary lookups in MOVE_INDEX
 DIRECTIONS = ('left', 'right', 'up', 'down')
 MOVES = tuple(map(lambda d: MOVE_INDEX[DIRECTIONS[d]]['func'], range(len(DIRECTIONS))))
 OPP_MOVES = tuple(map(lambda d: DIRECTIONS.index(MOVE_INDEX[DIRECTIONS[d]]['opp']), range(len(DIRECTIONS))))
+
 ##==============================================================================================##
 
-SECTION_SEPARATOR = '=========================================================================='
-RUN_ID = time.strftime(f'%y%m%d-%H%M%S')
-OUTPUT_DIRECTORY = 'output/'
+def parseArgs():
+	parser = ArgumentParser(description='n-puzzle pattern database generator')
+	parser.add_argument('pattern_name', help='choose a pattern', choices=list(PATTERNS.keys()))
+	args = parser.parse_args()
+	return args.pattern_name
+
+def init():
+	pname = parseArgs()
+	ptiles = PATTERNS[pname]['pattern tiles']
+	dim = PATTERNS[pname]['dim']
+	BASE_OUTPUT_FILENAME = getBaseOutputfileName(pname)
+	return pname, ptiles, dim, BASE_OUTPUT_FILENAME
 
 def getBaseOutputfileName(pname):
 	OUTPUT_FILENAME_PREFIX = "".join([pname, '_'])
 	OUTPUT_FILENAME_SUFFIX = "".join(['_', RUN_ID])
 	base_output_filename = "".join([OUTPUT_FILENAME_PREFIX, 'pdb', OUTPUT_FILENAME_SUFFIX])
 	return base_output_filename
+
+def initLogger(loggerName, BASE_OUTPUT_FILENAME):
+	logfile = "".join([OUTPUT_DIRECTORY, BASE_OUTPUT_FILENAME, '.log'])
+	
+	# create logger
+	logger = logging.getLogger(__name__)
+	logger.setLevel(logging.DEBUG)  	# CAN SET TO INFO / DEBUG
+	
+	# create handlers for logigng to both file and stdout
+	stdout_handler = logging.StreamHandler(stream=sys.stdout)
+	logger.addHandler(stdout_handler)
+	output_file_handler = logging.FileHandler(logfile)
+	output_file_handler.setLevel(logging.INFO)	# don't ever want debug stuff in the logfile
+	logger.addHandler(output_file_handler)
+	return logger, logfile
+
+##==============================================================================================##
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+# Source: https://stackoverflow.com/questions/6234405/logging-uncaught-exceptions-in-python
+	if issubclass(exc_type, KeyboardInterrupt):
+		sys.__excepthook__(exc_type, exc_value, exc_traceback)
+		return
+	
+	logger.critical("\nUncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+	logger.info('\n')
+	
+sys.excepthook = handle_exception
+
+##==============================================================================================##
+
+def generateStats(t_start, maxrss_start, len_db):
+	stats = dict()
+	stats['entries collected'] = len_db
+	stats['platform'] = sys.platform
+	stats['time (s)'] = float("{:.2f}".format( time.perf_counter() - t_start))
+	stats['memory (raw)'] = getMaxRSS() - maxrss_start
+	stats['time (min)'] = float("{:.2f}".format(stats['time (s)'] /60))
+	stats['memory (units)'] = rawMaxRSStoPrettyString(stats['memory (raw)'])
+	return stats
+
+def printHeader(logger, BASE_OUTPUT_FILENAME, pname):
+	logger.info(SECTION_SEPARATOR)
+	logger.info('Run ID: '+str(RUN_ID))
+	logger.info('DB name: '+BASE_OUTPUT_FILENAME)
+	logger.info('Pattern type: '+str(pname))
+	logger.info("".join([SECTION_SEPARATOR, '\n']))
+	return
+
+def printStats(logger, stats):
+	stats_as_strings = sorted([ f'{key} : {stats[key]}' for key in stats ])
+	logger.info("".join(['\n', SECTION_SEPARATOR]))
+	for stat in stats_as_strings:
+		logger.info(stat) 
+	logger.info(SECTION_SEPARATOR)
+	return
 
 ##==============================================================================================##
 
@@ -101,13 +172,7 @@ def bytes_to_human_readable_string(size,precision=2):
 
 ##==============================================================================================##
 
-def parseArgs():
-	parser = ArgumentParser(description='n-puzzle pattern database generator')
-	parser.add_argument('pattern_name', help='choose a pattern', choices=list(PATTERNS.keys()))
-	args = parser.parse_args()
-	return args.pattern_name
-
-def generateTargetPatternAsBytes(ptiles):
+def makeTargetPattern(ptiles):
 	# generate pattern representation of puzzle goal state = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
 	# which will be the initial state for the backwards BFS used to generate the PDB
 	
@@ -123,10 +188,9 @@ def generateTargetPatternAsBytes(ptiles):
 		pattern.append(tile)
 	return bytes(pattern)
 
-def generateInitialSearchNode(ptiles):
-#	return (generateTargetPatternAsBytes(ptiles), bytes([0, 255, 255]))
-	return generateTargetPatternAsBytes(ptiles)+bytes([0,255,255])
-
+def generateInitialNode(ptiles):
+#	return (makeTargetPattern(ptiles), bytes([0, 255, 255]))
+	return makeTargetPattern(ptiles)+bytes([0,255,255])
 
 def generateChildren(state, state_info, dim, moveSetAsTuple, undoMoves):
 	state_depth = state_info[0]
@@ -188,33 +252,6 @@ def generateChildrenOptimized(state, state_info, dim, moveSetAsTuple, undoMoves)
 			moveID += 1
 		ptileID += 1
 	return children
-
-##==============================================================================================##
-def initLogger(loggerName, BASE_OUTPUT_FILENAME):
-	logfile = "".join([OUTPUT_DIRECTORY, BASE_OUTPUT_FILENAME, '.log'])
-	
-	# create logger
-	logger = logging.getLogger(__name__)
-	logger.setLevel(logging.DEBUG)  	# CAN SET TO INFO / DEBUG
-	
-	# create handlers for logigng to both file and stdout
-	stdout_handler = logging.StreamHandler(stream=sys.stdout)
-	logger.addHandler(stdout_handler)
-	output_file_handler = logging.FileHandler(logfile)
-	output_file_handler.setLevel(logging.INFO)	# don't ever want debug stuff in the logfile
-	logger.addHandler(output_file_handler)
-	return logger, logfile
-
-def handle_exception(exc_type, exc_value, exc_traceback):
-# Source: https://stackoverflow.com/questions/6234405/logging-uncaught-exceptions-in-python
-	if issubclass(exc_type, KeyboardInterrupt):
-		sys.__excepthook__(exc_type, exc_value, exc_traceback)
-		return
-	
-	logger.critical("\nUncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
-	logger.info('\n')
-	
-sys.excepthook = handle_exception
 
 ##==============================================================================================##
 #	 G E N E R A T E   P A T T E R N   D A T A B A S E
@@ -285,41 +322,21 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves, BASE_OUTPUT_FILENA
 	
 	return visitedCount
 
+
 ##==============================================================================================##
 #		M	A 	I	N
 ##==============================================================================================##
 if __name__ == '__main__':
-	pname = parseArgs()
-	ptiles = PATTERNS[pname]['pattern tiles']
-	dim = PATTERNS[pname]['dim']
-	BASE_OUTPUT_FILENAME = getBaseOutputfileName(pname)
+	pname, ptiles, dim, BASE_OUTPUT_FILENAME = init()
 	logger, logfile = initLogger(__name__, BASE_OUTPUT_FILENAME)
+	printHeader(logger, BASE_OUTPUT_FILENAME, pname)
 	
-	logger.info(SECTION_SEPARATOR)
-	logger.info('Run ID: '+str(RUN_ID))
-	logger.info('DB name: '+BASE_OUTPUT_FILENAME)
-	logger.info('Pattern type: '+str(pname))
-	logger.info("".join([SECTION_SEPARATOR, '\n']))
-
-	stats = dict()
 	t_start = time.perf_counter()
 	maxrss_start = getMaxRSS()
-
+	
 	#GENERATE DATABASE
-	len_db = generatePDB(generateInitialSearchNode(ptiles), dim, len(ptiles), MOVES, OPP_MOVES, BASE_OUTPUT_FILENAME, logger)
+	len_db = generatePDB(generateInitialNode(ptiles), dim, len(ptiles), MOVES, OPP_MOVES, BASE_OUTPUT_FILENAME, logger)
 	
-	stats['entries collected'] = len_db
-	stats['platform'] = sys.platform
-	stats['time (s)'] = float("{:.2f}".format( time.perf_counter() - t_start))
-	stats['memory (raw)'] = getMaxRSS() - maxrss_start
-	stats['time (min)'] = float("{:.2f}".format(stats['time (s)'] /60))
-	stats['memory (units)'] = rawMaxRSStoPrettyString(stats['memory (raw)'])
-	
-	stats_as_strings = sorted([ f'{key} : {stats[key]}' for key in stats ])
-	logger.info("".join(['\n', SECTION_SEPARATOR]))
-	
-	for stat in stats_as_strings:
-		logger.info(stat) 
-	logger.info(SECTION_SEPARATOR)
+	stats = generateStats(t_start, maxrss_start, len_db)
+	printStats(logger, stats)
 	logger.info('logfile: '+logfile)
-	
