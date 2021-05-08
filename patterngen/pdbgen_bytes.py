@@ -70,9 +70,6 @@ PATTERNS = {
 				},
 }
 
-DIRECTIONS = ('left', 'right', 'up', 'down')
-OPP_MOVES = (DIRECTIONS.index('right'), DIRECTIONS.index('left'), DIRECTIONS.index('down'), DIRECTIONS.index('up'))
-
 MOVE_XY = {
 	'left': lambda x,y: (x, y-1),
 	'right': lambda x,y: (x, y+1),
@@ -112,7 +109,9 @@ MOVE_INDEX = {
 	'down': move_index_down,
 		}
 
-MOVE_INDEX_DIRECTIONS = (move_index_left, move_index_right, move_index_up, move_index_down)
+DIRECTIONS = ('left', 'right', 'up', 'down')
+OPP_MOVES = (DIRECTIONS.index('right'), DIRECTIONS.index('left'), DIRECTIONS.index('down'), DIRECTIONS.index('up'))
+MOVE_INDEX_DIRECTIONS = (MOVE_INDEX['left'], MOVE_INDEX['right'], MOVE_INDEX['up'], MOVE_INDEX['down'])
 # having the functions in a list saves dictionary lookups in MOVE_INDEX
 
 ##==============================================================================================##
@@ -178,16 +177,15 @@ def repr(pattern):
 	# get representation of each pattern - used as keys for storage, etc.
 	return bytes(pattern)
 
+
 def getActions(state, stateInfo, dim, moveSetAsTuple):
 # Returns list of possible actions in the form action=(tileindex, direction)
+	allowedActions = []
 	undoAction = (int(stateInfo[1]), int(stateInfo[2]))
 	# disallowed bc it would just take you back to the state's parent from which it was generated
 	# and it's a waste of time to generate that parent state again
 	
-	allowedActions = []
-	
 	for ptileID, tileLocationInPuzzle in enumerate(state):
-		
 		for moveID, moveFunction in enumerate(moveSetAsTuple):
 			action = (ptileID, moveID)
 			if action == undoAction:
@@ -195,36 +193,40 @@ def getActions(state, stateInfo, dim, moveSetAsTuple):
 			tileLocationAfterMove = moveFunction(tileLocationInPuzzle, dim)
 			if tileLocationAfterMove and tileLocationAfterMove not in state:
 				allowedActions.append(action)
-				
 	return allowedActions
 
-# Sooooo... we don't need a separate getActions and doActions now. In fact, it doubles our work unnecessarily...
 
-
-def doAction(startState, dim, action, startStateDepth, moveSet):
-	# action e.g. (0, 'up') 
+def doAction(startState, dim, action, startStateDepth, moveSetAsTuple=MOVE_INDEX_DIRECTIONS, undoMoves=OPP_MOVES):
 	i, dir = action
 	newState = list(startState)
-	newState[i] = moveSet[dir](startState[i], dim)
-	
-	# directions order: ('left', 'right', 'up', 'down')
-	undoMoves = {
-		'left': 1,
-		'right': 0,
-		'up': 3,
-		'down': 2
-	}
-	'''
-	undoMoves = {
-		'left': MOVE_INDEX_DIRECTIONS.index(move_index_right),
-		'right': MOVE_INDEX_DIRECTIONS.index(move_index_left),
-		'up': MOVE_INDEX_DIRECTIONS.index(move_index_down),
-		'down': MOVE_INDEX_DIRECTIONS.index(move_index_up)
-	}
-	'''
-	
+	newState[i] = moveSetAsTuple[dir](startState[i], dim)
 	info = [startStateDepth+1, i, undoMoves[dir]]
 	return repr(newState), bytes(info)
+
+
+# combines getActions and doAction
+# getAction and doAction still useful for unit testing!
+def generateChildren(state, state_info, dim, moveSetAsTuple=MOVE_INDEX_DIRECTIONS, undoMoves=OPP_MOVES):
+	state_depth = state_info[0]
+	children_depth = state_depth + 1
+	action_generate_parent = (int(state_info[1]), int(state_info[2]))
+	# the above action would generate the parent from which this state originated
+	
+	children = []
+	for ptileID, tileLocationInPuzzle in enumerate(state):
+		for moveID, moveFunction in enumerate(moveSetAsTuple):
+			action = (ptileID, moveID)
+			if action == action_generate_parent:
+				continue
+			new_tile_location = moveFunction(tileLocationInPuzzle, dim)
+			if new_tile_location and new_tile_location not in state:
+			# checks that new location is in bounds, and that the new square is not occupied by another pattern tile
+				child = list(state)
+				child[ptileID] = new_tile_location
+				childInfo = [children_depth, ptileID, undoMoves[moveID]]
+				children.append((repr(child), bytes(childInfo)))
+	return children
+	
 
 ##==============================================================================================##
 
@@ -271,6 +273,12 @@ Comparing values stored as bytes vs as ints
 0.11794590199860977
 >>> timeit(lambda: 1 == 2)
 0.11735898000006273
+>>> timeit(lambda: 13  == b'\x02')
+0.12782957599847578
+>>> timeit(lambda: 15 == b'\x0f')
+0.12981452200256172
+>>> timeit(lambda: 15 == 15)
+0.11791720199835254
 
 retrieving a val from bytestring or list
 >>> timeit(lambda: pat_list[3])

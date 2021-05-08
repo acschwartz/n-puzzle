@@ -97,13 +97,15 @@ class TestUnitFunctions(unittest.TestCase):
 	
 	def test_doAction(self):
 		dim = dim_15puzzle
+		ptiles = PATTERNS['15fringe']['pattern tiles']
 		state = bytes([0, 3, 7, 11, 12, 13, 14, 15])
-		action = (6, 'up')
+		action = (ptiles.index(14), DIRECTIONS.index('up'))
 		state_depth = 0
 		moveSetDict = MOVE_INDEX
 		moveSetTuple = MOVE_INDEX_DIRECTIONS
+		undoMoves = OPP_MOVES
 		
-		resultState, info = doAction(state, dim, action, state_depth, moveSetDict)
+		resultState, info = doAction(state, dim, action, state_depth, moveSetTuple, undoMoves)
 		self.assertEqual(resultState[action[0]], 10, "Should be 10")
 		self.assertEqual(info[0], state_depth+1, "Should be 1")
 		self.assertEqual(info[1], action[0], "Should be 6")
@@ -117,7 +119,7 @@ class TestUnitFunctions(unittest.TestCase):
 		moveSetTuple = MOVE_INDEX_DIRECTIONS
 		dirs = DIRECTIONS
 		ptiles = PATTERNS['15fringe']['pattern tiles']
-		state, info = doAction(bytes([0, 3, 7, 11, 12, 13, 14, 15]), dim, (ptiles.index(3),'left'), 0, moveSetDict)
+		state, info = doAction(bytes([0, 3, 7, 11, 12, 13, 14, 15]), dim, (ptiles.index(3),dirs.index('left')), 0, moveSetTuple)
 		
 		returnedActions = getActions(state, info, dim, moveSetTuple)
 		
@@ -135,32 +137,24 @@ class TestUnitFunctions(unittest.TestCase):
 			(ptiles.index(14), dirs.index('up')),
 		]
 		
-		self.assertEqual(returnedActions, allowedActions)
-	def test_getActions(self):
+		self.assertEqual(set(returnedActions), set(allowedActions))
+		
+		
+	def test_generateChildren(self):
 		dim = dim_15puzzle
-		moveSetDict = MOVE_INDEX
 		moveSetTuple = MOVE_INDEX_DIRECTIONS
+		undoMoves = OPP_MOVES
 		dirs = DIRECTIONS
 		ptiles = PATTERNS['15fringe']['pattern tiles']
-		state, info = doAction(bytes([0, 3, 7, 11, 12, 13, 14, 15]), dim, (ptiles.index(3),'left'), 0, moveSetDict)
+		parent, parent_info = doAction(bytes([0, 3, 7, 11, 12, 13, 14, 15]), dim, (ptiles.index(3),dirs.index('left')), 0, moveSetTuple)
 		
-		returnedActions = set(getActions(state, info, dim, moveSetTuple))
+		children = generateChildren(parent, parent_info, dim, moveSetTuple, undoMoves)
 		
-		excludedAction = (ptiles.index(3), dirs.index('right')),	# This is the undo action that takes you back to parent state
-		allowedActions = {
-			(ptiles.index(0), dirs.index('right')),
-			(ptiles.index(0), dirs.index('down')),
-			(ptiles.index(3), dirs.index('left')),
-			(ptiles.index(3), dirs.index('down')),
-			(ptiles.index(7), dirs.index('up')),
-			(ptiles.index(7), dirs.index('left')),
-			(ptiles.index(11), dirs.index('left')),
-			(ptiles.index(12), dirs.index('up')),
-			(ptiles.index(13), dirs.index('up')),
-			(ptiles.index(14), dirs.index('up')),
-		}
-		
-		self.assertEqual(returnedActions, allowedActions)
+		for child in children:
+			child_state, child_info = child
+			action_to_generate_parent = (child_info[1],child_info[2])
+			result = doAction(child_state, dim, action_to_generate_parent, child_info[0], moveSetTuple, undoMoves)
+			self.assertEqual(result[0], parent)
 
 		
 if __name__ == '__main__':
