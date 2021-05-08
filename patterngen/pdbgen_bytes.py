@@ -1,71 +1,13 @@
 #!/usr/bin/env python3
 from argparse import ArgumentParser
-from sys import platform
 from math import floor
 from collections import deque
+import sys
 import time
 import resource
 import pickle
-
-'''
-
-TODO: HUGE !!!!!!! H U G E discovery...
-deepcopy is slow asf, compared to converting between lists and tuples
-
-pz = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
->>> timeit(lambda:list(tuple(pz)))
-0.31665251099911984
->>> timeit(lambda:deepcopy(pz))
-11.42695140199794
-
-YIKES.
-That's probably why this ran so incredibly slowly.
-
-P.S. bytearrays take up much less room and can be copied much quicker:
->>> ba = bytearray(pz)
->>> ba
-bytearray(b'\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f')
->>> timeit(lambda:bytearray(ba))
-0.2905499839980621
-
-Comparing two bytearrays is also faster than comparing two arrays.
-
-ba2 = bytearray(ba) creates a new bytearray in ba2 that is distinct from and not a ref to ba
-
-'''
-##==============================================================================================##
-'''
-ANOTHER NOTE:
-
-A dict with ints for keys and a dict with bytes for keys are apparently the same size.
-So that is not a legitimate way to save space.. oddly.
-
-for i in range(10000):
-	d_ints[i] = randint(0,255)
-	d_bytes[i] = bytes([int(randint(0,255)])
-
->>> sizeof(d_ints)
-295000
->>> sizeof(d_bytes)
-295000
-
-'''
-'''
-ANOTHER NOTE:
-
-Math on ints is much faster than math on bytes
-
->>> a = bytes([3])
->>> b= bytes([15])
->>> from timeit import timeit
->>> timeit(lambda:a+b)
-0.17650921399996378
->>> timeit(lambda:3+15)
-0.0963714110000069
-
-'''
-
-##==============================================================================================##
+import traceback
+import pprint
 
 ##==============================================================================================##
 PATTERNS = {
@@ -126,9 +68,20 @@ MOVES = tuple(map(lambda d: MOVE_INDEX[DIRECTIONS[d]]['func'], range(len(DIRECTI
 OPP_MOVES = tuple(map(lambda d: DIRECTIONS.index(MOVE_INDEX[DIRECTIONS[d]]['opp']), range(len(DIRECTIONS))))
 ##==============================================================================================##
 
-OUTPUTFILE_IDENTIFIER = ""
+MAXRSS_UNIT_COEFFICIENT = 1024 if sys.platform.startswith('darwin') else 1
+RUN_ID = time.strftime(f'%y%m%d-%H%M%S')
 OUTPUT_DIRECTORY = 'output/'
-MAXRSS_UNIT_COEFFICIENT = 1024 if platform != 'darwin' else 1
+OUTPUT_FILENAME_PREFIX = ''		# initialized in initOutputFileID
+OUTPUT_FILENAME_SUFFIX= ''		# initialized in initOutputFileID
+
+def initOutputFileID(pname):
+	#Doesn't actually initialize the RUN_ID, that's done at top of tile
+	global OUTPUT_FILENAME_PREFIX, OUTPUT_FILENAME_SUFFIX
+	OUTPUT_FILENAME_PREFIX = "".join([pname, '_'])
+	OUTPUT_FILENAME_SUFFIX = "".join(['_', RUN_ID])
+	print('Run ID:', RUN_ID)
+	print('Pattern type:', pname)
+	return RUN_ID
 
 ##==============================================================================================##
 
@@ -149,12 +102,6 @@ def parseArgs():
 	parser.add_argument('pattern_name', help='choose a pattern', choices=list(PATTERNS.keys()))
 	args = parser.parse_args()
 	return args.pattern_name
-
-def initOutputFileID(pname):
-	global OUTPUTFILE_IDENTIFIER
-	OUTPUTFILE_IDENTIFIER = "".join([str(floor(time.time()*1000)-(1619863801*1000)-372000000), '__', pname, '_'])
-	print(OUTPUTFILE_IDENTIFIER)
-	return OUTPUTFILE_IDENTIFIER
 
 def generateTargetPatternAsBytes(ptiles):
 	# generate pattern representation of puzzle goal state = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
@@ -247,6 +194,9 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves):
 	visitedCount = 0
 	
 	while queue:
+		#DEBUG
+		break
+		
 		node = queue.popleft()
 		state_repr = node[:num_ptiles]
 		state_info = node[num_ptiles:]
@@ -271,11 +221,17 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves):
 		if not frontier:
 			break
 	
-	print("Writing entries to database...")
-	filename = "".join([OUTPUTFILE_IDENTIFIER, "database.pickle"])
-	with open("".join([OUTPUT_DIRECTORY, filename]), "wb") as f:
-		pickle.dump(visited, f)
-		
+	filename = "".join([OUTPUT_FILENAME_PREFIX, 'pdb', OUTPUT_FILENAME_SUFFIX])
+	with open(OUTPUT_DIRECTORY+filename, "wb") as f:
+		try:
+			print("Attempting to write entries to database file:", OUTPUT_DIRECTORY+filename)
+			print('........ .... .... ...')
+			pickle.dump(visited, f, pickle.HIGHEST_PROTOCOL)
+			raise OSError('test')
+			print('Done!')
+		except OSError as err:
+			traceback.print_exc()
+			
 	return filename, visitedCount
 
 		
@@ -293,24 +249,25 @@ if __name__ == '__main__':
 	stats['memory'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
 	#GENERATE DATABASE
-	stats['_PDB file'], stats['db entries (nodes explored)'] = generatePDB(generateInitialSearchNode(ptiles), PATTERNS[patternName]['dim'], len(ptiles), MOVES, OPP_MOVES)
-	
+	stats['_ Database file'], stats['db entries (nodes explored)'] = generatePDB(generateInitialSearchNode(ptiles), PATTERNS[patternName]['dim'], len(ptiles), MOVES, OPP_MOVES)
+	stats['_ Run ID'] = RUN_ID
+	stats['_ platform'] = sys.platform
 	
 	stats['time (seconds)'] = float("{:.2f}".format( time.perf_counter() - stats['time (seconds)']))
-	stats['memory'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss - stats['memory']
+	stats['memory (raw)'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss - stats['memory']
 	stats['time (mins)'] = float("{:.2f}".format(stats['time (seconds)'] /60))
-	stats['memory (w/ units)'] = bytes_to_human_readable_string(stats['memory'] * MAXRSS_UNIT_COEFFICIENT, 2)
+	stats['memory (w/ units)'] = bytes_to_human_readable_string(stats['memory (raw)'] * MAXRSS_UNIT_COEFFICIENT, 2)
 	
-	file = "".join([OUTPUTFILE_IDENTIFIER, "stats.txt"])
-	with open(OUTPUT_DIRECTORY+file, "w") as f:
+	logfile = "".join([OUTPUT_DIRECTORY, OUTPUT_FILENAME_PREFIX, 'pdb', OUTPUT_FILENAME_SUFFIX, '_log','.txt'])
+	pp = pprint.PrettyPrinter(indent=3)
+	with open(logfile, "w") as f:
 		# create list of strings
-		stringz = [ f'{key} : {stats[key]}' for key in stats ]
-		stringz.sort()
+		stats_as_strings = sorted([ f'{key} : {stats[key]}' for key in stats ])
 		# write string one by one adding newline
-		[f.write(f'{st}\n') for st in stringz ]
+		[f.write(f'{st}\n') for st in stats_as_strings ]
 		
-	stats['_stats file:'] = OUTPUT_DIRECTORY+file
-	print(stats)
+	print('Stats written to log file:', logfile)
+	pp.pprint(stats_as_strings)
 
 ##==============================================================================================##
 
@@ -384,3 +341,63 @@ retrieving a val from bytestring or list
 >>> timeit(lambda: pat_list[15]+1)
 0.14973862400074722
 '''
+
+'''
+
+TODO: HUGE !!!!!!! H U G E discovery...
+deepcopy is slow asf, compared to converting between lists and tuples
+
+pz = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+>>> timeit(lambda:list(tuple(pz)))
+0.31665251099911984
+>>> timeit(lambda:deepcopy(pz))
+11.42695140199794
+
+YIKES.
+That's probably why this ran so incredibly slowly.
+
+P.S. bytearrays take up much less room and can be copied much quicker:
+>>> ba = bytearray(pz)
+>>> ba
+bytearray(b'\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f')
+>>> timeit(lambda:bytearray(ba))
+0.2905499839980621
+
+Comparing two bytearrays is also faster than comparing two arrays.
+
+ba2 = bytearray(ba) creates a new bytearray in ba2 that is distinct from and not a ref to ba
+
+'''
+##==============================================================================================##
+'''
+ANOTHER NOTE:
+
+A dict with ints for keys and a dict with bytes for keys are apparently the same size.
+So that is not a legitimate way to save space.. oddly.
+
+for i in range(10000):
+	d_ints[i] = randint(0,255)
+	d_bytes[i] = bytes([int(randint(0,255)])
+
+>>> sizeof(d_ints)
+295000
+>>> sizeof(d_bytes)
+295000
+
+'''
+'''
+ANOTHER NOTE:
+
+Math on ints is much faster than math on bytes
+
+>>> a = bytes([3])
+>>> b= bytes([15])
+>>> from timeit import timeit
+>>> timeit(lambda:a+b)
+0.17650921399996378
+>>> timeit(lambda:3+15)
+0.0963714110000069
+
+'''
+
+##==============================================================================================##

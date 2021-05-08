@@ -225,6 +225,16 @@ class TestUnitFunctions(unittest.TestCase):
 #		
 #		self.assertEqual(db1, db2)	# PASSED!
 
+class TestErrorHandling(unittest.TestCase):
+	def test_catchOSError(self):
+		try:
+			raise OSError()
+			print('Done!')
+		except OSError as err:
+#			print("OSError: {0}".format(err))
+#			print(f'OSError: {err}\n' )
+			traceback.print_exc()
+
 		
 if __name__ == '__main__':
 	unittest.main()
