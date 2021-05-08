@@ -8,7 +8,6 @@ import resource
 import pickle
 import traceback
 import logging
-import pprint
 
 ##==============================================================================================##
 PATTERNS = {
@@ -69,7 +68,6 @@ MOVES = tuple(map(lambda d: MOVE_INDEX[DIRECTIONS[d]]['func'], range(len(DIRECTI
 OPP_MOVES = tuple(map(lambda d: DIRECTIONS.index(MOVE_INDEX[DIRECTIONS[d]]['opp']), range(len(DIRECTIONS))))
 ##==============================================================================================##
 
-MAXRSS_UNIT_COEFFICIENT = 1024 if sys.platform.startswith('darwin') else 1
 SECTION_SEPARATOR = '=========================================================================='
 RUN_ID = time.strftime(f'%y%m%d-%H%M%S')
 OUTPUT_DIRECTORY = 'output/'
@@ -81,6 +79,15 @@ def getBaseOutputfileName(pname):
 	return base_output_filename
 
 ##==============================================================================================##
+
+MAXRSS_UNIT_COEFFICIENT = 1024 if not sys.platform.startswith('darwin') else 1
+
+def getMaxRSS():
+	return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+
+def rawMaxRSStoPrettyString(raw_maxrss):
+	# get_maxrss returns bytes on macOS and kB on linux. this handles that for you.
+	return bytes_to_human_readable_string(raw_maxrss * MAXRSS_UNIT_COEFFICIENT)
 
 def bytes_to_human_readable_string(size,precision=2):
 # SOURCE: https://stackoverflow.com/questions/5194057/better-way-to-convert-file-sizes-in-python/14822210
@@ -183,6 +190,21 @@ def generateChildrenOptimized(state, state_info, dim, moveSetAsTuple, undoMoves)
 	return children
 
 ##==============================================================================================##
+def initLogger(loggerName, BASE_OUTPUT_FILENAME):
+	logfile = "".join([OUTPUT_DIRECTORY, BASE_OUTPUT_FILENAME, '.log'])
+	
+	# create logger
+	logger = logging.getLogger(__name__)
+	logger.setLevel(logging.DEBUG)  	# CAN SET TO INFO / DEBUG
+	
+	# create handlers for logigng to both file and stdout
+	stdout_handler = logging.StreamHandler(stream=sys.stdout)
+	logger.addHandler(stdout_handler)
+	output_file_handler = logging.FileHandler(logfile)
+	output_file_handler.setLevel(logging.INFO)	# don't ever want debug stuff in the logfile
+	logger.addHandler(output_file_handler)
+	return logger
+
 def handle_exception(exc_type, exc_value, exc_traceback):
 # Source: https://stackoverflow.com/questions/6234405/logging-uncaught-exceptions-in-python
 	if issubclass(exc_type, KeyboardInterrupt):
@@ -205,53 +227,60 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves, BASE_OUTPUT_FILENA
 	visited = dict()
 	visitedCount = 0
 	
-	while queue:
-		#DEBUG
-#		break
-		
-		node = queue.popleft()
-		state_repr = node[:num_ptiles]
-		state_info = node[num_ptiles:]
-		
-		for child_state, child_info in generateChildrenOptimized(state_repr, state_info, dim, moveSet, oppMoves):
-			if (child_state not in visited) and (child_state not in frontier):
-				queue.append(child_state+child_info)
-				frontier.add(child_state)
-				
-		visited[state_repr] = bytes([state_info[0]])
-		visitedCount += 1
-		frontier.remove(state_repr)
-		
-#		DEBUG
-		if visitedCount == 10000:
-			logger.debug(visited)
-			break
-		
-		if visitedCount % 10000 == 0:
-			print("Entries collected:", visitedCount)
+	try:
+		# Generate Pattern Database using breadth-first search "backwards" from goal state.
+		while queue:
+			#DEBUG
+	#		break
 			
-		if not frontier:
-			break
+			node = queue.popleft()
+			state_repr = node[:num_ptiles]
+			state_info = node[num_ptiles:]
+			
+			for child_state, child_info in generateChildrenOptimized(state_repr, state_info, dim, moveSet, oppMoves):
+				if (child_state not in visited) and (child_state not in frontier):
+					queue.append(child_state+child_info)
+					frontier.add(child_state)
+					
+			visited[state_repr] = bytes([state_info[0]])
+			visitedCount += 1
+			frontier.remove(state_repr)
+			
+			#DEBUG
+#			if visitedCount == 10000:
+#				import pprint
+#				pprint.pp(visited, indent=1)
+#				break
+			
+			if visitedCount % 10000 == 0:
+				print("Entries collected:", visitedCount)
+		
+		
+		# Save database / write to file.
+		outfile = OUTPUT_DIRECTORY+BASE_OUTPUT_FILENAME
+		logger.info("".join(["\nWriting entries to database file:", outfile, " ....."]))
+		tryAgain = 'y'
+		while tryAgain == 'y':
+			try:
+				f = open(outfile, "wb")
+				pickle.dump(visited, f, pickle.HIGHEST_PROTOCOL)
+				logger.info('Done!')
+				f.close()
+				tryAgain = False
+			except OSError as err:
+				f.close()
+				logger.exception(err)
+				maxrss = getMaxRSS()
+				logger.info("".join(['(', str(visitedCount), ' entries in memory, using ', rawMaxRSStoPrettyString(maxrss) ,')\n']))
+				
+				tryAgain = input('\nPress y to retry ')
+				if tryAgain == 'y':
+					logger.info('\nRetrying ....')
+				else:
+					logger.info('User aborted.')
 	
-	# WRITE TO DATABASE FILE
-	outfile = OUTPUT_DIRECTORY+BASE_OUTPUT_FILENAME
-	tryAgain = 'y'
-	while tryAgain == 'y':
-		try:
-			actionMessage = "".join(["\nWriting entries to database file:", outfile, "....."])
-			f = open(outfile, "wb")
-			logger.info(actionMessage)
-#			raise OSError
-			pickle.dump(visited, f, pickle.HIGHEST_PROTOCOL)
-			logger.info('Done!')
-			f.close()
-			tryAgain = False
-		except OSError as err:
-			f.close()
-			logger.exception(err)
-			tryAgain = input('\nPress y to retry ')
-			if tryAgain == 'y':
-				logger.info('\nUser directive: retry')
+	except KeyboardInterrupt as e:
+		logger.info('\nKeyboardInterrupt: Aborted search. No database file created.')
 			
 	return visitedCount
 
@@ -263,18 +292,7 @@ if __name__ == '__main__':
 	ptiles = PATTERNS[pname]['pattern tiles']
 	dim = PATTERNS[pname]['dim']
 	BASE_OUTPUT_FILENAME = getBaseOutputfileName(pname)
-	logfile = "".join([OUTPUT_DIRECTORY, BASE_OUTPUT_FILENAME, '.log'])
-	
-	# create logger
-	logger = logging.getLogger(__name__)
-	logger.setLevel(logging.DEBUG)  	# CAN SET TO INFO / DEBUG
-	
-	# create handlers for logigng to both file and stdout
-	stdout_handler = logging.StreamHandler(stream=sys.stdout)
-	logger.addHandler(stdout_handler)
-	output_file_handler = logging.FileHandler(logfile)
-	output_file_handler.setLevel(logging.INFO)	# don't ever want debug stuff in the logfile
-	logger.addHandler(output_file_handler)
+	logger = initLogger(__name__, BASE_OUTPUT_FILENAME)
 	
 	logger.info(SECTION_SEPARATOR)
 	logger.info('Run ID: '+str(RUN_ID))
@@ -284,7 +302,7 @@ if __name__ == '__main__':
 
 	stats = dict()
 	t_start = time.perf_counter()
-	maxrss_start = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+	maxrss_start = getMaxRSS()
 
 	#GENERATE DATABASE
 	len_db = generatePDB(generateInitialSearchNode(ptiles), dim, len(ptiles), MOVES, OPP_MOVES, BASE_OUTPUT_FILENAME, logger)
@@ -292,9 +310,9 @@ if __name__ == '__main__':
 	stats['entries collected'] = len_db
 	stats['platform'] = sys.platform
 	stats['time (s)'] = float("{:.2f}".format( time.perf_counter() - t_start))
-	stats['memory (raw)'] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss - maxrss_start
+	stats['memory (raw)'] = getMaxRSS() - maxrss_start
 	stats['time (min)'] = float("{:.2f}".format(stats['time (s)'] /60))
-	stats['memory (units)'] = bytes_to_human_readable_string(stats['memory (raw)'] * MAXRSS_UNIT_COEFFICIENT, 2)
+	stats['memory (units)'] = rawMaxRSStoPrettyString(stats['memory (raw)'])
 	
 	stats_as_strings = sorted([ f'{key} : {stats[key]}' for key in stats ])
 	logger.info("".join(['\n', SECTION_SEPARATOR]))
@@ -302,136 +320,4 @@ if __name__ == '__main__':
 	for stat in stats_as_strings:
 		logger.info(stat) 
 	logger.info(SECTION_SEPARATOR)
-
-##==============================================================================================##
-
-# NOTES: 
-'''
->>> sizeof((1,2))
-56
->>> sizeof(Coords(1,2))
-48
-
-class Coords:
-	__slots__: ['x', 'y']
-	def __init__(self, x, y):
-		self.x = x
-		self.y = y
-'''
-'''
-As far s PDB lookups go...
->>> timeit(lambda:bytes(bytearray([1,2,3,4,7,8,9])))
-0.6865901119999762
->>> timeit(lambda:tuple([1,2,3,4,7,8,9]))
-0.23621258300045156
->>> timeit(lambda:bytes([1,2,3,4,7,8,9]))
-0.4075702660011302
-
-Recall dictionary keys have to be IMMUTABLE TYPE - so lists, bytearrays not allowed
-tuples, bytes, allowed
-
-......
-Regarding representations of states:
-
->>> pat_list = [0, 255, 255, 4, 255, 255, 255, 13, 255, 255, 255, 14, 2, 10, 3, 6]
->>> timeit(lambda:str(tuple(pat_list)))
-2.4628033119988686
->>> timeit(lambda:str(bytes(pat_list))b')
-0.7033650670000497
-timeit(lambda:bytes(pat_list))
-0.4218067380006687
->>> timeit(lambda:list(pat_list_as_bytes))
-0.39167072900090716
-
-Comparing values stored as bytes vs as ints
->>> timeit(lambda: b'\x01' == b'\x02')
-0.11794590199860977
->>> timeit(lambda: 1 == 2)
-0.11735898000006273
->>> timeit(lambda: 13  == b'\x02')
-0.12782957599847578
->>> timeit(lambda: 15 == b'\x0f')
-0.12981452200256172
->>> timeit(lambda: 15 == 15)
-0.11791720199835254
-
-retrieving a val from bytestring or list
->>> timeit(lambda: pat_list[3])
-0.12938051099990844
->>> timeit(lambda: pat_list_as_bytes[3])
-0.13401093900029082
->>> timeit(lambda: pat_list[15])
-0.1675721989995509
->>> timeit(lambda: pat_list_as_bytes[15])
-0.1338116719998652
-
-
->>> timeit(lambda: pat_list_as_bytes[15]+1)
-0.15390037799988932
->>> pat_list_as_bytes[15]+1
-7
->>> pat_list[15]+1
-7
->>> timeit(lambda: pat_list[15]+1)
-0.14973862400074722
-'''
-
-'''
-
-TODO: HUGE !!!!!!! H U G E discovery...
-deepcopy is slow asf, compared to converting between lists and tuples
-
-pz = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
->>> timeit(lambda:list(tuple(pz)))
-0.31665251099911984
->>> timeit(lambda:deepcopy(pz))
-11.42695140199794
-
-YIKES.
-That's probably why this ran so incredibly slowly.
-
-P.S. bytearrays take up much less room and can be copied much quicker:
->>> ba = bytearray(pz)
->>> ba
-bytearray(b'\x00\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f')
->>> timeit(lambda:bytearray(ba))
-0.2905499839980621
-
-Comparing two bytearrays is also faster than comparing two arrays.
-
-ba2 = bytearray(ba) creates a new bytearray in ba2 that is distinct from and not a ref to ba
-
-'''
-##==============================================================================================##
-'''
-ANOTHER NOTE:
-
-A dict with ints for keys and a dict with bytes for keys are apparently the same size.
-So that is not a legitimate way to save space.. oddly.
-
-for i in range(10000):
-	d_ints[i] = randint(0,255)
-	d_bytes[i] = bytes([int(randint(0,255)])
-
->>> sizeof(d_ints)
-295000
->>> sizeof(d_bytes)
-295000
-
-'''
-'''
-ANOTHER NOTE:
-
-Math on ints is much faster than math on bytes
-
->>> a = bytes([3])
->>> b= bytes([15])
->>> from timeit import timeit
->>> timeit(lambda:a+b)
-0.17650921399996378
->>> timeit(lambda:3+15)
-0.0963714110000069
-
-'''
-
-##==============================================================================================##
+	
