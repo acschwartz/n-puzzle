@@ -71,6 +71,7 @@ PATTERNS = {
 }
 
 DIRECTIONS = ('left', 'right', 'up', 'down')
+OPP_MOVES = (DIRECTIONS.index('right'), DIRECTIONS.index('left'), DIRECTIONS.index('down'), DIRECTIONS.index('up'))
 
 MOVE_XY = {
 	'left': lambda x,y: (x, y-1),
@@ -177,7 +178,30 @@ def repr(pattern):
 	# get representation of each pattern - used as keys for storage, etc.
 	return bytes(pattern)
 
-def doAction(startState, action, startStateDepth, moveSet, dim):
+def getActions(state, stateInfo, dim, moveSetAsTuple):
+# Returns list of possible actions in the form action=(tileindex, direction)
+	undoAction = (int(stateInfo[1]), int(stateInfo[2]))
+	# disallowed bc it would just take you back to the state's parent from which it was generated
+	# and it's a waste of time to generate that parent state again
+	
+	allowedActions = []
+	
+	for ptileID, tileLocationInPuzzle in enumerate(state):
+		
+		for moveID, moveFunction in enumerate(moveSetAsTuple):
+			action = (ptileID, moveID)
+			if action == undoAction:
+				continue
+			tileLocationAfterMove = moveFunction(tileLocationInPuzzle, dim)
+			if tileLocationAfterMove and tileLocationAfterMove not in state:
+				allowedActions.append(action)
+				
+	return allowedActions
+
+# Sooooo... we don't need a separate getActions and doActions now. In fact, it doubles our work unnecessarily...
+
+
+def doAction(startState, dim, action, startStateDepth, moveSet):
 	# action e.g. (0, 'up') 
 	i, dir = action
 	newState = list(startState)

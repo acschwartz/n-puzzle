@@ -59,6 +59,7 @@ class TestMOVE_INDEX(unittest.TestCase):
 			self.compare_MOVE_XY_to_MOVE_INDEX(dir, i, dim)
 		for i in (0,4,8,12):
 			self.assertIsNone(MOVE_INDEX[dir](i,dim))
+		self.assertEqual(move_index_left(2, 4), 1, "Should be 1")
 	
 	def test_15puzzle_MOVE_INDEX_right(self):
 		dir = 'right'
@@ -102,26 +103,64 @@ class TestUnitFunctions(unittest.TestCase):
 		moveSetDict = MOVE_INDEX
 		moveSetTuple = MOVE_INDEX_DIRECTIONS
 		
-		resultState, info = doAction(state, action, state_depth, moveSetDict, dim)
+		resultState, info = doAction(state, dim, action, state_depth, moveSetDict)
 		self.assertEqual(resultState[action[0]], 10, "Should be 10")
 		self.assertEqual(info[0], state_depth+1, "Should be 1")
 		self.assertEqual(info[1], action[0], "Should be 6")
 		self.assertEqual(moveSetTuple[info[2]], move_index_down, "Should be move_index_down")
 
-# THIS ONE IS GONNA TEST ACTIONS UNDOING THEMSELVES
-#	def test_doAction2(self):
-#		dim = dim_15puzzle
-#		state = bytes([0, 1, 7, 11, 8, 13, 10, 15])
-#		action = (6, 'up')
-#		state_depth = 0
-#		moveSetDict = MOVE_INDEX
-#		moveSetTuple = MOVE_INDEX_DIRECTIONS
-#		
-#		resultState, info = doAction(state, action, state_depth, moveSetDict, dim)
-#		self.assertEqual(resultState[action[0]], 10, "Should be 10")
-#		self.assertEqual(info[0], state_depth+1, "Should be 1")
-#		self.assertEqual(info[1], action[0], "Should be 6")
-#		self.assertEqual(moveSetTuple[info[2]], move_index_down, "Should be move_index_down")
+# I WANT TO TEST ACTIONS UNDOING THEMSELVES
+	
+	def test_getActions(self):
+		dim = dim_15puzzle
+		moveSetDict = MOVE_INDEX
+		moveSetTuple = MOVE_INDEX_DIRECTIONS
+		dirs = DIRECTIONS
+		ptiles = PATTERNS['15fringe']['pattern tiles']
+		state, info = doAction(bytes([0, 3, 7, 11, 12, 13, 14, 15]), dim, (ptiles.index(3),'left'), 0, moveSetDict)
+		
+		returnedActions = getActions(state, info, dim, moveSetTuple)
+		
+		excludedAction = (ptiles.index(3), dirs.index('right')),	# This is the undo action that takes you back to parent state
+		allowedActions = [
+			(ptiles.index(0), dirs.index('right')),
+			(ptiles.index(0), dirs.index('down')),
+			(ptiles.index(3), dirs.index('left')),
+			(ptiles.index(3), dirs.index('down')),
+			(ptiles.index(7), dirs.index('up')),
+			(ptiles.index(7), dirs.index('left')),
+			(ptiles.index(11), dirs.index('left')),
+			(ptiles.index(12), dirs.index('up')),
+			(ptiles.index(13), dirs.index('up')),
+			(ptiles.index(14), dirs.index('up')),
+		]
+		
+		self.assertEqual(returnedActions, allowedActions)
+	def test_getActions(self):
+		dim = dim_15puzzle
+		moveSetDict = MOVE_INDEX
+		moveSetTuple = MOVE_INDEX_DIRECTIONS
+		dirs = DIRECTIONS
+		ptiles = PATTERNS['15fringe']['pattern tiles']
+		state, info = doAction(bytes([0, 3, 7, 11, 12, 13, 14, 15]), dim, (ptiles.index(3),'left'), 0, moveSetDict)
+		
+		returnedActions = set(getActions(state, info, dim, moveSetTuple))
+		
+		excludedAction = (ptiles.index(3), dirs.index('right')),	# This is the undo action that takes you back to parent state
+		allowedActions = {
+			(ptiles.index(0), dirs.index('right')),
+			(ptiles.index(0), dirs.index('down')),
+			(ptiles.index(3), dirs.index('left')),
+			(ptiles.index(3), dirs.index('down')),
+			(ptiles.index(7), dirs.index('up')),
+			(ptiles.index(7), dirs.index('left')),
+			(ptiles.index(11), dirs.index('left')),
+			(ptiles.index(12), dirs.index('up')),
+			(ptiles.index(13), dirs.index('up')),
+			(ptiles.index(14), dirs.index('up')),
+		}
+		
+		self.assertEqual(returnedActions, allowedActions)
 
 		
 if __name__ == '__main__':
