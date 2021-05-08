@@ -260,9 +260,10 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves):
 		visitedCount += 1
 		frontier.remove(state_repr)
 		
-		if visitedCount == 2000000:
-			print(visited)
-			break
+#		DEBUG
+#		if visitedCount == 2000000:
+#			print(visited)
+#			break
 		
 		if visitedCount % 10000 == 0:
 			print("Entries collected:", visitedCount)
