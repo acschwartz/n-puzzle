@@ -12,6 +12,7 @@ dim_15puzzle = 4
 ##==============================================================================================##
 
 class TestIndexConversions_1d_xy(unittest.TestCase):
+	pass
 	
 #	def test_index_1d_to_xy(self):
 #		dim = dim_15puzzle
