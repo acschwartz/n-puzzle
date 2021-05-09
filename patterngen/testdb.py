@@ -80,11 +80,11 @@ if __name__ == '__main__':
 		cur.execute("""INSERT INTO patterncosts(pstring, cost) 
 							VALUES (?,?);""", (key, DICT[key]))
 	
+	del DICT
+	
 	time_delta = timeDelta(time_start)
 	maxrss_after_populate_table = getMaxRSS()
 	maxrss_delta_pretty = rawMaxRSStoPrettyString(maxrss_after_populate_table - maxrss_start)
-	
-	if DEBUG: print(f'maxrss_after_populate_table: {maxrss_after_populate_table}')
 	
 	res = cur.execute("SELECT * from patterncosts LIMIT 1")
 	for row in res:
@@ -94,6 +94,8 @@ if __name__ == '__main__':
 		res = cur.execute("SELECT * from patterncosts")
 		for row in res:
 			print(row)
+	
+	if DEBUG: print(f'maxrss_after_populate_table: {maxrss_after_populate_table}')
 	
 	n_entries = len(DICT)
 #	print('\n')
