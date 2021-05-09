@@ -102,7 +102,7 @@ def initLogger(loggerName, base_output_filename, output_path=OUTPUT_DIRECTORY):
 	
 	# create logger
 	logger = logging.getLogger(loggerName)
-	logger.setLevel(logging.DEBUG)  	# CAN SET TO INFO / DEBUG
+	logger.setLevel(logging.DEBUG)
 	
 	# create handlers for logigng to both file and stdout
 	stdout_handler = logging.StreamHandler(stream=sys.stdout)
@@ -142,12 +142,15 @@ def printHeader(logger, BASE_OUTPUT_FILENAME, pname):
 	logger.info('Run ID: '+str(RUN_ID))
 	logger.info('DB name: '+BASE_OUTPUT_FILENAME)
 	logger.info('Pattern type: '+str(pname))
-	logger.info(f'\n{SECTION_SEPARATOR}')
+	logger.info(f'{SECTION_SEPARATOR}\n')
 	return
 
-def printStats(logger, stats):
+def printStats(logger, stats, title=None):
 	stats_as_strings = sorted([ f'{key} : {stats[key]}' for key in stats ])
 	logger.info(f'\n{SECTION_SEPARATOR}')
+	if title:
+		logger.info(f'\t{title}')
+		logger.info(SECTION_SEPARATOR)
 	for stat in stats_as_strings:
 		logger.info(stat) 
 	logger.info(SECTION_SEPARATOR)
@@ -342,5 +345,5 @@ if __name__ == '__main__':
 	len_db = generatePDB(generateInitialNode(ptiles), dim, len(ptiles), MOVES, OPP_MOVES, BASE_OUTPUT_FILENAME, logger)
 	
 	stats = generateStats(t_start, maxrss_start, len_db)
-	printStats(logger, stats)
-	logger.info(f'logfile: {logfile}')
+	printStats(logger, stats, title="Stats")
+	logger.debug(f'logfile: {logfile}')
