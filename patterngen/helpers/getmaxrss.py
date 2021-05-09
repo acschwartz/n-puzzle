@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from resource import getrusage, RUSAGE_SELF
-from sys import platform
 
 
 def getMaxRSS():
@@ -9,6 +8,7 @@ def getMaxRSS():
 
 
 def rawMaxRSStoPrettyString(raw_maxrss):
+	from sys import platform
 	MAXRSS_UNIT_COEFFICIENT = 1024 if not platform.startswith('darwin') else 1
 	# get_maxrss returns bytes on macOS and kB on linux. this handles that for you.
 	return bytes_to_human_readable_string(raw_maxrss * MAXRSS_UNIT_COEFFICIENT)
