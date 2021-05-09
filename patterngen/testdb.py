@@ -2,6 +2,7 @@
 
 import sqlite3
 import pprint
+import os
 from argparse import ArgumentParser
 from time import perf_counter
 from helpers.getmaxrss import *
@@ -85,6 +86,9 @@ if __name__ == '__main__':
 	maxrss_delta = maxrss_after_populate_table - maxrss_start
 	maxrss_delta_pretty = rawMaxRSStoPrettyString(maxrss_delta)
 	
+	pid = os.getpid()
+	current_rss = os.system(f'ps -o rss= {pid}')
+	
 	res = cur.execute("SELECT * from patterncosts LIMIT 1")
 	for row in res:
 		example_row = row
@@ -98,10 +102,14 @@ if __name__ == '__main__':
 	if DEBUG: print(f'maxrss_after_populate_table: {maxrss_after_populate_table}\t{rawMaxRSStoPrettyString(maxrss_after_populate_table)}')
 	if DEBUG: print(f'maxrss_delta: {maxrss_delta}\t{rawMaxRSStoPrettyString(maxrss_delta)}')
 	
+	if DEBUG: print(f'pid: {pid}')
+	if DEBUG: print(f'current rss from \'ps -o rss= $PID\': {current_rss}')
+	
+	
 #	print('\n')
 #	print(f'\n{SEPARATOR_SM}')
 	print(f'\nPrimary key type: {datasetName}\t\te.g. {example_row}')
 #	print(SEPARATOR_SM)
 	print(f'{prettyTime(time_delta)} to insert {n_entries} entries')
-	print(f'memory used (to store DB): {maxrss_delta_pretty}')
+	print(f'memory used (to store DB): {rawMaxRSStoPrettyString(current_rss)}')
 #	print(SEPARATOR)
