@@ -340,7 +340,7 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves, BASE_OUTPUT_FILENA
 
 
 ##==============================================================================================##
-#		M	A 	I	N
+#		M	A I	N
 ##==============================================================================================##
 if __name__ == '__main__':
 	initDirectory(OUTPUT_DIRECTORY)
