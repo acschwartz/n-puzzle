@@ -208,27 +208,6 @@ def generateInitialNode(ptiles):
 #	return (makeTargetPattern(ptiles), bytes([0, 255, 255]))
 	return makeTargetPattern(ptiles)+bytes([0,255,255])
 
-def generateChildren(state, state_info, dim, moveSetAsTuple, undoMoves):
-	state_depth = state_info[0]
-	children_depth = state_depth + 1
-	action_generate_parent = (state_info[1], state_info[2])
-	# the above action would generate the parent from which this state originated
-	
-	children = []
-	for ptileID, tileLocationInPuzzle in enumerate(state):
-		for moveID, moveFunction in enumerate(moveSetAsTuple):
-			action = (ptileID, moveID)
-			if action == action_generate_parent:
-				continue
-			new_tile_location = moveFunction(tileLocationInPuzzle, dim)
-			if new_tile_location and new_tile_location not in state:
-			# checks that new location is in bounds, and that the new square is not occupied by another pattern tile
-				child = list(state)
-				child[ptileID] = new_tile_location
-				childInfo = [children_depth, ptileID, undoMoves[moveID]]
-				children.append((bytes(child), bytes(childInfo)))
-	return children
-
 
 def generateChildrenOptimized(state, state_info, dim, moveSetAsTuple, undoMoves):
 # Apparently this is a legitimate optimization...
@@ -269,6 +248,55 @@ def generateChildrenOptimized(state, state_info, dim, moveSetAsTuple, undoMoves)
 		ptileID += 1
 	return children
 
+
+def generateChildren(state, state_info, dim, moveSetAsTuple, undoMoves):
+# '''
+# NEW generateChildren function - Hopefully fixed because now allows swapping between any adjacent tiles
+# does not behave same as generateChildrenOptimized, currently.
+# '''
+	state_depth = state_info[0]
+	children_depth = state_depth + 1
+	action_generate_parent = (state_info[1], state_info[2])
+	# the above action would generate the parent from which this state originated
+	
+	children = []
+	ptileID = 0
+	for tileLocationInPuzzle in state:
+		moveID = 0
+		for moveFunction in moveSetAsTuple:
+			action = (ptileID, moveID)
+			if action == action_generate_parent:
+				moveID += 1
+				continue
+			new_tile_location = moveFunction(tileLocationInPuzzle, dim)
+			if new_tile_location:
+				child = list(state)
+				try:
+					# i.e. if new_tile_location in state:
+					# then we are swapping with another pattern tile and must update both in pattern
+					
+					other_ptileID = state.index(new_tile_location)
+					other_ptile_current_location = new_tile_location
+					
+					this_ptile_current_location = tileLocationInPuzzle
+					
+					child[ptileID] = other_ptile_current_location
+					child[other_ptileID] = this_ptile_current_location
+					# (not super optimized code but extra vars important for clarity)
+					# (TODO: may need to optimize to use fewer vars if this becomes a performance problem)
+					
+				except ValueError:
+					# else: new_tile_location not in state
+					# then we are swapping with a non-pattern tile
+					
+					child[ptileID] = new_tile_location
+				childInfo = [children_depth, ptileID, undoMoves[moveID]]
+				children.append((bytes(child), bytes(childInfo)))
+			moveID += 1
+		ptileID += 1
+	return children
+
+
 ##==============================================================================================##
 #	 G E N E R A T E   P A T T E R N   D A T A B A S E
 ##==============================================================================================##
@@ -287,7 +315,7 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves, BASE_OUTPUT_FILENA
 			state_repr = node[:num_ptiles]
 			state_info = node[num_ptiles:]
 			
-			for child_state, child_info in generateChildrenOptimized(state_repr, state_info, dim, moveSet, oppMoves):
+			for child_state, child_info in generateChildren(state_repr, state_info, dim, moveSet, oppMoves):
 				if (child_state not in visited) and (child_state not in frontier):
 					queue.append(child_state+child_info)
 					frontier.add(child_state)
