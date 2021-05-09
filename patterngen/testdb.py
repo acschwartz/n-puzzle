@@ -84,6 +84,8 @@ if __name__ == '__main__':
 	maxrss_after_populate_table = getMaxRSS()
 	maxrss_delta_pretty = rawMaxRSStoPrettyString(maxrss_after_populate_table - maxrss_start)
 	
+	if DEBUG: print(f'maxrss_after_populate_table: {maxrss_after_populate_table}')
+	
 	res = cur.execute("SELECT * from patterncosts LIMIT 1")
 	for row in res:
 		example_row = row
