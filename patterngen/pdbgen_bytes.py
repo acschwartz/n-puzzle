@@ -15,6 +15,17 @@ PATTERNS = {
 	'15fringe': {
 				'dim': 4,	# 15-puzzle is 4x4
 				'pattern tiles': (0, 3, 7, 11, 12, 13, 14, 15),
+				'goal state': (0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15),
+				},
+	'full8puzzle': {
+				'dim': 3,
+				'pattern tiles': (0, 1, 2, 3, 4, 5, 6, 7, 8),
+				'goal state': (0, 1, 2, 3, 4, 5, 6, 7, 8),
+				},
+	'8puzzlesubproblem': {		# subproblem of 15-puzzle
+				'dim': 3,
+				'pattern tiles': (0, 1, 2, 4, 5, 6, 8, 9, 10),
+				'goal state': (0, 1, 2, 4, 5, 6, 8, 9, 10),
 				},
 }
 ##==============================================================================================##
@@ -85,8 +96,9 @@ def initVars():
 	pname = parseArgs()
 	ptiles = PATTERNS[pname]['pattern tiles']
 	dim = PATTERNS[pname]['dim']
+	goal_state = PATTERNS[pname]['goal state']
 	BASE_OUTPUT_FILENAME = getBaseOutputfileName(pname)
-	return pname, ptiles, dim, BASE_OUTPUT_FILENAME
+	return pname, ptiles, dim, goal_state, BASE_OUTPUT_FILENAME
 
 def getBaseOutputfileName(pname):
 	return f'{pname}_pdb_{RUN_ID}'
@@ -188,7 +200,7 @@ def sec_to_hours(seconds):
 
 ##==============================================================================================##
 
-def makeTargetPattern(ptiles):
+def makeTargetPattern(ptiles, goal_state):
 	# generate pattern representation of puzzle goal state = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
 	# which will be the initial state for the backwards BFS used to generate the PDB
 	
@@ -199,14 +211,16 @@ def makeTargetPattern(ptiles):
 	# "empty" squares which are not part of the pattern are omitted to save space
 	# (although this only saves ~8 bytes per state, this is amortized over the millions of states we must store).
 	# notes: bytestrings are like a 'tuple' compared to a bytearray - immutable but elements can be accessed by index
+	
 	pattern = []
 	for tile in ptiles:
-		pattern.append(tile)
+		pattern.append(goal_state.index(tile))
 	return bytes(pattern)
+	
 
-def generateInitialNode(ptiles):
+def generateInitialNode(ptiles, goal_state):
 #	return (makeTargetPattern(ptiles), bytes([0, 255, 255]))
-	return makeTargetPattern(ptiles)+bytes([0,255,255])
+	return makeTargetPattern(ptiles, goal_state)+bytes([0,255,255])
 
 
 def generateChildrenOptimized(state, state_info, dim, moveSetAsTuple, undoMoves):
@@ -297,6 +311,47 @@ def generateChildren(state, state_info, dim, moveSetAsTuple, undoMoves):
 	return children
 
 
+# TODO: Working on this because a full puzzle where you can only move the blank behaves differently
+#def generateChildrenOptimized_FullPuzzle(state, state_info, dim, moveSetAsTuple, undoMoves):
+#	def clone_and_swap(data,y0,y1):
+#		clone = list(data)
+#		tmp = clone[y0]
+#		clone[y0] = clone[y1]
+#		clone[y1] = tmp
+#		return tuple(clone)
+#
+#	state_depth = state_info[0]
+#	children_depth = state_depth + 1
+#	action_generate_parent = (state_info[1], state_info[2])
+#	# the above action would generate the parent from which this state originated
+#	
+#	children = []
+#	
+#	indexofBlankSquare = state[0]
+#	for moveFunction in moveSetAsTuple:
+#		action = (indexofBlankSquare)
+#	
+#	# THHIS IS JUST OLD FUNCTION:
+#	ptileID = 0
+#	for tileLocationInPuzzle in state:
+#		moveID = 0
+#		for moveFunction in moveSetAsTuple:
+#			action = (ptileID, moveID)
+#			if action == action_generate_parent:
+#				moveID += 1
+#				continue
+#			new_tile_location = moveFunction(tileLocationInPuzzle, dim)
+#			if new_tile_location and new_tile_location not in state:
+#			# checks that new location is in bounds, and that the new square is not occupied by another pattern tile
+#				child = list(state)
+#				child[ptileID] = new_tile_location
+#				childInfo = [children_depth, ptileID, undoMoves[moveID]]
+#				children.append((bytes(child), bytes(childInfo)))
+#			moveID += 1
+#		ptileID += 1
+#	return children
+
+
 ##==============================================================================================##
 #	 G E N E R A T E   P A T T E R N   D A T A B A S E
 ##==============================================================================================##
@@ -368,18 +423,18 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves, BASE_OUTPUT_FILENA
 
 
 ##==============================================================================================##
-#		M	A I	N
+#		M A I N
 ##==============================================================================================##
 if __name__ == '__main__':
 	initDirectory(OUTPUT_DIRECTORY)
-	pname, ptiles, dim, BASE_OUTPUT_FILENAME = initVars()
+	pname, ptiles, dim, goal_state, BASE_OUTPUT_FILENAME = initVars()
 	logger, logfile = initLogger(__name__, BASE_OUTPUT_FILENAME, OUTPUT_DIRECTORY)
 	printHeader(logger, BASE_OUTPUT_FILENAME, pname)
 	
 	t_start = perf_counter()
 	maxrss_start = getMaxRSS()
 	
-	len_db = generatePDB(generateInitialNode(ptiles), dim, len(ptiles), MOVES, OPP_MOVES, BASE_OUTPUT_FILENAME, logger)
+	len_db = generatePDB(generateInitialNode(ptiles, goal_state), dim, len(ptiles), MOVES, OPP_MOVES, BASE_OUTPUT_FILENAME, logger)
 	
 	stats = generateStats(t_start, maxrss_start, len_db)
 	printStats(logger, stats, title="Stats")
