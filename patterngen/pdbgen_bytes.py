@@ -21,8 +21,8 @@ PATTERNS = {
 
 RUN_ID = strftime(f'%y%m%d-%H%M%S')
 OUTPUT_DIRECTORY = 'output/'
-SECTION_SEPARATOR = '=========================================================================='
 
+SECTION_SEPARATOR = '=========================================================================='
 ##==============================================================================================##
 def move_index_left(i, dim):
 	if i % dim > 0:
@@ -81,7 +81,7 @@ def parseArgs():
 	args = parser.parse_args()
 	return args.pattern_name
 
-def init():
+def initVars():
 	pname = parseArgs()
 	ptiles = PATTERNS[pname]['pattern tiles']
 	dim = PATTERNS[pname]['dim']
@@ -97,9 +97,8 @@ def initDirectory(dir):
 		print(f'Directory created: {dir}')
 	return
 
-def initLogger(loggerName, BASE_OUTPUT_FILENAME):
-	initDirectory(OUTPUT_DIRECTORY)
-	logfile = f'{OUTPUT_DIRECTORY}{BASE_OUTPUT_FILENAME}.log'
+def initLogger(loggerName, base_output_filename, output_path=OUTPUT_DIRECTORY):
+	logfile = f'{output_path}{base_output_filename}.log'
 	
 	# create logger
 	logger = logging.getLogger(loggerName)
@@ -332,8 +331,9 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves, BASE_OUTPUT_FILENA
 #		M	A 	I	N
 ##==============================================================================================##
 if __name__ == '__main__':
-	pname, ptiles, dim, BASE_OUTPUT_FILENAME = init()
-	logger, logfile = initLogger(__name__, BASE_OUTPUT_FILENAME)
+	initDirectory(OUTPUT_DIRECTORY)
+	pname, ptiles, dim, BASE_OUTPUT_FILENAME = initVars()
+	logger, logfile = initLogger(__name__, BASE_OUTPUT_FILENAME, OUTPUT_DIRECTORY)
 	printHeader(logger, BASE_OUTPUT_FILENAME, pname)
 	
 	t_start = perf_counter()
