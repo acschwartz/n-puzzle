@@ -2,6 +2,7 @@
 from argparse import ArgumentParser
 from collections import deque
 from math import floor
+from os import mkdir, path
 from resource import getrusage, RUSAGE_SELF
 from time import perf_counter, strftime
 
@@ -90,7 +91,15 @@ def init():
 def getBaseOutputfileName(pname):
 	return f'{pname}_pdb_{RUN_ID}'
 
+def initOutputDir():
+	dir = OUTPUT_DIRECTORY
+	if not path.exists(dir):
+		mkdir(dir)
+		print(f'Directory created: {dir}')
+	return
+
 def initLogger(loggerName, BASE_OUTPUT_FILENAME):
+	initOutputDir()
 	logfile = f'{OUTPUT_DIRECTORY}{BASE_OUTPUT_FILENAME}.log'
 	
 	# create logger
@@ -302,6 +311,9 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves, BASE_OUTPUT_FILENA
 			logger.info('Done!')
 			f.close()
 			tryAgain = False
+		except FileNotFoundError:
+			initOutputDir()
+			tryAgain = 'y'
 		except OSError as err:
 			f.close()
 			logger.exception(err)
@@ -328,7 +340,6 @@ if __name__ == '__main__':
 	t_start = perf_counter()
 	maxrss_start = getMaxRSS()
 	
-	#GENERATE DATABASE
 	len_db = generatePDB(generateInitialNode(ptiles), dim, len(ptiles), MOVES, OPP_MOVES, BASE_OUTPUT_FILENAME, logger)
 	
 	stats = generateStats(t_start, maxrss_start, len_db)
