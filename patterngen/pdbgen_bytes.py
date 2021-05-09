@@ -88,13 +88,10 @@ def init():
 	return pname, ptiles, dim, BASE_OUTPUT_FILENAME
 
 def getBaseOutputfileName(pname):
-	OUTPUT_FILENAME_PREFIX = "".join([pname, '_'])
-	OUTPUT_FILENAME_SUFFIX = "".join(['_', RUN_ID])
-	base_output_filename = "".join([OUTPUT_FILENAME_PREFIX, 'pdb', OUTPUT_FILENAME_SUFFIX])
-	return base_output_filename
+	return f'{pname}_pdb_{RUN_ID}'
 
 def initLogger(loggerName, BASE_OUTPUT_FILENAME):
-	logfile = "".join([OUTPUT_DIRECTORY, BASE_OUTPUT_FILENAME, '.log'])
+	logfile = f'{OUTPUT_DIRECTORY}{BASE_OUTPUT_FILENAME}.log'
 	
 	# create logger
 	logger = logging.getLogger(__name__)
@@ -138,12 +135,12 @@ def printHeader(logger, BASE_OUTPUT_FILENAME, pname):
 	logger.info('Run ID: '+str(RUN_ID))
 	logger.info('DB name: '+BASE_OUTPUT_FILENAME)
 	logger.info('Pattern type: '+str(pname))
-	logger.info("".join([SECTION_SEPARATOR, '\n']))
+	logger.info(f'\n{SECTION_SEPARATOR}')
 	return
 
 def printStats(logger, stats):
 	stats_as_strings = sorted([ f'{key} : {stats[key]}' for key in stats ])
-	logger.info("".join(['\n', SECTION_SEPARATOR]))
+	logger.info(f'\n{SECTION_SEPARATOR}')
 	for stat in stats_as_strings:
 		logger.info(stat) 
 	logger.info(SECTION_SEPARATOR)
@@ -296,7 +293,7 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves, BASE_OUTPUT_FILENA
 	
 	# Save database / write to file.
 	outfile = OUTPUT_DIRECTORY+BASE_OUTPUT_FILENAME
-	logger.info("".join(["\nWriting entries to database file:", outfile, " ....."]))
+	logger.info(f'\nWriting entries to database file: {outfile} .....')
 	tryAgain = 'y'
 	while tryAgain == 'y':
 		try:
@@ -308,7 +305,8 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves, BASE_OUTPUT_FILENA
 		except OSError as err:
 			f.close()
 			logger.exception(err)
-			logger.info("".join(['(', str(visitedCount), ' entries in memory, using ', rawMaxRSStoPrettyString(getMaxRSS()) ,')\n']))
+			maxrss = rawMaxRSStoPrettyString(getMaxRSS())
+			logger.info(f'({visitedCount}  entries in memory, using {maxrss})\n')
 			
 			tryAgain = input('\nPress y to retry ')
 			if tryAgain == 'y':
@@ -335,4 +333,4 @@ if __name__ == '__main__':
 	
 	stats = generateStats(t_start, maxrss_start, len_db)
 	printStats(logger, stats)
-	logger.info('logfile: '+logfile)
+	logger.info(f'logfile: {logfile}')
