@@ -267,9 +267,6 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves, BASE_OUTPUT_FILENA
 	try:
 		# Generate Pattern Database using breadth-first search "backwards" from goal state.
 		while queue:
-			#DEBUG
-	#		break
-			
 			node = queue.popleft()
 			state_repr = node[:num_ptiles]
 			state_info = node[num_ptiles:]
@@ -311,8 +308,7 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves, BASE_OUTPUT_FILENA
 		except OSError as err:
 			f.close()
 			logger.exception(err)
-			maxrss = getMaxRSS()
-			logger.info("".join(['(', str(visitedCount), ' entries in memory, using ', rawMaxRSStoPrettyString(maxrss) ,')\n']))
+			logger.info("".join(['(', str(visitedCount), ' entries in memory, using ', rawMaxRSStoPrettyString(getMaxRSS()) ,')\n']))
 			
 			tryAgain = input('\nPress y to retry ')
 			if tryAgain == 'y':
