@@ -39,7 +39,8 @@ if __name__ == '__main__':
 	datasetName, n_entries, DEBUG = parseArgs()
 	con = sqlite3.connect(':memory:')
 	cur = con.cursor()
-	
+	pid = os.getpid()
+
 	DICT = generate_dataset[datasetName](n_entries)
 	maxrss_start = getMaxRSS()
 	time_start = perf_counter()
@@ -78,7 +79,7 @@ if __name__ == '__main__':
 	#	cur.execute(f'INSERT INTO patterncosts VALUES ({key}, {DICT[key]})')	# <-- didn't work for strings
 		cur.execute("""INSERT INTO patterncosts(pstring, cost) 
 							VALUES (?,?);""", (key, DICT[key]))
-	
+        if DEBUG: print(f'')
 	del DICT
 	
 	time_delta = timeDelta(time_start)
@@ -86,8 +87,7 @@ if __name__ == '__main__':
 	maxrss_delta = maxrss_after_populate_table - maxrss_start
 	maxrss_delta_pretty = rawMaxRSStoPrettyString(maxrss_delta)
 	
-	pid = os.getpid()
-	current_rss = os.system(f'ps -o rss= {pid}')
+        current_rss = os.system(f'ps -o rss= {pid}')
 	
 	res = cur.execute("SELECT * from patterncosts LIMIT 1")
 	for row in res:
