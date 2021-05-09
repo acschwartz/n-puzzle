@@ -91,15 +91,14 @@ def init():
 def getBaseOutputfileName(pname):
 	return f'{pname}_pdb_{RUN_ID}'
 
-def initOutputDir():
-	dir = OUTPUT_DIRECTORY
+def initDirectory(dir):
 	if not path.exists(dir):
 		mkdir(dir)
 		print(f'Directory created: {dir}')
 	return
 
 def initLogger(loggerName, BASE_OUTPUT_FILENAME):
-	initOutputDir()
+	initDirectory(OUTPUT_DIRECTORY)
 	logfile = f'{OUTPUT_DIRECTORY}{BASE_OUTPUT_FILENAME}.log'
 	
 	# create logger
@@ -312,7 +311,7 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves, BASE_OUTPUT_FILENA
 			f.close()
 			tryAgain = False
 		except FileNotFoundError:
-			initOutputDir()
+			initDirectory(OUTPUT_DIRECTORY)
 			tryAgain = 'y'
 		except OSError as err:
 			f.close()
