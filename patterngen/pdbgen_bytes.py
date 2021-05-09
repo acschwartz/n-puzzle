@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 from argparse import ArgumentParser
-from math import floor
 from collections import deque
-import sys
-import time
-import resource
-import pickle
-import traceback
+from math import floor
+from os import mkdir, path
+from resource import getrusage, RUSAGE_SELF
+from time import perf_counter, strftime
+
 import logging
+import pickle
+import sys
 
 ##==============================================================================================##
 PATTERNS = {
@@ -16,6 +17,12 @@ PATTERNS = {
 				'pattern tiles': (0, 3, 7, 11, 12, 13, 14, 15),
 				},
 }
+##==============================================================================================##
+
+RUN_ID = strftime(f'%y%m%d-%H%M%S')
+OUTPUT_DIRECTORY = 'output/'
+
+SECTION_SEPARATOR = '=========================================================================='
 ##==============================================================================================##
 def move_index_left(i, dim):
 	if i % dim > 0:
@@ -62,28 +69,101 @@ MOVE_INDEX = {
 	}
 }
 
-# having the functions in a list saves dictionary lookups in MOVE_INDEX
 DIRECTIONS = ('left', 'right', 'up', 'down')
 MOVES = tuple(map(lambda d: MOVE_INDEX[DIRECTIONS[d]]['func'], range(len(DIRECTIONS))))
 OPP_MOVES = tuple(map(lambda d: DIRECTIONS.index(MOVE_INDEX[DIRECTIONS[d]]['opp']), range(len(DIRECTIONS))))
+
 ##==============================================================================================##
 
-SECTION_SEPARATOR = '=========================================================================='
-RUN_ID = time.strftime(f'%y%m%d-%H%M%S')
-OUTPUT_DIRECTORY = 'output/'
+def parseArgs():
+	parser = ArgumentParser(description='n-puzzle pattern database generator')
+	parser.add_argument('pattern_name', help='choose a pattern', choices=list(PATTERNS.keys()))
+	args = parser.parse_args()
+	return args.pattern_name
+
+def initVars():
+	pname = parseArgs()
+	ptiles = PATTERNS[pname]['pattern tiles']
+	dim = PATTERNS[pname]['dim']
+	BASE_OUTPUT_FILENAME = getBaseOutputfileName(pname)
+	return pname, ptiles, dim, BASE_OUTPUT_FILENAME
 
 def getBaseOutputfileName(pname):
-	OUTPUT_FILENAME_PREFIX = "".join([pname, '_'])
-	OUTPUT_FILENAME_SUFFIX = "".join(['_', RUN_ID])
-	base_output_filename = "".join([OUTPUT_FILENAME_PREFIX, 'pdb', OUTPUT_FILENAME_SUFFIX])
-	return base_output_filename
+	return f'{pname}_pdb_{RUN_ID}'
+
+def initDirectory(dir):
+	if not path.exists(dir):
+		mkdir(dir)
+		print(f'Directory created: {dir}')
+	return
+
+def initLogger(loggerName, base_output_filename, output_path=OUTPUT_DIRECTORY):
+	logfile = f'{output_path}{base_output_filename}.log'
+	
+	# create logger
+	logger = logging.getLogger(loggerName)
+	logger.setLevel(logging.DEBUG)
+	
+	# create handlers for logigng to both file and stdout
+	stdout_handler = logging.StreamHandler(stream=sys.stdout)
+	logger.addHandler(stdout_handler)
+	output_file_handler = logging.FileHandler(logfile)
+	output_file_handler.setLevel(logging.INFO)	# don't ever want debug stuff in the logfile
+	logger.addHandler(output_file_handler)
+	return logger, logfile
+
+##==============================================================================================##
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+# Source: https://stackoverflow.com/questions/6234405/logging-uncaught-exceptions-in-python
+	if issubclass(exc_type, KeyboardInterrupt):
+		sys.__excepthook__(exc_type, exc_value, exc_traceback)
+		return
+	
+	logger.critical("\nUncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+	logger.info('\n')
+	
+sys.excepthook = handle_exception
+
+##==============================================================================================##
+
+def generateStats(t_start, maxrss_start, len_db):
+	stats = dict()
+	stats['entries collected'] = len_db
+	stats['platform'] = sys.platform
+	t_delta = perf_counter() - t_start
+	m_delta = getMaxRSS() - maxrss_start
+	stats['time_raw'] = f'{t_delta:.2f}'
+	stats['memory_raw'] = m_delta
+	stats['time'] = sec_to_hours(t_delta)
+	stats['memory'] = rawMaxRSStoPrettyString(m_delta)
+	return stats
+
+def printHeader(logger, BASE_OUTPUT_FILENAME, pname):
+	logger.info(SECTION_SEPARATOR)
+	logger.info('Run ID: '+str(RUN_ID))
+	logger.info('DB name: '+BASE_OUTPUT_FILENAME)
+	logger.info('Pattern type: '+str(pname))
+	logger.info(f'{SECTION_SEPARATOR}\n')
+	return
+
+def printStats(logger, stats, title=None):
+	stats_as_strings = sorted([ f'{key} : {stats[key]}' for key in stats ])
+	logger.info(f'\n{SECTION_SEPARATOR}')
+	if title:
+		logger.info(f'\t{title}')
+		logger.info(SECTION_SEPARATOR)
+	for stat in stats_as_strings:
+		logger.info(stat) 
+	logger.info(SECTION_SEPARATOR)
+	return
 
 ##==============================================================================================##
 
 MAXRSS_UNIT_COEFFICIENT = 1024 if not sys.platform.startswith('darwin') else 1
 
 def getMaxRSS():
-	return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+	return getrusage(RUSAGE_SELF).ru_maxrss
 
 def rawMaxRSStoPrettyString(raw_maxrss):
 	# get_maxrss returns bytes on macOS and kB on linux. this handles that for you.
@@ -99,15 +179,16 @@ def bytes_to_human_readable_string(size,precision=2):
 		size = size/1024.0 #apply the division
 	return "%.*f%s"%(precision,size,suffixes[suffixIndex])
 
+def sec_to_hours(seconds):
+# SOURCE: https://stackoverflow.com/questions/775049/how-do-i-convert-seconds-to-hours-minutes-and-seconds
+	h=seconds//3600
+	m=(seconds%3600)//60
+	s=(seconds%3600)%60
+	return f'{h} hours {m} mins {s:.2f} sec'
+
 ##==============================================================================================##
 
-def parseArgs():
-	parser = ArgumentParser(description='n-puzzle pattern database generator')
-	parser.add_argument('pattern_name', help='choose a pattern', choices=list(PATTERNS.keys()))
-	args = parser.parse_args()
-	return args.pattern_name
-
-def generateTargetPatternAsBytes(ptiles):
+def makeTargetPattern(ptiles):
 	# generate pattern representation of puzzle goal state = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
 	# which will be the initial state for the backwards BFS used to generate the PDB
 	
@@ -123,10 +204,9 @@ def generateTargetPatternAsBytes(ptiles):
 		pattern.append(tile)
 	return bytes(pattern)
 
-def generateInitialSearchNode(ptiles):
-#	return (generateTargetPatternAsBytes(ptiles), bytes([0, 255, 255]))
-	return generateTargetPatternAsBytes(ptiles)+bytes([0,255,255])
-
+def generateInitialNode(ptiles):
+#	return (makeTargetPattern(ptiles), bytes([0, 255, 255]))
+	return makeTargetPattern(ptiles)+bytes([0,255,255])
 
 def generateChildren(state, state_info, dim, moveSetAsTuple, undoMoves):
 	state_depth = state_info[0]
@@ -190,33 +270,6 @@ def generateChildrenOptimized(state, state_info, dim, moveSetAsTuple, undoMoves)
 	return children
 
 ##==============================================================================================##
-def initLogger(loggerName, BASE_OUTPUT_FILENAME):
-	logfile = "".join([OUTPUT_DIRECTORY, BASE_OUTPUT_FILENAME, '.log'])
-	
-	# create logger
-	logger = logging.getLogger(loggerName)
-	logger.setLevel(logging.DEBUG)  	# CAN SET TO INFO / DEBUG
-	
-	# create handlers for logigng to both file and stdout
-	stdout_handler = logging.StreamHandler(stream=sys.stdout)
-	logger.addHandler(stdout_handler)
-	output_file_handler = logging.FileHandler(logfile)
-	output_file_handler.setLevel(logging.INFO)	# don't ever want debug stuff in the logfile
-	logger.addHandler(output_file_handler)
-	return logger, logfile
-
-def handle_exception(exc_type, exc_value, exc_traceback):
-# Source: https://stackoverflow.com/questions/6234405/logging-uncaught-exceptions-in-python
-	if issubclass(exc_type, KeyboardInterrupt):
-		sys.__excepthook__(exc_type, exc_value, exc_traceback)
-		return
-	
-	logger.critical("\nUncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
-	logger.info('\n')
-	
-sys.excepthook = handle_exception
-
-##==============================================================================================##
 #	 G E N E R A T E   P A T T E R N   D A T A B A S E
 ##==============================================================================================##
 
@@ -230,9 +283,6 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves, BASE_OUTPUT_FILENA
 	try:
 		# Generate Pattern Database using breadth-first search "backwards" from goal state.
 		while queue:
-			#DEBUG
-	#		break
-			
 			node = queue.popleft()
 			state_repr = node[:num_ptiles]
 			state_info = node[num_ptiles:]
@@ -262,7 +312,7 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves, BASE_OUTPUT_FILENA
 	
 	# Save database / write to file.
 	outfile = OUTPUT_DIRECTORY+BASE_OUTPUT_FILENAME
-	logger.info("".join(["\nWriting entries to database file:", outfile, " ....."]))
+	logger.info(f'\nWriting entries to database file: {outfile} .....')
 	tryAgain = 'y'
 	while tryAgain == 'y':
 		try:
@@ -271,11 +321,14 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves, BASE_OUTPUT_FILENA
 			logger.info('Done!')
 			f.close()
 			tryAgain = False
+		except FileNotFoundError:
+			initDirectory(OUTPUT_DIRECTORY)
+			tryAgain = 'y'
 		except OSError as err:
 			f.close()
 			logger.exception(err)
-			maxrss = getMaxRSS()
-			logger.info("".join(['(', str(visitedCount), ' entries in memory, using ', rawMaxRSStoPrettyString(maxrss) ,')\n']))
+			maxrss = rawMaxRSStoPrettyString(getMaxRSS())
+			logger.info(f'({visitedCount}  entries in memory, using {maxrss})\n')
 			
 			tryAgain = input('\nPress y to retry ')
 			if tryAgain == 'y':
@@ -285,41 +338,21 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves, BASE_OUTPUT_FILENA
 	
 	return visitedCount
 
+
 ##==============================================================================================##
-#		M	A 	I	N
+#		M	A I	N
 ##==============================================================================================##
 if __name__ == '__main__':
-	pname = parseArgs()
-	ptiles = PATTERNS[pname]['pattern tiles']
-	dim = PATTERNS[pname]['dim']
-	BASE_OUTPUT_FILENAME = getBaseOutputfileName(pname)
-	logger, logfile = initLogger(__name__, BASE_OUTPUT_FILENAME)
+	initDirectory(OUTPUT_DIRECTORY)
+	pname, ptiles, dim, BASE_OUTPUT_FILENAME = initVars()
+	logger, logfile = initLogger(__name__, BASE_OUTPUT_FILENAME, OUTPUT_DIRECTORY)
+	printHeader(logger, BASE_OUTPUT_FILENAME, pname)
 	
-	logger.info(SECTION_SEPARATOR)
-	logger.info('Run ID: '+str(RUN_ID))
-	logger.info('DB name: '+BASE_OUTPUT_FILENAME)
-	logger.info('Pattern type: '+str(pname))
-	logger.info("".join([SECTION_SEPARATOR, '\n']))
-
-	stats = dict()
-	t_start = time.perf_counter()
+	t_start = perf_counter()
 	maxrss_start = getMaxRSS()
-
-	#GENERATE DATABASE
-	len_db = generatePDB(generateInitialSearchNode(ptiles), dim, len(ptiles), MOVES, OPP_MOVES, BASE_OUTPUT_FILENAME, logger)
 	
-	stats['entries collected'] = len_db
-	stats['platform'] = sys.platform
-	stats['time (s)'] = float("{:.2f}".format( time.perf_counter() - t_start))
-	stats['memory (raw)'] = getMaxRSS() - maxrss_start
-	stats['time (min)'] = float("{:.2f}".format(stats['time (s)'] /60))
-	stats['memory (units)'] = rawMaxRSStoPrettyString(stats['memory (raw)'])
+	len_db = generatePDB(generateInitialNode(ptiles), dim, len(ptiles), MOVES, OPP_MOVES, BASE_OUTPUT_FILENAME, logger)
 	
-	stats_as_strings = sorted([ f'{key} : {stats[key]}' for key in stats ])
-	logger.info("".join(['\n', SECTION_SEPARATOR]))
-	
-	for stat in stats_as_strings:
-		logger.info(stat) 
-	logger.info(SECTION_SEPARATOR)
-	logger.info('logfile: '+logfile)
-	
+	stats = generateStats(t_start, maxrss_start, len_db)
+	printStats(logger, stats, title="Stats")
+	logger.debug(f'logfile: {logfile}')
