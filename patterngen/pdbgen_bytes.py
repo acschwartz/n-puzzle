@@ -13,19 +13,35 @@ import sys
 ##==============================================================================================##
 PATTERNS = {
 	'15fringe': {
+		# 0  -  -  3
+		# -  -  -  7
+		# -  -  -  11
+		# 12 13 14 15
+				
 				'dim': 4,	# 15-puzzle is 4x4
-				'pattern tiles': (0, 3, 7, 11, 12, 13, 14, 15),
+				'pattern tiles': (3, 7, 11, 12, 13, 14, 15),
 				'goal state': (0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15),
+				'empty tile': 0,
 				},
 	'full8puzzle': {
+		# 0  1  2
+		# 4  5  6
+		# 8  9 10
 				'dim': 3,
-				'pattern tiles': (0, 1, 2, 3, 4, 5, 6, 7, 8),
+				'pattern tiles': (1, 2, 3, 4, 5, 6, 7, 8),
 				'goal state': (0, 1, 2, 3, 4, 5, 6, 7, 8),
+				'empty tile': 0,
 				},
-	'8puzzlesubproblem': {		# subproblem of 15-puzzle
+	'8puzzlesubproblem': {
+	# subproblem of 15-puzzle when fringe pattern in target position
+	# maps to 8-puzzle solutions
+		# 0  1  2
+		# 4  5  6
+		# 8  9 10
 				'dim': 3,
-				'pattern tiles': (0, 1, 2, 4, 5, 6, 8, 9, 10),
+				'pattern tiles': (1, 2, 4, 5, 6, 8, 9, 10),
 				'goal state': (0, 1, 2, 4, 5, 6, 8, 9, 10),
+				'empty tile': 0,
 				},
 }
 ##==============================================================================================##
@@ -237,6 +253,9 @@ def generateChildrenOptimized(state, state_info, dim, moveSetAsTuple, undoMoves)
 #...             i += 1
 #timeit(stepThruwithi) = 31.335610534995794
 
+# NOTE: CONFIRMED THIS IS NOT THE PROPER WAY TO IMPLEMENT A PDB
+# YOU ARE NOT SUPPOSED TO MOVE ALL THE TILES, ONLY THE EMPTY ONE (as usual...)
+
 	state_depth = state_info[0]
 	children_depth = state_depth + 1
 	action_generate_parent = (state_info[1], state_info[2])
@@ -267,11 +286,16 @@ def generateChildren(state, state_info, dim, moveSetAsTuple, undoMoves):
 # '''
 # NEW generateChildren function - Hopefully fixed because now allows swapping between any adjacent tiles
 # does not behave same as generateChildrenOptimized, currently.
+# TO CLARIFY, THIS ALLOWS SWAPPING BETWEEN ALL PATTERN TILES AND 'BLANK' TILES ON THE BOARD
+# therefore for a full-pattern 8-puzzle, it generates double the states it should (362,880 vs 181,440
+	
+# NOTE: CONFIRMED THIS IS NOT THE PROPER WAY TO IMPLEMENT A PDB
 # '''
 	state_depth = state_info[0]
 	children_depth = state_depth + 1
 	action_generate_parent = (state_info[1], state_info[2])
-	# the above action would generate the parent from which this state originated
+	# ^ this action applied to the current state would generate the parent from which it originated
+
 	
 	children = []
 	ptileID = 0
@@ -312,44 +336,56 @@ def generateChildren(state, state_info, dim, moveSetAsTuple, undoMoves):
 
 
 # TODO: Working on this because a full puzzle where you can only move the blank behaves differently
-#def generateChildrenOptimized_FullPuzzle(state, state_info, dim, moveSetAsTuple, undoMoves):
-#	def clone_and_swap(data,y0,y1):
-#		clone = list(data)
-#		tmp = clone[y0]
-#		clone[y0] = clone[y1]
-#		clone[y1] = tmp
-#		return tuple(clone)
-#
-#	state_depth = state_info[0]
-#	children_depth = state_depth + 1
-#	action_generate_parent = (state_info[1], state_info[2])
-#	# the above action would generate the parent from which this state originated
-#	
-#	children = []
-#	
-#	indexofBlankSquare = state[0]
-#	for moveFunction in moveSetAsTuple:
-#		action = (indexofBlankSquare)
-#	
-#	# THHIS IS JUST OLD FUNCTION:
-#	ptileID = 0
-#	for tileLocationInPuzzle in state:
-#		moveID = 0
-#		for moveFunction in moveSetAsTuple:
-#			action = (ptileID, moveID)
-#			if action == action_generate_parent:
-#				moveID += 1
-#				continue
-#			new_tile_location = moveFunction(tileLocationInPuzzle, dim)
-#			if new_tile_location and new_tile_location not in state:
-#			# checks that new location is in bounds, and that the new square is not occupied by another pattern tile
-#				child = list(state)
-#				child[ptileID] = new_tile_location
-#				childInfo = [children_depth, ptileID, undoMoves[moveID]]
-#				children.append((bytes(child), bytes(childInfo)))
+def generateChildren_FullPuzzlePattern(state, state_info, dim, moveSetAsTuple, undoMoves, indexOfEmptyTileInPattern=0):	
+# '''
+# ONLY THE EMPTY TILE MOVES - AND DOESN'T WORK FOR SOME REASON
+# '''
+	
+	logger.debug(f'Calling generateChildren_FullPuzzlePattern on State: {list(state)}')
+	
+	state_depth = state_info[0]
+	children_depth = state_depth + 1
+	action_generate_parent = (state_info[1], state_info[2])
+	# ^ this action applied to the current state would generate the parent from which it originated
+	emptyTileLocationInPuzzle = state[indexOfEmptyTileInPattern]
+	logger.debug(f'emptyTileLocationInPuzzle: {emptyTileLocationInPuzzle}')
+	
+	children = []
+#	moveID = 0
+	for moveID, moveFunction in enumerate(moveSetAsTuple):
+		logger.debug(f'\nEvaluating moveID {moveID} = {DIRECTIONS[moveID]}')
+		action = (indexOfEmptyTileInPattern, moveID)
+#		if action == action_generate_parent:
+#			logger.debug('action == action_generate_parent')
 #			moveID += 1
-#		ptileID += 1
-#	return children
+#			continue
+		new_emptyTileLocation = moveFunction(indexOfEmptyTileInPattern, dim)
+		logger.debug(f'new empty tile location after proposed move: {new_emptyTileLocation}')
+		if new_emptyTileLocation:
+			child = list(state)
+			try:
+				# then we are swapping with another pattern tile and must update both in pattern
+				# (if the pattern is the full puzzle, then all tiles are pattern tiles)
+				
+				other_ptileID = state.index(new_emptyTileLocation)
+				other_ptile_current_location = new_emptyTileLocation
+
+				child[indexOfEmptyTileInPattern] = other_ptile_current_location
+				child[other_ptileID] = emptyTileLocationInPuzzle
+				# (not super optimized code but extra vars important for clarity)
+				# (TODO: may need to optimize to use fewer vars if this becomes a performance problem)
+				
+			except ValueError:
+				# else: new_tile_location not in state
+				# then we are swapping with a non-pattern tile
+				raise RuntimeError
+				# This should NOT happen in this case so something would be terribly wrong
+				
+			childInfo = [children_depth, indexOfEmptyTileInPattern, undoMoves[moveID]]
+			children.append((bytes(child), bytes(childInfo)))
+#		moveID += 1
+
+	return children
 
 
 ##==============================================================================================##
@@ -370,7 +406,7 @@ def generatePDB(initNode, dim, num_ptiles, moveSet, oppMoves, BASE_OUTPUT_FILENA
 			state_repr = node[:num_ptiles]
 			state_info = node[num_ptiles:]
 			
-			for child_state, child_info in generateChildren(state_repr, state_info, dim, moveSet, oppMoves):
+			for child_state, child_info in generateChildren_FullPuzzlePattern(state_repr, state_info, dim, moveSet, oppMoves):
 				if (child_state not in visited) and (child_state not in frontier):
 					queue.append(child_state+child_info)
 					frontier.add(child_state)
