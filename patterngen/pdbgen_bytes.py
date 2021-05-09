@@ -17,6 +17,11 @@ PATTERNS = {
 				'pattern tiles': (0, 3, 7, 11, 12, 13, 14, 15),
 				'goal state': (0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15),
 				},
+	'full8puzzle': {
+				'dim': 3,
+				'pattern tiles': (0, 1, 2, 3, 4, 5, 6, 7, 8),
+				'goal state': (0, 1, 2, 3, 4, 5, 6, 7, 8),
+				},
 	'8puzzlesubproblem': {		# subproblem of 15-puzzle
 				'dim': 3,
 				'pattern tiles': (0, 1, 2, 4, 5, 6, 8, 9, 10),
@@ -277,6 +282,47 @@ def generateChildrenOptimized(state, state_info, dim, moveSetAsTuple, undoMoves)
 			moveID += 1
 		ptileID += 1
 	return children
+
+
+# TODO: Working on this because a full puzzle where you can only move the blank behaves differently
+#def generateChildrenOptimized_FullPuzzle(state, state_info, dim, moveSetAsTuple, undoMoves):
+#	def clone_and_swap(data,y0,y1):
+#		clone = list(data)
+#		tmp = clone[y0]
+#		clone[y0] = clone[y1]
+#		clone[y1] = tmp
+#		return tuple(clone)
+#
+#	state_depth = state_info[0]
+#	children_depth = state_depth + 1
+#	action_generate_parent = (state_info[1], state_info[2])
+#	# the above action would generate the parent from which this state originated
+#	
+#	children = []
+#	
+#	indexofBlankSquare = state[0]
+#	for moveFunction in moveSetAsTuple:
+#		action = (indexofBlankSquare)
+#	
+#	# THHIS IS JUST OLD FUNCTION:
+#	ptileID = 0
+#	for tileLocationInPuzzle in state:
+#		moveID = 0
+#		for moveFunction in moveSetAsTuple:
+#			action = (ptileID, moveID)
+#			if action == action_generate_parent:
+#				moveID += 1
+#				continue
+#			new_tile_location = moveFunction(tileLocationInPuzzle, dim)
+#			if new_tile_location and new_tile_location not in state:
+#			# checks that new location is in bounds, and that the new square is not occupied by another pattern tile
+#				child = list(state)
+#				child[ptileID] = new_tile_location
+#				childInfo = [children_depth, ptileID, undoMoves[moveID]]
+#				children.append((bytes(child), bytes(childInfo)))
+#			moveID += 1
+#		ptileID += 1
+#	return children
 
 ##==============================================================================================##
 #	 G E N E R A T E   P A T T E R N   D A T A B A S E
