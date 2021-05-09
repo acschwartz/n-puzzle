@@ -103,7 +103,7 @@ def initLogger(loggerName, BASE_OUTPUT_FILENAME):
 	logfile = f'{OUTPUT_DIRECTORY}{BASE_OUTPUT_FILENAME}.log'
 	
 	# create logger
-	logger = logging.getLogger(__name__)
+	logger = logging.getLogger(loggerName)
 	logger.setLevel(logging.DEBUG)  	# CAN SET TO INFO / DEBUG
 	
 	# create handlers for logigng to both file and stdout
