@@ -3,13 +3,13 @@
 from resource import getrusage, RUSAGE_SELF
 from sys import platform
 
-MAXRSS_UNIT_COEFFICIENT = 1024 if not platform.startswith('darwin') else 1
 
 def getMaxRSS():
 	return getrusage(RUSAGE_SELF).ru_maxrss
 
 
 def rawMaxRSStoPrettyString(raw_maxrss):
+	MAXRSS_UNIT_COEFFICIENT = 1024 if not platform.startswith('darwin') else 1
 	# get_maxrss returns bytes on macOS and kB on linux. this handles that for you.
 	return bytes_to_human_readable_string(raw_maxrss * MAXRSS_UNIT_COEFFICIENT)
 
