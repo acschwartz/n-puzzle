@@ -97,7 +97,6 @@ if __name__ == '__main__':
 	
 	if DEBUG: print(f'maxrss_after_populate_table: {maxrss_after_populate_table}')
 	
-	n_entries = len(DICT)
 #	print('\n')
 #	print(f'\n{SEPARATOR_SM}')
 	print(f'\nPrimary key type: {datasetName}\t\te.g. {example_row}')
