@@ -131,10 +131,12 @@ def generateStats(t_start, maxrss_start, len_db):
 	stats = dict()
 	stats['entries collected'] = len_db
 	stats['platform'] = sys.platform
-	stats['time (s)'] = float("{:.2f}".format( perf_counter() - t_start))
-	stats['memory (raw)'] = getMaxRSS() - maxrss_start
-	stats['time (min)'] = float("{:.2f}".format(stats['time (s)'] /60))
-	stats['memory (units)'] = rawMaxRSStoPrettyString(stats['memory (raw)'])
+	t_delta = perf_counter() - t_start
+	m_delta = getMaxRSS() - maxrss_start
+	stats['time_raw'] = f'{t_delta:.2f}'
+	stats['memory_raw'] = m_delta
+	stats['time'] = sec_to_hours(t_delta)
+	stats['memory'] = rawMaxRSStoPrettyString(m_delta)
 	return stats
 
 def printHeader(logger, BASE_OUTPUT_FILENAME, pname):
@@ -176,6 +178,13 @@ def bytes_to_human_readable_string(size,precision=2):
 		suffixIndex += 1 #increment the index of the suffix
 		size = size/1024.0 #apply the division
 	return "%.*f%s"%(precision,size,suffixes[suffixIndex])
+
+def sec_to_hours(seconds):
+# SOURCE: https://stackoverflow.com/questions/775049/how-do-i-convert-seconds-to-hours-minutes-and-seconds
+	h=seconds//3600
+	m=(seconds%3600)//60
+	s=(seconds%3600)%60
+	return f'{h} hours {m} mins {s:.2f} sec'
 
 ##==============================================================================================##
 
