@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 from argparse import ArgumentParser
-from math import floor
 from collections import deque
-import sys
-import time
-import resource
-import pickle
-import traceback
+from math import floor
+from resource import getrusage, RUSAGE_SELF
+from time import perf_counter, strftime
+
 import logging
+import pickle
+import sys
 
 ##==============================================================================================##
 PATTERNS = {
@@ -18,7 +18,7 @@ PATTERNS = {
 }
 ##==============================================================================================##
 
-RUN_ID = time.strftime(f'%y%m%d-%H%M%S')
+RUN_ID = strftime(f'%y%m%d-%H%M%S')
 OUTPUT_DIRECTORY = 'output/'
 SECTION_SEPARATOR = '=========================================================================='
 
@@ -127,7 +127,7 @@ def generateStats(t_start, maxrss_start, len_db):
 	stats = dict()
 	stats['entries collected'] = len_db
 	stats['platform'] = sys.platform
-	stats['time (s)'] = float("{:.2f}".format( time.perf_counter() - t_start))
+	stats['time (s)'] = float("{:.2f}".format( perf_counter() - t_start))
 	stats['memory (raw)'] = getMaxRSS() - maxrss_start
 	stats['time (min)'] = float("{:.2f}".format(stats['time (s)'] /60))
 	stats['memory (units)'] = rawMaxRSStoPrettyString(stats['memory (raw)'])
@@ -154,7 +154,7 @@ def printStats(logger, stats):
 MAXRSS_UNIT_COEFFICIENT = 1024 if not sys.platform.startswith('darwin') else 1
 
 def getMaxRSS():
-	return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+	return getrusage(RUSAGE_SELF).ru_maxrss
 
 def rawMaxRSStoPrettyString(raw_maxrss):
 	# get_maxrss returns bytes on macOS and kB on linux. this handles that for you.
@@ -327,7 +327,7 @@ if __name__ == '__main__':
 	logger, logfile = initLogger(__name__, BASE_OUTPUT_FILENAME)
 	printHeader(logger, BASE_OUTPUT_FILENAME, pname)
 	
-	t_start = time.perf_counter()
+	t_start = perf_counter()
 	maxrss_start = getMaxRSS()
 	
 	#GENERATE DATABASE
