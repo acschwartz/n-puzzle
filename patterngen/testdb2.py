@@ -6,8 +6,8 @@ import os
 import subprocess
 from argparse import ArgumentParser
 from time import perf_counter
-from helpers.getmaxrss import *
-from helpers.time import *
+from helpers.memorytools import *
+from helpers.timetools import *
 
 ##==============================================================================================##
 # Fav sqlite tutorial:   https://docs.python.org/3/library/sqlite3.html

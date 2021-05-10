@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
 import unittest
-from math import ceil
+from math import floor, ceil
 from timeit import timeit
 
 import inspect
 myself = lambda: inspect.stack()[1][3]
 
 DEBUG = False
-TIMEIT = True
+TIMEIT = False
 
 
 
@@ -55,16 +55,16 @@ class TestStubs(unittest.TestCase):
 		for i, n in enumerate(range(256)):
 			self.assertEqual(16**(i&1)*n, n*(1<<(4*(i&1))))
 			
-	if DEBUG:
-		def test_visually_encoding_logic(self):
-			print(myself())
-			pattern = [3,7,11,12,13,14,15]
-			print()
-			for i, n in enumerate(pattern):
-				print(i, n, hex(16**(i&1)*n), 16**(i&1)*n)
-			print()
-			for i, n in enumerate(pattern):
-				print(i&1, 1<<4, 1<<(4*(i&1)), n*(1<<(4*(i&1))))
+#	if DEBUG:
+#		def test_visually_encoding_logic(self):
+#			print(myself())
+#			pattern = [3,7,11,12,13,14,15]
+#			print()
+#			for i, n in enumerate(pattern):
+#				print(i, n, hex(16**(i&1)*n), 16**(i&1)*n)
+#			print()
+#			for i, n in enumerate(pattern):
+#				print(i&1, 1<<4, 1<<(4*(i&1)), n*(1<<(4*(i&1))))
 		
 #	if TIMEIT:
 #		def test_timing_exp_vs_bitwise(self):
@@ -89,51 +89,93 @@ class TestStubs(unittest.TestCase):
 #			print(f'\n{myself()}: timeit exp 16**(i&1)*n -- more granular')
 #			for i,n in enumerate(pattern):
 #				print(timeit(lambda: exp(i,n)))
-				
-
-		
-	def test_encode(self):
-		def encodePattern(pattern):
-			encoding = [16, 0, 0, 0]
-			for i, n in enumerate(pattern):
-				k = ceil(i/2)
-				encoding[k] += 16**(i&1) * n
-			return bytes(encoding)
-		
-		pattern = [3,7,11,12,13,14,15]
-		encoding = encodePattern(pattern)
-		self.assertEqual(encoding, b'\x13\x7b\xcd\xef')
-#		if TIMEIT: print(f'\n{myself()}: timeit encodePattern: {timeit(lambda: encodePattern(pattern))}')
 	
 	
-	def test_encode_optimize(self):
-		def encodePattern(pattern):
-			encoding = [16, 0, 0, 0]
-			i=0
-			for n in pattern:
-				encoding[ceil(i/2)] += n*(1<<(4*(i&1)))
-				i+=1
+	def test_encode_logic(self):
+		def encodePattern(pattern, includeEmptyTile):
+			# this if statement should be later removed for optimization - pick an encoding!
+			if DEBUG: print(f'\n{myself()}: pattern: {pattern}')
+			if includeEmptyTile:
+				if DEBUG: 
+					print('\nk = n*(1<<(4*(~i&1)))')
+					print(f'i\tfloor(i/2)\tn\tk\thex(k)')
+				encoding = [0, 0, 0, 0]
+				i=0
+				for n in pattern:
+					if DEBUG: 
+						k = 16**(~i&1)*n
+						print(f'{i}\t{ceil(i/2)}\t\t{n}\t{k}\t{hex(k)}')
+					encoding[floor(i/2)] += n*(1<<(4*(~i&1)))
+					i+=1
+			else:
+				if DEBUG: 
+					print('\nk = n*(1<<(4*(i&1)))')
+					print(f'i\tceil(i/2)\tn\tk\thex(k)')
+				encoding = [16, 0, 0, 0]
+				i=0
+				for n in pattern:
+					k = n*(1<<(4*(i&1)))
+					if DEBUG: 
+						print(f'{i}\t{ceil(i/2)}\t\t{n}\t{k}\t{hex(k)}')
+					encoding[ceil(i/2)] += k
+					i+=1
+			
+			if DEBUG:
+				print(encoding)
+				print([hex(n) for n in encoding])
+				print(bytes(encoding))
 			return bytes(encoding)
 
-		pattern = [3,7,11,12,13,14,15]
-		encoding = encodePattern(pattern)
-		self.assertEqual(encoding, b'\x13\x7b\xcd\xef')
-		if TIMEIT: print(f'\n{myself()}: timeit encodePattern: {timeit(lambda: encodePattern(pattern))}')
+		pattern1 = [3,7,11,12,13,14,15]
+		encoding1 = encodePattern(pattern1, False)
+		self.assertEqual(encoding1, b'\x13\x7b\xcd\xef')
+		if TIMEIT: print(f'\n{myself()}: timeit encodePattern: {timeit(lambda: encodePattern(pattern1, False))}')
+		
+		pattern2 = [3,7,0,12,13,14,15]
+		encoding2 = encodePattern(pattern2, False)
+		self.assertEqual(encoding2, b'\x13\x70\xcd\xef')
+		if TIMEIT: print(f'{myself()}: timeit encodePattern: {timeit(lambda: encodePattern(pattern2, False))}')
+		
+		pattern3 = [0,3,7,11,12,13,14,15]
+		encoding3 = encodePattern(pattern3, True)
+		self.assertEqual(encoding3, b'\x03\x7b\xcd\xef')
+		if TIMEIT: print(f'{myself()}: timeit encodePattern: {timeit(lambda: encodePattern(pattern3, True))}')
+		
+		pattern4 = [12,1,4,5,14,9,10,0]
+		encoding4 = encodePattern(pattern4, True)
+		self.assertEqual(encoding4, b'\xc1\x45\xe9\xa0')
+		if TIMEIT: print(f'{myself()}: timeit encodePattern: {timeit(lambda: encodePattern(pattern4, True))}')
 	
 	
 	def test_decode(self):
-		def decodebytes(bytestr):
+		def decodebytes(bytestr, includeEmptyTile):
 			decoded = []
 			for n in bytestr:
 				decoded.append((n//16) % 16)
 				decoded.append(n%16)
-			del decoded[0]
+			if not includeEmptyTile:	# remove if statement for optimization
+				del decoded[0]
 			return tuple(decoded)
 		
-		b = b'\x13\x7b\xcd\xef'
-		if DEBUG: print(decodebytes(b))
-		if TIMEIT: print(f'{myself()}: timeit decodebytes: {timeit(lambda: decodebytes(b))}')
-		self.assertEqual(decodebytes(b), (3,7,11,12,13,14,15))
+		b1 = b'\x13\x7b\xcd\xef'
+		if DEBUG: print(decodebytes(b1, False))
+		if TIMEIT: print(f'{myself()}: timeit decodebytes: {timeit(lambda: decodebytes(b1, False))}')
+		self.assertEqual(decodebytes(b1, False), (3,7,11,12,13,14,15))
+		
+		b2 = b'\x13\x70\xcd\xef'
+		if DEBUG: print(decodebytes(b2, False))
+		if TIMEIT: print(f'{myself()}: timeit decodebytes: {timeit(lambda: decodebytes(b2, False))}')
+		self.assertEqual(decodebytes(b2, False), (3,7,0,12,13,14,15))
+		
+		b3 = b'\x03\x7b\xcd\xef'
+		if DEBUG: print(decodebytes(b3, True))
+		if TIMEIT: print(f'{myself()}: timeit decodebytes: {timeit(lambda: decodebytes(b3, True))}')
+		self.assertEqual(decodebytes(b3, True), (0,3,7,11,12,13,14,15))
+		
+		b4 = b'\xc1\x45\xe9\xa0'
+		if DEBUG: print(decodebytes(b4, True))
+		if TIMEIT: print(f'{myself()}: timeit decodebytes: {timeit(lambda: decodebytes(b4, True))}')
+		self.assertEqual(decodebytes(b4, True), (12,1,4,5,14,9,10,0))
 
 
 

@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 from time import perf_counter
 
+def pCounter():
+	return perf_counter()
+
 def timeDelta(t_start):
 	return perf_counter() - t_start
 
