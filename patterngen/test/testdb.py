@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
 
+#import sys
+#sys.path.insert(0, '..')
+
 import sqlite3
 import pprint
 import os
 import subprocess
 from argparse import ArgumentParser
-from time import perf_counter
-from helpers.getmaxrss import *
-from helpers.time import *
+from helpers.memorytools import *
+from helpers.timetools import *
 import dummyvalues
+
+
 
 ##==============================================================================================##
 
@@ -52,7 +56,7 @@ if __name__ == '__main__':
 	
 	DICT = generate_dataset[datasetName](n_entries)
 	maxrss_start = getMaxRSS()
-	time_start = perf_counter()
+	time_start = pCounter()
 	
 	if DEBUG: print('Creating table...')
 	
