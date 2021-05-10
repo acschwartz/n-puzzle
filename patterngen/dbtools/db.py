@@ -25,7 +25,7 @@ def createTables(con, n_tables, logger, base_name='PatternCosts_EmptyTileLocatio
 			cost INTEGER NOT NULL
 			) WITHOUT ROWID;
 		'''%tablename)
-		logger.debug('Success!')
+		logger.debug('Success!\n')
 		tablenames.append(tablename)
 	return tablenames
 

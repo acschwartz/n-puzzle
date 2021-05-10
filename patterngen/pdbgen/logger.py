@@ -29,7 +29,7 @@ def initLogger(logfile=None):
 def generateStats(t_start, maxrss_start, dbfile, tables, n_entries):
 	stats = dict()
 	stats['database file'] = dbfile
-	stats['entries collected'] = n_entries
+	stats['entries collected'] = f'{n_entries:,}'
 	stats['platform'] = platform
 	t_delta = pCounter() - t_start
 	m_delta = getMaxRSS() - maxrss_start

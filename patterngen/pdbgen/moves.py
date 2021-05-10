@@ -53,3 +53,6 @@ MOVE_FUNCTIONS = tuple(map(lambda d: MOVES_INFO[DIRECTIONS[d]]['func'], range(le
 # functions stored in tuple to iterate through in order
 
 OPP_MOVE_IDs = tuple(map(lambda d: DIRECTIONS.index(MOVES_INFO[DIRECTIONS[d]]['opp']), range(len(DIRECTIONS))))
+
+
+
