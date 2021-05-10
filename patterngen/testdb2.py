@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-#!/usr/bin/env python3
-
 import sqlite3
 import pprint
 import os
@@ -10,13 +8,9 @@ from argparse import ArgumentParser
 from time import perf_counter
 from helpers.getmaxrss import *
 from helpers.time import *
-#import dummyvalues
 
 ##==============================================================================================##
-
-SEPARATOR = '=========================================================================='
-SEPARATOR_SM = '--------------------------------------------------------------------------'
-
+# Fav sqlite tutorial:   https://docs.python.org/3/library/sqlite3.html
 ##==============================================================================================##
 
 
@@ -58,7 +52,7 @@ def populateTableWithBinaryBlobs(cur, tablename, n_entries, len_blob=4, max_cost
 ## e.g. 'b'\x00\x03\x07\x0b\x0c\r\x0e\x0f'' representing (0, 3, 7, 9, 11, 12, 13, 14, 15)
 	from random import randint
 	
-	if DEBUG: print(f'\nPopulating table: {tablename}')
+	if DEBUG: print(f'\nPopulating table: {tablename} ...')
 	
 	first_key = bytes([0]*len_blob)
 	key_mutable = [0]*len(first_key)
@@ -91,7 +85,8 @@ def getSplits(dividend, divisor):
 if __name__ == '__main__':
 	n_entries, n_tables, DEBUG = parseArgs()
 	pid = os.getpid()
-	con = sqlite3.connect(':memory:')
+#	con = sqlite3.connect(':memory:')
+	con = sqlite3.connect('testdb2.db')
 	cur = con.cursor()
 	
 	maxrss_start = getMaxRSS()
@@ -132,5 +127,8 @@ if __name__ == '__main__':
 	
 	print(f'\nPrimary key type: Binary blob\t\te.g. {example_row}')
 	print(f'{prettyTime(time_delta)} to insert {n_entries:,} entries')
-	print(f'memory used (to store DB): {rawMaxRSStoPrettyString(current_rss)}')
+	print(f'DB size: {rawMaxRSStoPrettyString(maxrss_delta)}')
+	
+	con.commit()
+	con.close()
 	
