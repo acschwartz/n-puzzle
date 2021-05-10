@@ -8,6 +8,7 @@ import inspect
 myself = lambda: inspect.stack()[1][3]
 
 from dbtools import db
+from pdbgen import logger
 
 DEBUG = False
 TIMEIT = False
@@ -93,11 +94,13 @@ class TestStubs(unittest.TestCase):
 #				print(timeit(lambda: exp(i,n)))
 	
 	
-	def test_encode_logic(self):
-		def encodePattern(pattern, includeEmptyTile):
+	def test_encode_stub(self):
+		def encodePattern(pattern):
+			patternEvenLength = bool(~len(pattern)&1)
+			
 			# this if statement should be later removed for optimization - pick an encoding!
 			if DEBUG: print(f'\n{myself()}: pattern: {pattern}')
-			if includeEmptyTile:
+			if patternEvenLength:
 				if DEBUG: 
 					print('\nk = n*(1<<(4*(~i&1)))')
 					print(f'i\tfloor(i/2)\tn\tk\thex(k)')
@@ -129,27 +132,30 @@ class TestStubs(unittest.TestCase):
 			return bytes(encoding)
 
 		pattern1 = [3,7,11,12,13,14,15]
-		encoding1 = encodePattern(pattern1, False)
+		encoding1 = encodePattern(pattern1)
 		self.assertEqual(encoding1, b'\x13\x7b\xcd\xef')
 		if TIMEIT: print(f'\n{myself()}: timeit encodePattern: {timeit(lambda: encodePattern(pattern1, False))}')
 		
 		pattern2 = [3,7,0,12,13,14,15]
-		encoding2 = encodePattern(pattern2, False)
+		encoding2 = encodePattern(pattern2)
 		self.assertEqual(encoding2, b'\x13\x70\xcd\xef')
 		if TIMEIT: print(f'{myself()}: timeit encodePattern: {timeit(lambda: encodePattern(pattern2, False))}')
 		
 		pattern3 = [0,3,7,11,12,13,14,15]
-		encoding3 = encodePattern(pattern3, True)
+		encoding3 = encodePattern(pattern3)
 		self.assertEqual(encoding3, b'\x03\x7b\xcd\xef')
 		if TIMEIT: print(f'{myself()}: timeit encodePattern: {timeit(lambda: encodePattern(pattern3, True))}')
 		
 		pattern4 = [12,1,4,5,14,9,10,0]
-		encoding4 = encodePattern(pattern4, True)
+		encoding4 = encodePattern(pattern4)
 		self.assertEqual(encoding4, b'\xc1\x45\xe9\xa0')
 		if TIMEIT: print(f'{myself()}: timeit encodePattern: {timeit(lambda: encodePattern(pattern4, True))}')
+		
+		eightpuzzle1 = [1,2,3,4,5,6,7,8]
+		encode_8p1 = encodePattern(eightpuzzle1)
+		self.assertEqual(encode_8p1, b'\x12\x34\x56\x78')
 	
-	
-	def test_decode(self):
+	def test_decode_stub(self):
 		def decodebytes(bytestr, includeEmptyTile):
 			decoded = []
 			for n in bytestr:
@@ -178,6 +184,13 @@ class TestStubs(unittest.TestCase):
 		if DEBUG: print(decodebytes(b4, True))
 		if TIMEIT: print(f'{myself()}: timeit decodebytes: {timeit(lambda: decodebytes(b4, True))}')
 		self.assertEqual(decodebytes(b4, True), (12,1,4,5,14,9,10,0))
+		
+		eightpuzzle1 = (1,2,3,4,5,6,7,8)
+		decode_8p1 = decodebytes(b'\x12\x34\x56\x78', True)
+		if DEBUG: print(decode_8p1)
+		self.assertEqual(decode_8p1, eightpuzzle1)
+		# TODO: Fix this "include empty tile" business!! 
+		# this puzzle doesn't even include the empty tile.. ugh lol
 
 
 class DatabaseTestsInMemory(unittest.TestCase):
@@ -238,6 +251,15 @@ class DatabaseTestsInMemory(unittest.TestCase):
 #	
 #	def test_1(self):
 #		pass
+
+#class LoggerTests(unittest.TestCase):
+#	def test_logging(self):
+#		log, logfile = logger.initLogger(logfile='test/testlog.log')
+#		
+#		log.debug('debug message. it should not be printed to the logfile')
+#		log.log(15, 'level 15. it should go to stdout only, not the logfile')
+#		log.info('info message. this should go to stdout AND BE PRINTED TO THE LOGFILE')
+		
 
 ##==============================================================================================##
 if __name__ == '__main__':
