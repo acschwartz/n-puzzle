@@ -122,6 +122,6 @@ if __name__ == '__main__':
 #	print(f'\n{SEPARATOR_SM}')
 	print(f'\nPrimary key type: {datasetName}\t\te.g. {example_row}')
 #	print(SEPARATOR_SM)
-	print(f'{prettyTime(time_delta)} to insert {n_entries} entries')
+	print(f'{prettyTime(time_delta)} to insert {n_entries:,} entries')
 	print(f'memory used (to store DB): {rawMaxRSStoPrettyString(current_rss)}')
 #	print(SEPARATOR)
