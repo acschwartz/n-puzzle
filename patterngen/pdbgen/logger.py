@@ -12,7 +12,7 @@ def initLogger(logfile=None, output_path=None):
 
 	# create logger
 	logger = logging.getLogger()
-	logger.setLevel(logging.DEBUG)
+	logger.setLevel(logging.DEBUG)  
 	
 	# create handlers for logging to both file and stdout
 	stdout_handler = logging.StreamHandler(stream=stdout)

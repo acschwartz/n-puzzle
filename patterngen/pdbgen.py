@@ -48,5 +48,5 @@ if __name__ == '__main__':
 #	print(encode(ptiles))
 #	print(decode(encode(ptiles)))
 	
-	generator.generatePatternDatabase(info, log)
+	generator.generatePatternDatabase(info, log, RUN_ID)
 	
