@@ -6,6 +6,7 @@ from time import strftime
 from helpers.memorytools import *
 from helpers.timetools import *
 
+from pdbgen import generator
 from pdbgen import logger
 from pdbgen import moves
 from pdbgen.parser import parseArgs
@@ -41,6 +42,11 @@ if __name__ == '__main__':
 	print(f'RUN_ID: {RUN_ID}')
 	
 	log, logfile = logger.initLogger()
-
 	
+	info = patterns.PATTERN_INFO[pname]
+	
+#	print(encode(ptiles))
+#	print(decode(encode(ptiles)))
+	
+	generator.generatePatternDatabase(info, log)
 	

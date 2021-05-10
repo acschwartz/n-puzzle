@@ -8,8 +8,10 @@ import inspect
 myself = lambda: inspect.stack()[1][3]
 
 from dbtools import db
+from pdbgen import generator
 from pdbgen import logger
 from pdbgen import encoding
+from pdbgen import patterns
 
 DEBUG = False
 TIMEIT = False
@@ -135,22 +137,22 @@ class TestStubs(unittest.TestCase):
 		pattern1 = [3,7,11,12,13,14,15]
 		encoding1 = encodePattern(pattern1)
 		self.assertEqual(encoding1, b'\x13\x7b\xcd\xef')
-		if TIMEIT: print(f'\n{myself()}: timeit encodePattern: {timeit(lambda: encodePattern(pattern1, False))}')
+		if TIMEIT: print(f'\n{myself()}: timeit encodePattern: {timeit(lambda: encodePattern(pattern1))}')
 		
 		pattern2 = [3,7,0,12,13,14,15]
 		encoding2 = encodePattern(pattern2)
 		self.assertEqual(encoding2, b'\x13\x70\xcd\xef')
-		if TIMEIT: print(f'{myself()}: timeit encodePattern: {timeit(lambda: encodePattern(pattern2, False))}')
+		if TIMEIT: print(f'{myself()}: timeit encodePattern: {timeit(lambda: encodePattern(pattern2))}')
 		
 		pattern3 = [0,3,7,11,12,13,14,15]
 		encoding3 = encodePattern(pattern3)
 		self.assertEqual(encoding3, b'\x03\x7b\xcd\xef')
-		if TIMEIT: print(f'{myself()}: timeit encodePattern: {timeit(lambda: encodePattern(pattern3, True))}')
+		if TIMEIT: print(f'{myself()}: timeit encodePattern: {timeit(lambda: encodePattern(pattern3))}')
 		
 		pattern4 = [12,1,4,5,14,9,10,0]
 		encoding4 = encodePattern(pattern4)
 		self.assertEqual(encoding4, b'\xc1\x45\xe9\xa0')
-		if TIMEIT: print(f'{myself()}: timeit encodePattern: {timeit(lambda: encodePattern(pattern4, True))}')
+		if TIMEIT: print(f'{myself()}: timeit encodePattern: {timeit(lambda: encodePattern(pattern4))}')
 		
 		eightpuzzle1 = [1,2,3,4,5,6,7,8]
 		encode_8p1 = encodePattern(eightpuzzle1)
@@ -168,7 +170,7 @@ class TestStubs(unittest.TestCase):
 		
 		b1 = b'\x13\x7b\xcd\xef'
 		if DEBUG: print(decodebytes(b1, False))
-		if TIMEIT: print(f'{myself()}: timeit decodebytes: {timeit(lambda: decodebytes(b1, False))}')
+		if TIMEIT: print(f'\n{myself()}: timeit decodebytes: {timeit(lambda: decodebytes(b1, False))}')
 		self.assertEqual(decodebytes(b1, False), (3,7,11,12,13,14,15))
 		
 		b2 = b'\x13\x70\xcd\xef'
@@ -192,6 +194,24 @@ class TestStubs(unittest.TestCase):
 		self.assertEqual(decode_8p1, eightpuzzle1)
 		# TODO: Fix this "include empty tile" business!! 
 		# this puzzle doesn't even include the empty tile.. ugh lol
+	
+	
+	if TIMEIT:
+		def test_target_pattern_list_compr(self):
+			pname = 'full8puzzle'
+			ptiles = patterns.PATTERN_INFO[pname]['pattern tiles']
+			goalstate = patterns.PATTERN_INFO[pname]['goal state']
+			pattern = []
+			
+			def forloop():
+				for tile in ptiles:
+					pattern.append(goalstate.index(tile))
+			
+			def listcompr():
+				pattern = [goalstate.index(tile) for tile in ptiles]
+			
+			print(f'{myself()}: timeit forloop: {timeit(forloop)}')
+			print(f'{myself()}: timeit listcompr: {timeit(listcompr)}')
 
 
 class DatabaseTestsInMemory(unittest.TestCase):
@@ -257,9 +277,10 @@ class LoggerTests(unittest.TestCase):
 	def test_logging(self):
 		log, logfile = logger.initLogger(logfile='test/testlog.log')
 		
-		log.debug('debug message. it should not be printed to the logfile')
-		log.log(15, 'level 15. it should go to stdout only, not the logfile')
-		log.info('info message. this should go to stdout AND BE PRINTED TO THE LOGFILE')
+		print()
+		log.debug(f'{myself()}: debug message. it should not be printed to the logfile')
+		log.log(15, f'{myself()}: level 15. it should go to stdout only, not the logfile')
+		log.info(f'{myself()}: info message. this should go to stdout AND BE PRINTED TO THE LOGFILE')
 
 class TestEncoding(unittest.TestCase):
 	def __init__(self, *args, **kwargs):
@@ -290,7 +311,18 @@ class TestEncoding(unittest.TestCase):
 		for i, e in enumerate(res):
 			self.assertEqual(e, puzzles[i]['pattern'])
 			
-	
+	def test_makeInitialNode(self):
+		pname = 'full8puzzle'
+		ptiles = patterns.PATTERN_INFO[pname]['pattern tiles']
+		goalstate = patterns.PATTERN_INFO[pname]['goal state']
+		emptytile = patterns.PATTERN_INFO[pname]['empty tile']
+		encode = patterns.PATTERN_INFO[pname]['encode']
+		decode = patterns.PATTERN_INFO[pname]['decode']
+		
+		initnode, len_encoded_pattern = generator.makeInitialNode(ptiles, emptytile, goalstate, encode)
+		pattern, nodeinfo = generator.splitNode(initnode, len_encoded_pattern)
+		print(decode(pattern))
+		print(nodeinfo)
 		
 
 ##==============================================================================================##

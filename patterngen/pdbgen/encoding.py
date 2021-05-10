@@ -2,6 +2,7 @@
 from math import floor, ceil
 
 def encode8puzzle(pattern):
+# includes locations of the pattern tiles but not the empty tile
 	encoding = [0, 0, 0, 0]
 	i=0
 	for n in pattern:
@@ -10,6 +11,7 @@ def encode8puzzle(pattern):
 	return bytes(encoding)
 
 def decode8puzzle(bytestr):
+# includes locations of the pattern tiles but not the empty tile
 	decoded = []
 	for n in bytestr:
 		decoded.append((n//16) % 16)
