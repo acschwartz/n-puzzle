@@ -32,12 +32,12 @@ def get_children(data, size):     # returns CHILDREN
     return res
 
 
-def a_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST):
+def a_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST, PDB_CONNECTION):
     
     counter = count()
     pqueue = [(0, next(counter), init_state, 0, None)]
             # (f, gen_order,     node,       g, parent)
-    frontier = {init_state: (0, HEURISTIC(init_state, goal_state, size))}
+    frontier = {init_state: (0, HEURISTIC(init_state, goal_state, size, PDB_CONNECTION))}
         # frontier = {node: (g, h)}
     explored = {}
         # explored = {node: parent}
@@ -81,7 +81,7 @@ def a_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST):
                 else:
                     pass
             else:
-                h_child = HEURISTIC(child, goal_state, size)
+                h_child = HEURISTIC(child, goal_state, size, PDB_CONNECTION)
             
             frontier[child] = g_child_thispath, h_child
             heappush(pqueue, (h_child + g_child_thispath, next(counter), child, g_child_thispath, node))
@@ -97,7 +97,7 @@ Each iteration of IDA* is a complete depth-first search that keeps track of the 
 Since at any point IDA* is performing a depth-first search, the memory requirement of the algorithm is linear in the solution depth.
 '''
 global ida_star_nodes_generated
-def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST, RANDOM_NODE_ORDER):
+def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST, RANDOM_NODE_ORDER, PDB_CONNECTION):
     
     def DFS(path, g, f_limit):
         global ida_star_nodes_generated
@@ -105,7 +105,7 @@ def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST, RA
         # Note: while I would normally consider the above to count "nodes expanded", since the line of code is executed when a node is expanded. However, after some research, it looks that this implementation features backtracking, where only one node is generated at a time (and uses O(m) memory instead of O(bm). Therefore the above count is correct.
         
         node = path[0]
-        f_node = g + HEURISTIC(node, goal_state, size)
+        f_node = g + HEURISTIC(node, goal_state, size, PDB_CONNECTION)
         
         # THIS IS FOR A "LEAF" NODE (i.e. nodes that cannot be expanded)
         if f_node > f_limit:
@@ -132,7 +132,7 @@ def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST, RA
     
     global ida_star_nodes_generated
     ida_star_nodes_generated = 0
-    f_limit = HEURISTIC(init_state, goal_state, size)
+    f_limit = HEURISTIC(init_state, goal_state, size, PDB_CONNECTION)
     
     path = deque([init_state])
     

@@ -1,0 +1,40 @@
+====================================================
+blob length 8 with 1 table:
+
+maxrss_start: 8642560	8.24MB
+maxrss_after_populate_table: 188182528	179.46MB
+maxrss_delta: 179539968	171.22MB
+current rss (after populating tables into memory):	183760	179.45KB
+
+
+Primary key type: Binary blob		e.g. (b'\x00\x00\x00\x00\x00\t\x05\x0e', 90)
+0.0 hours 1.0 mins 58.18 sec to insert 10,000,000 entries
+memory used (to store DB): 179.45KB
+
+
+====================================================
+blob length 7 with 16 tables:
+
+maxrss_start: 8687616	8.29MB
+maxrss_after_populate_table: 176553984	168.38MB
+maxrss_delta: 167866368	160.09MB
+current rss (after populating tables into memory):	172404	168.36KB
+
+Primary key type: Binary blob		e.g. (b'\x00\x00\x00\x00\x04\x03\x03', 54)
+0.0 hours 1.0 mins 56.32 sec to insert 10,000,000 entries
+memory used (to store DB): 168.36KB
+
+====================================================
+
+blob length 4 with 16 tables
+
+
+maxrss_start: 8716288	8.31MB
+maxrss_after_populate_table: 139882496	133.40MB
+maxrss_delta: 131166208	125.09MB
+current rss (after populating tables into memory):	136580	133.38KB
+
+Primary key type: Binary blob		e.g. (b'\x00\x00M\x14', 3)
+0.0 hours 1.0 mins 59.25 sec to insert 10,000,000 entries
+memory used (to store DB): 133.38KB
+# ~~~~~~NOTE: actual size on disk ended up being 134.3 MB  so maxrss is the correct measurement here

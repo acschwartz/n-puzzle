@@ -12,7 +12,11 @@ from npuzzle.colors import color
 from npuzzle import parser
 from npuzzle import heuristics
 from npuzzle import goal_states
-from npuzzle import pdb
+from npuzzle.pdb import pdb
+
+global PDB_CONNECTION
+PDB_CONNECTION = None
+
 
 def pretty_print_steps(steps, size):
     width = len(str(size*size))
@@ -48,7 +52,7 @@ def bytes_to_human_readable_string(size,precision=2):
 def color_yes_no(v):
     return color('green', 'YES') if v else color('red', 'NO')
 
-def verbose_info(args, puzzle, goal_state, size):
+def verbose_info(args, puzzle, goal_state, size, PDB_CONNECTION):
     opts1 = {
             'greedy search:': args.g,
             'uniform cost search:': args.u,
@@ -60,7 +64,7 @@ def verbose_info(args, puzzle, goal_state, size):
         print(color(opt_color, k), color_yes_no(v))
 
     opts2 = {'heuristic function:': color('green2', args.f),
-            'pdb:': color('green2', args.pdb if args.pdb else 'None'),
+#            'pdb:': color('green2', args.pdb if args.pdb else 'None'),
             'puzzle size:': str(size),
             'solution type:': color('green2', args.s),
             'initial state:': str(puzzle),
@@ -69,9 +73,10 @@ def verbose_info(args, puzzle, goal_state, size):
         print(color(opt_color, k), v)
    
     # NOTE: removed because it wasn't vibing with my handling of the pdb's.. worry bout it later (TODO)
-#    print(color('blue2', 'heuristic scores for initial state'))
-#    for k,v in heuristics.KV.items():
-#        print(color('blue2', '  - ' + k + '\t:'), v(puzzle, goal_state, size))
+    if is_solvable(puzzle, goal_state, size):
+        print(color('blue2', 'heuristic scores for initial state'))
+        for k,v in heuristics.KV.items():
+            print(color('blue2', '  - ' + k + '\t:'), v(puzzle, goal_state, size, PDB_CONNECTION))
 
     print(color('red2', 'search algorithm:'), ('IDA* w/ random node ordering (IDA*_R)' if args.r else 'IDA*') if args.ida else 'A*')
 
@@ -103,9 +108,15 @@ def main(arglist=None):
     HEURISTIC = heuristics.KV[args.f]
     if args.u:
         HEURISTIC = heuristics.uniform_cost
-
+    
+    global PDB_CONNECTION
+    if args.f.startswith('pdb_') and not PDB_CONNECTION:
+        pdbtype = args.f[4:]
+        PDB_CONNECTION = pdb.initDB(pdbtype)
+        
+    
     goal_state = goal_states.KV[args.s](size)
-    verbose_info(args, puzzle, goal_state, size)
+    verbose_info(args, puzzle, goal_state, size, PDB_CONNECTION)
     if not is_solvable(puzzle, goal_state, size):
         print(color('red','this puzzle is not solvable'))
         sys.exit(0)
@@ -123,15 +134,12 @@ def main(arglist=None):
             maxrss_before_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 #            print(color('red', 'max rss before search:'), maxrss_before_search)
     
-#    t_start = perf_counter()
-    if args.pdb and not pdb.PATTERN_DATABASE:
-        time_to_load_pdb = pdb.load_pdb(args.pdb)
-        print(color('yellow','time to load PDB:') + ' %.4f second(s)' % (time_to_load_pdb))
+
     t_before_search = perf_counter()
     if args.ida:
-        res = ida_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST, RANDOM_NODE_ORDER)
+        res = ida_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST, RANDOM_NODE_ORDER, PDB_CONNECTION)
     else:
-        res = a_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST)
+        res = a_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST, PDB_CONNECTION)
     t_search = perf_counter() - t_before_search
     
     success, steps, complexity = res
@@ -183,6 +191,7 @@ def main(arglist=None):
 #    if success and args.v:
 #        visualizer(steps, size)
 
+    PDB_CONNECTION.close()
     
 if __name__ == '__main__':    
     main(sys.argv[1:])

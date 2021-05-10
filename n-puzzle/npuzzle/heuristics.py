@@ -1,17 +1,18 @@
 from npuzzle import goal_states
-from npuzzle.pdb import pdb_lookup
+from npuzzle.pdb import pdb
+from npuzzle.pdb.eightpuzzle.full8puzzle import full8puzzle
 
-def uniform_cost(puzzle, goal_state, size):
+def uniform_cost(puzzle, goal_state, size, db=None):
     return 0
 
-def hamming(candidate, goal_state, size): #aka tiles out of place
+def hamming(candidate, goal_state, size, db=None): #aka tiles out of place
     res = 0
     for i in range(size*size):
         if candidate[i] != 0 and candidate[i] != goal_state[i]:
             res += 1
     return res
 
-def gaschnig(candidate, goal_state, size):
+def gaschnig(candidate, goal_state, size, db=None):
     res = 0
     candidate = list(candidate)
     goal_state = list(goal_state)
@@ -29,7 +30,7 @@ def gaschnig(candidate, goal_state, size):
         res += 1
     return res
 
-def manhattan(candidate, goal_state, size):
+def manhattan(candidate, goal_state, size, db=None):
     res = 0
     for i in range(size*size):
         if candidate[i] != 0 and candidate[i] != goal_state[i]:
@@ -39,7 +40,7 @@ def manhattan(candidate, goal_state, size):
             res += abs(y) + abs(x)
     return res
 
-def linear_conflicts(candidate, goal_state, size):
+def linear_conflicts(candidate, goal_state, size, db=None):
 
     def count_conflicts(candidate_row, goal_row, size, ans=0):
         counts = [0 for x in range(size)]
@@ -79,11 +80,16 @@ def linear_conflicts(candidate, goal_state, size):
     return res
 
 
+def pdb_Query_full8puzzle(state, goal_state, size, db_connection):
+    table, pattern = full8puzzle.convertToQueryable(state)
+    cost = pdb.queryPDB(table, pattern, db_connection)
+    return cost
+
 
 KV = {
         'hamming':      hamming,
         'gaschnig':     gaschnig,
         'manhattan':    manhattan,
         'lc':    linear_conflicts,
-        'pdb': pdb_lookup,
+        'pdb_full8puzzle': pdb_Query_full8puzzle,
 }
