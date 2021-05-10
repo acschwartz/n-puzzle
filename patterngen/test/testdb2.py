@@ -85,8 +85,8 @@ def getSplits(dividend, divisor):
 if __name__ == '__main__':
 	n_entries, n_tables, DEBUG = parseArgs()
 	pid = os.getpid()
-#	con = sqlite3.connect(':memory:')
-	con = sqlite3.connect('testdb2.db')
+	con = sqlite3.connect(':memory:')
+#	con = sqlite3.connect('testdb2.db')
 	cur = con.cursor()
 	
 	maxrss_start = getMaxRSS()
