@@ -291,6 +291,10 @@ class TestEncoding(unittest.TestCase):
 			{ 'pattern': (8,0,7,3,1,6,5,4), 'encoding': b'\x80\x73\x16\x54' },
 			{ 'pattern': (8,4,7,3,1,6,5,0), 'encoding': b'\x84\x73\x16\x50' },
 		)
+		self.fifteenpuzzles_fringe = (
+			{ 'pattern': (3,7,11,12,13,14,15), 'encoding': b'\x13\x7b\xcd\xef' },
+			{ 'pattern': (3,7,0,12,13,14,15), 'encoding': b'\x13\x70\xcd\xef' },
+		)
 	
 	def test_encode8puzzle(self):
 		puzzles = self.eightpuzzles
@@ -311,8 +315,48 @@ class TestEncoding(unittest.TestCase):
 		for i, e in enumerate(res):
 			self.assertEqual(e, puzzles[i]['pattern'])
 			
-	def test_makeInitialNode(self):
+	def test_makeInitialNode_full8puzzle(self):
 		pname = 'full8puzzle'
+		ptiles = patterns.PATTERN_INFO[pname]['pattern tiles']
+		goalstate = patterns.PATTERN_INFO[pname]['goal state']
+		emptytile = patterns.PATTERN_INFO[pname]['empty tile']
+		encode = patterns.PATTERN_INFO[pname]['encode']
+		decode = patterns.PATTERN_INFO[pname]['decode']
+		
+		initnode, len_encoded_pattern = generator.makeInitialNode(ptiles, emptytile, goalstate, encode)
+		pattern, nodeinfo = generator.splitNode(initnode, len_encoded_pattern)
+		print(decode(pattern))
+		print(nodeinfo)
+	
+	def test_encode15puzzle_fringe(self):
+		pname = '15puzzle_fringe'
+		ptiles = patterns.PATTERN_INFO[pname]['pattern tiles']
+		goalstate = patterns.PATTERN_INFO[pname]['goal state']
+		emptytile = patterns.PATTERN_INFO[pname]['empty tile']
+		encode = patterns.PATTERN_INFO[pname]['encode']
+		decode = patterns.PATTERN_INFO[pname]['decode']
+	
+	def test_encode15puzzle_fringe(self):
+		puzzles = self.fifteenpuzzles_fringe
+		res = []
+		for p in puzzles:
+			res.append(encoding.encode15puzzle_fringe(p['pattern']))
+			
+		for i, e in enumerate(res):
+			self.assertEqual(e, puzzles[i]['encoding'])
+			
+			
+	def test_decode15puzzle_fringe(self):
+		puzzles = self.fifteenpuzzles_fringe
+		res = []
+		for p in puzzles:
+			res.append(encoding.decode15puzzle_fringe(p['encoding']))
+			
+		for i, e in enumerate(res):
+			self.assertEqual(e, puzzles[i]['pattern'])
+	
+	def test_makeInitialNode_15puzzle_fringe(self):
+		pname = '15puzzle_fringe'
 		ptiles = patterns.PATTERN_INFO[pname]['pattern tiles']
 		goalstate = patterns.PATTERN_INFO[pname]['goal state']
 		emptytile = patterns.PATTERN_INFO[pname]['empty tile']

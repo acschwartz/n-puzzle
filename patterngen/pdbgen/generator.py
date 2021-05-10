@@ -17,8 +17,10 @@ def makeInitialNode(ptiles, emptytile, goalstate, encode):
 
 def makeNode(encodedPattern, stateinfo):
 #	print(f'makeNode: {decode8puzzle(encodedPattern)}, {stateinfo}')
-	info = [stateinfo['cost'], stateinfo['emptyTileLocation'], stateinfo['undo']]
-	return encodedPattern+bytes(info) # TODO: maybe could optimize
+#	info = [stateinfo['cost'], stateinfo['emptyTileLocation'], stateinfo['undo']]
+	info = [stateinfo['c'], stateinfo['e'], stateinfo['u']]  # hoping this optimizes memory
+	return encodedPattern+bytes(info)
+# TODO: maybe could optimize
 
 def splitNode(node, len_encoded_pattern):
 # returns encoded pattern, cost, location of empty tile, undo move
@@ -62,8 +64,8 @@ def generatePatternDatabase(info, log, dbfile=None, moves=MOVE_FUNCTIONS, opp_mo
 		# generate children
 		children = generateChildren(pattern, nodeinfo, dim, ptiles, moves, opp_moves, encode, decode, log)
 		for child_pattern, childinfo in children:
-			table = tables[childinfo['emptyTileLocation']]
-#			log.debug(f"Checking table {table} for pattern {decode(child_pattern)} (empty tile loc: {childinfo['emptyTileLocation']})")
+			table = tables[childinfo['e']]
+#			log.debug(f"Checking table {table} for pattern {decode(child_pattern)} (empty tile loc: {childinfo['e']})")
 			if not db.checkRowExists(con, table, child_pattern):
 				queue.append(makeNode(child_pattern, childinfo))
 #				log.debug(f'\tChild pattern {child_pattern} not in db; added to queue.')
@@ -71,8 +73,8 @@ def generatePatternDatabase(info, log, dbfile=None, moves=MOVE_FUNCTIONS, opp_mo
 		
 		# add node to visited
 		try:
-			tbl = tables[nodeinfo['emptyTileLocation']]
-			c = nodeinfo['cost']
+			tbl = tables[nodeinfo['e']]
+			c = nodeinfo['c']
 			db.insert(con, tbl, pattern, c)
 			visitedCount += 1
 #			log.debug(f"\nNode fully explored; added ({pattern}, {c}) to table {tbl}")
@@ -107,12 +109,12 @@ def generatePatternDatabase(info, log, dbfile=None, moves=MOVE_FUNCTIONS, opp_mo
 
 
 def generateChildren(pattern, stateinfo, dim, ptiles, moves, opp_moves, encode, decode, log):
-	from pdbgen.moves import DIRECTIONS as DIRS	# for DEBUGGING only
+#	from pdbgen.moves import DIRECTIONS as DIRS	# for DEBUGGING only
 #	log.debug('\n\n ---- generateChildren -----')
 	
-	emptyTileLocation = stateinfo['emptyTileLocation']
-	current_cost = stateinfo['cost']
-	undo = stateinfo['undo']
+	emptyTileLocation = stateinfo['e']
+	current_cost = stateinfo['c']
+	undo = stateinfo['u']
 	decoded_pattern = decode(pattern)
 	# ^ this action applied to the current state would generate the parent from which it originated
 	
@@ -134,23 +136,23 @@ def generateChildren(pattern, stateinfo, dim, ptiles, moves, opp_moves, encode, 
 		if new_emptyTileLocation is not None:
 			child = list(decoded_pattern)
 			childinfo = {}
-			childinfo['emptyTileLocation'] = new_emptyTileLocation
-			childinfo['undo'] = opp_moves[moveID]
+			childinfo['e'] = new_emptyTileLocation
+			childinfo['u'] = opp_moves[moveID]
 			try:
 				# swapping with another pattern tile 
 				# this means we also update cost
 				ptileID = decoded_pattern.index(new_emptyTileLocation)
 				child[ptileID] = emptyTileLocation
-				childinfo['cost'] = current_cost + 1
+				childinfo['c'] = current_cost + 1
 				
 #				log.debug(f'Pattern was: {decoded_pattern}')
 #				log.debug(f'Swapped with another pattern tile represented by index {ptileID} in the pattern')
 #				log.debug(f'That tile is now at location {emptyTileLocation}')
-#				log.debug(f"Pattern cost incremented to {childinfo['cost']}")
+#				log.debug(f"Pattern cost incremented to {childinfo['c']}")
 			except ValueError:
 				# swapping with a non-pattern tile
 				# and cost stays the same
-				childinfo['cost'] = current_cost
+				childinfo['c'] = current_cost
 				
 #				log.debug(f'Swapped with non-pattern tile.')
 #				log.debug(f'Pattern and cost do not need to be updated.')
