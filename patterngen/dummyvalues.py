@@ -69,13 +69,14 @@ def tuples_len8_pickled(n_entries, max_cost=100):
 ###==============================================================================================##
 
 ###==============================================================================================##
-## e.g. '(3, 7, 11, 12, 13, 14, 15, 0)'  (representing '0x37bcdef0')
+## e.g. '3,7,11,12,13,14,15,0'  (representing '0x37bcdef0')
 def string_repr_tuples_of_ints (n_entries, max_cost=100):
 	string_repr_tuples_of_ints = {}
 	first_key = 935124720
 	for n in range(n_entries):
 		cost = n % max_cost
-		next_key = str(hexstr_to_int_tuple(hex(first_key + n)))
+		s = str(hexstr_to_int_tuple(hex(first_key + n)))
+		next_key = ''.join((filter(lambda char: char not in ['(', ')', '[', ']', ' '], s)))
 		string_repr_tuples_of_ints[next_key] = cost
 	return string_repr_tuples_of_ints 
 	
