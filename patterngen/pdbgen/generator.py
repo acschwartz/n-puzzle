@@ -13,10 +13,15 @@ def makeInitialNode(ptiles, emptytile, goalstate, encode):
 	# node info [cost, emptyTileLocation, undoMove]
 	return encoding+bytes([0, emptyTileLocation, 255]), len(encoding)
 
+def makeNode(encodedPattern, stateinfo):
+	info = [stateinfo['cost'], stateinfo['emptyTileLocation'], stateinfo['undo']]
+	return encodedPattern+bytes(info) # TODO: maybe could optimize
+
 def splitNode(node, len_encoded_pattern):
 # returns encoded pattern, cost, location of empty tile, undo move
 #	return node[:len_encoded_pattern], node[len_encoded_pattern], node[len_encoded_pattern+1], node[len_encoded_pattern+2]
 	return node[:len_encoded_pattern], {'cost': node[len_encoded_pattern], 'emptyTileLocation': node[len_encoded_pattern+1], 'undo': node[len_encoded_pattern+2]}
+
 
 def generatePatternDatabase(info, log, RUN_ID, moves=MOVE_FUNCTIONS, opp_moves=OPP_MOVE_IDs):
 # (initNode, dim, num_ptiles, moveSet, oppMoves, BASE_OUTPUT_FILENAME, logger)
@@ -34,7 +39,8 @@ def generatePatternDatabase(info, log, RUN_ID, moves=MOVE_FUNCTIONS, opp_moves=O
 	visitedCount = 0
 #	con, cur = db.initDB(log, f'{RUN_ID}.db')
 	con, cur = db.initDB(log)
-	tablenames = db.createTables(cur, dim*dim, log)
+	tables = db.createTables(cur, dim*dim, log)
+	print(f'tables created: {tables}')
 
 	# Begin Generating Pattern Database
 	# using breadth-first search "backwards" from target pattern
@@ -45,14 +51,40 @@ def generatePatternDatabase(info, log, RUN_ID, moves=MOVE_FUNCTIONS, opp_moves=O
 		# split node whatever
 		pattern, nodeinfo = splitNode(node, len_pattern_encoding)
 		
-		print(pattern)
-		print(list(pattern))
-		print(nodeinfo)
+		log.debug(f'\n\n=========== POPPED! Node off Queue ==============')
+		log.debug(f'\tPattern: {decode(pattern)}')
+		log.debug(f'\tInfo: {nodeinfo}')
 		
 		# generate children
 		children = generateChildren(pattern, nodeinfo, dim, ptiles, moves, opp_moves, encode, decode, log)
+		for child_pattern, childinfo in children:
+			table = tables[childinfo['emptyTileLocation']]
+			print(childinfo['emptyTileLocation'], table)
+			if not db.checkRowExists(cur, table, child_pattern):
+				queue.append(makeNode(child_pattern, childinfo))
+				log.debug(f'\tChild pattern {child_pattern} not in db; added to queue.')
+			else: log.debug(f'\tChild pattern {child_pattern} already in db.')
+		
+		# add node to visited
+		db.insert(cur, tables[nodeinfo['emptyTileLocation']], pattern, nodeinfo['cost'])
+		visitedCount += 1
+		
+		log.debug(f"\nNode fully explored; added to DB table {tables[nodeinfo['emptyTileLocation']]} with cost {nodeinfo['cost']}")
+		log.debug(f"Explored: {visitedCount}\n")
+		log.debug(f'~~~~~~~~ Queue: ~~~~~~')
+		import pprint
+		pprint.pp(queue, indent=2)
+		log.debug(f'~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
+		
+#		if visitedCount % 10000 == 0:
+#			print("Entries collected:", visitedCount)
+		
+		# !!!! DEBUG
+		if visitedCount == 10:
+			break
 
-def generateChildren(pattern, stateinfo, dim, ptiles, moves, opp_moves, encode, decode, log=None):
+
+def generateChildren(pattern, stateinfo, dim, ptiles, moves, opp_moves, encode, decode, log):
 	from pdbgen.moves import DIRECTIONS as DIRS
 	log.debug('\n\n ---- generateChildren -----')
 	emptyTileLocation = stateinfo['emptyTileLocation']
@@ -99,11 +131,10 @@ def generateChildren(pattern, stateinfo, dim, ptiles, moves, opp_moves, encode, 
 				
 				log.debug(f'Swapped with non-pattern tile.')
 				log.debug(f'Pattern and cost do not need to be updated.')
-			log.debug(f'RESULTING CHILD STATE: {child}')
+			log.debug(f'RESULTING CHILD PATTERN: {child}')
 			log.debug(f'\tchildinfo: {childinfo}')
 			children.append((encode(child), childinfo))
 		moveID += 1
 	
 	log.debug(f'\nFinished generating children: \n{children}')
-	log.debug(f'~~~~~~~~\n')
 	return children
