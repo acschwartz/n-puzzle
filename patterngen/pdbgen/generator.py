@@ -46,7 +46,7 @@ def generatePatternDatabase(info, log, dbfile=None, moves=MOVE_FUNCTIONS, opp_mo
 	cur = con.cursor()
 	
 	tables = db.createTables(con, dim*dim, log)
-	log.debug(f'\nTables created: {tuple(enumerate(tables))}\n')
+#	log.debug(f'\nTables created: {tuple(enumerate(tables))}\n')
 
 	# Begin Generating Pattern Database
 	# using breadth-first search "backwards" from target pattern
@@ -105,7 +105,7 @@ def generatePatternDatabase(info, log, dbfile=None, moves=MOVE_FUNCTIONS, opp_mo
 	con.close()
 	log.debug(f'Done.')
 		
-	return dbfile, len(tables), visitedCount
+	return dbfile, tables, visitedCount
 
 
 def generateChildren(pattern, stateinfo, dim, ptiles, moves, opp_moves, encode, decode, log):

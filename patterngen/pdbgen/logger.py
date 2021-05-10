@@ -26,7 +26,7 @@ def initLogger(logfile=None):
 	return logger, logfile
 
 
-def generateStats(t_start, maxrss_start, dbfile, n_tables, n_entries):
+def generateStats(t_start, maxrss_start, dbfile, tables, n_entries):
 	stats = dict()
 	stats['database file'] = dbfile
 	stats['entries collected'] = n_entries
@@ -49,8 +49,8 @@ def printHeader(logger, pname, run_id, base_filename):
 	return
 
 
-def printStats(logger, t_start, maxrss_start, dbfile, n_tables, n_entries, title=None ):
-	stats = generateStats(t_start, maxrss_start, dbfile, n_tables, n_entries)
+def printStats(logger, t_start, maxrss_start, dbfile, tables, n_entries, title=None ):
+	stats = generateStats(t_start, maxrss_start, dbfile, tables, n_entries)
 	
 	stats_as_strings = sorted([ f'{key} : {stats[key]}' for key in stats ])
 	logger.info(f'\n{SECTION_SEPARATOR}')
@@ -59,5 +59,12 @@ def printStats(logger, t_start, maxrss_start, dbfile, n_tables, n_entries, title
 		logger.info(SECTION_SEPARATOR)
 	for stat in stats_as_strings:
 		logger.info(stat) 
+	logger.info(SECTION_SEPARATOR)
+	logger.info(f'Number tables: {len(tables)}')
+	logger.info(f'  Tables are separated by the location of the empty tile - it is imputed from the table number')
+	logger.info(f'  i.e. table0 hold all entries where the empty tile is at location 0 in the puzzle, etc...')
+	logger.info(f'\nTable names:')
+	for i, t in enumerate(tables):
+		logger.info(f'   {i}     {t}')
 	logger.info(SECTION_SEPARATOR)
 	return

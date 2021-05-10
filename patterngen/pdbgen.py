@@ -44,7 +44,7 @@ if __name__ == '__main__':
 	t_start = pCounter()
 	m_start = getMaxRSS()
 	
-	dbfile, n_tables, n_entries = generator.generatePatternDatabase(info, log, base_filename_with_path)
+	dbfile, tables, n_entries = generator.generatePatternDatabase(info, log, base_filename_with_path)
 	
-	logger.printStats(log, t_start, m_start, dbfile, n_tables, n_entries, title='Stats')
+	logger.printStats(log, t_start, m_start, dbfile, tables, n_entries, title='Stats')
 	log.debug(f'logfile: {logfile}')
