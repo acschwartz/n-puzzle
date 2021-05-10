@@ -97,7 +97,7 @@ if __name__ == '__main__':
 	time_delta = timeDelta(time_start)
 	maxrss_after_populate_table = getMaxRSS()
 	maxrss_delta = maxrss_after_populate_table - maxrss_start
-	maxrss_delta_pretty = rawMaxRSStoPrettyString(maxrss_delta)
+	maxrss_delta_pretty = prettyMemory(maxrss_delta)
 	
 	current_rss = getRSS()
 	
@@ -152,9 +152,9 @@ if __name__ == '__main__':
 			for row in res:
 				print(row)
 	
-	if DEBUG: print(f'maxrss_start: {maxrss_start}\t{rawMaxRSStoPrettyString(maxrss_start)}')
-	if DEBUG: print(f'maxrss_after_populate_table: {maxrss_after_populate_table}\t{rawMaxRSStoPrettyString(maxrss_after_populate_table)}')
-	if DEBUG: print(f'maxrss_delta: {maxrss_delta}\t{rawMaxRSStoPrettyString(maxrss_delta)}')
+	if DEBUG: print(f'maxrss_start: {maxrss_start}\t{prettyMemory(maxrss_start)}')
+	if DEBUG: print(f'maxrss_after_populate_table: {maxrss_after_populate_table}\t{prettyMemory(maxrss_after_populate_table)}')
+	if DEBUG: print(f'maxrss_delta: {maxrss_delta}\t{prettyMemory(maxrss_delta)}')
 	
 	if DEBUG: print(f'pid: {pid}')
 	if DEBUG: print(f'current rss from \'ps -o rss= {pid}\': {current_rss}')
@@ -162,5 +162,5 @@ if __name__ == '__main__':
 	
 	print(f'\nPrimary key type: {datasetName}\t\te.g. {example_row}')
 	print(f'{prettyTime(time_delta)} to insert {n_entries:,} entries')
-	print(f'memory used (to store DB): {rawMaxRSStoPrettyString(current_rss)}')
+	print(f'memory used (to store DB): {prettyMemory(current_rss)}')
 	

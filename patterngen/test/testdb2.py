@@ -9,26 +9,34 @@ from time import perf_counter
 from helpers.memorytools import *
 from helpers.timetools import *
 
+#import sys
+# I did #sys.path.insert(0, '..')
+# and not gonna lie idk if that persisted or what lol :/
+
+#print(sys.path[0])
+#exit()
+
 ##==============================================================================================##
-# Fav sqlite tutorial:   https://docs.python.org/3/library/sqlite3.html
+# FAV SQLITE TUTORIAL:   https://docs.python.org/3/library/sqlite3.html
 ##==============================================================================================##
 
 
 def parseArgs():
 	parser = ArgumentParser()
 	parser.add_argument( '-n', dest='n_entries', action = 'store', type = int, help = 'number of entries', default=10**6)
-	parser.add_argument( '-ntables', dest='n_tables', action = 'store', type = int, help = 'number of tables', default=1)
+	parser.add_argument( '-ntables', dest='n_tables', action = 'store', type = int, help = 'number of tables', default=16)
 	parser.add_argument( '-d', dest='debug', action = 'store_true', help = 'debug mode (prints more stuff)')
+	parser.add_argument( '-p', '-persist', dest='persist', action = 'store_true', help = 'save DB to hard drive')
 	args = parser.parse_args()
-	return args.n_entries, args.n_tables, args.debug
+	return args.n_entries, args.n_tables, args.debug, args.persist
 
 	
 ##==============================================================================================##
-def createTables(cur, n_tables):
+def createTables(cur, n_tables, base_name='PatternCosts'):
 	tablenames = []
-	for n in range(1, n_tables+1):
-		tablename = f'PatternCosts{n}'
-		if DEBUG: print(f'\nCreating table {tablename}  ({n} of {n_tables}) ...')
+	for n in range(0, n_tables):
+		tablename = f'{base_name}{n}'
+		if DEBUG: print(f'\nCreating table {tablename}  ({n+1} of {n_tables}) ...')
 		cur.execute('''
 		CREATE TABLE %s(
 			pattern BLOB PRIMARY KEY,
@@ -83,10 +91,14 @@ def getSplits(dividend, divisor):
 ##==============================================================================================##
 
 if __name__ == '__main__':
-	n_entries, n_tables, DEBUG = parseArgs()
+	n_entries, n_tables, DEBUG, persist = parseArgs()
 	pid = os.getpid()
-	con = sqlite3.connect(':memory:')
-#	con = sqlite3.connect('testdb2.db')
+	
+	if persist:
+		con = sqlite3.connect('testdb2.db')
+	else:
+		con = sqlite3.connect(':memory:')
+
 	cur = con.cursor()
 	
 	maxrss_start = getMaxRSS()
@@ -103,7 +115,7 @@ if __name__ == '__main__':
 	time_delta = timeDelta(time_start)
 	maxrss_after_populate_table = getMaxRSS()
 	maxrss_delta = maxrss_after_populate_table - maxrss_start
-	maxrss_delta_pretty = rawMaxRSStoPrettyString(maxrss_delta)
+	maxrss_delta_pretty = prettyMemory(maxrss_delta)
 	current_rss = getRSS()
 	
 
@@ -118,16 +130,17 @@ if __name__ == '__main__':
 #			for row in res:
 #				print(row)
 #				
-	if DEBUG: print(f'maxrss_start: {maxrss_start}\t{rawMaxRSStoPrettyString(maxrss_start)}')
-	if DEBUG: print(f'maxrss_after_populate_table: {maxrss_after_populate_table}\t{rawMaxRSStoPrettyString(maxrss_after_populate_table)}')
-	if DEBUG: print(f'maxrss_delta: {maxrss_delta}\t{rawMaxRSStoPrettyString(maxrss_delta)}')
+	if DEBUG: print(f'maxrss_start: {maxrss_start}\t{prettyMemory(maxrss_start)}')
+	if DEBUG: print(f'maxrss_after_populate_table: {maxrss_after_populate_table}\t{prettyMemory(maxrss_after_populate_table)}')
+	if DEBUG: print(f'maxrss_delta: {maxrss_delta}\t{prettyMemory(maxrss_delta)}')
 	
-	if DEBUG: print(f'current rss (after populating tables into memory):\t{current_rss}\t{rawMaxRSStoPrettyString(current_rss)}')
+	if DEBUG: print(f'current rss (after populating tables into memory):\t{current_rss}\t{prettyMemory(current_rss)}')
 	
 	
 	print(f'\nPrimary key type: Binary blob\t\te.g. {example_row}')
+	print(f'Number of tables: {n_tables}')
 	print(f'{prettyTime(time_delta)} to insert {n_entries:,} entries')
-	print(f'DB size: {rawMaxRSStoPrettyString(maxrss_delta)}')
+	print(f'DB size: {prettyMemory(maxrss_delta)}')
 	
 	con.commit()
 	con.close()

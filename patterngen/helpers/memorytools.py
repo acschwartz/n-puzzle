@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 
-from resource import getrusage, RUSAGE_SELF
 from os import getpid
+from resource import getrusage, RUSAGE_SELF
+from sys import platform
 import subprocess
+
+def getCurrentRSS(pid=None):
+	return getRSS(pid)
 
 def getRSS(pid=None):
 	if not pid:
@@ -14,13 +18,11 @@ def getRSS(pid=None):
 def getMaxRSS():
 	return getrusage(RUSAGE_SELF).ru_maxrss
 
-
-def rawMaxRSStoPrettyString(raw_maxrss):
-	from sys import platform
-	MAXRSS_UNIT_COEFFICIENT = 1024 if not platform.startswith('darwin') else 1
-	# get_maxrss returns bytes on macOS and kB on linux. this handles that for you.
-	return bytes_to_human_readable_string(raw_maxrss * MAXRSS_UNIT_COEFFICIENT)
-
+def prettyMemory(raw_val_returned_by_os):
+	# os memory functions returns bytes on macOS and kB on linux
+	# this takes in the raw value given by the os and converts it automatically
+	OS_MEMORY_UNIT_COEFFICIENT = 1024 if not platform.startswith('darwin') else 1
+	return bytes_to_human_readable_string(raw_val_returned_by_os * OS_MEMORY_UNIT_COEFFICIENT)
 
 def bytes_to_human_readable_string(size,precision=2):
 # SOURCE: https://stackoverflow.com/questions/5194057/better-way-to-convert-file-sizes-in-python/14822210
