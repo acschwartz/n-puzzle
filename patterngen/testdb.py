@@ -3,6 +3,7 @@
 import sqlite3
 import pprint
 import os
+import subprocess
 from argparse import ArgumentParser
 from time import perf_counter
 from helpers.getmaxrss import *
@@ -31,16 +32,22 @@ def parseArgs():
 	args = parser.parse_args()
 	return args.datasetName, args.n_entries, args.debug
 
+def getRSS(pid=None):
+	if not pid:
+		pid = os.getpid()
+	cmd_get_current_rss = f'ps -o rss= {pid}'
+	output = subprocess.check_output(cmd_get_current_rss, shell=True)
+	return int(output)
+	
 
 ##==============================================================================================##
 ##==============================================================================================##
 
 if __name__ == '__main__':
 	datasetName, n_entries, DEBUG = parseArgs()
+	pid = os.getpid()
 	con = sqlite3.connect(':memory:')
 	cur = con.cursor()
-	pid = os.getpid()
-	cmd_get_current_rss = f'ps -o rss= {pid}'
 	
 	DICT = generate_dataset[datasetName](n_entries)
 	maxrss_start = getMaxRSS()
@@ -81,24 +88,24 @@ if __name__ == '__main__':
 		cur.execute("""INSERT INTO patterncosts(pstring, cost) 
 							VALUES (?,?);""", (key, DICT[key]))
 	
-	if DEBUG: print(f'from os: current rss before deleting DICT: {os.system(cmd_get_current_rss)}')
+	if DEBUG: print(f'from os: current rss before del DICT: {getRSS()}')
 	del DICT
-	if DEBUG: print(f'from os: current rss after del DICT: {os.system(cmd_get_current_rss)}')
+	if DEBUG: print(f'from os: current rss after del DICT: {getRSS()}')
 	
 	time_delta = timeDelta(time_start)
 	maxrss_after_populate_table = getMaxRSS()
 	maxrss_delta = maxrss_after_populate_table - maxrss_start
 	maxrss_delta_pretty = rawMaxRSStoPrettyString(maxrss_delta)
 	
-	current_rss = os.system(cmd_get_current_rss)
+	current_rss = getRSS()
 	
 	res = cur.execute("SELECT * from patterncosts LIMIT 1")
 	for row in res:
 		example_row = row
 	
 	if DEBUG:
-		input = ('press p to print the table (SELECT * from patterncosts)')
-		if input == 'p':
+		i = input('press p if you want to see the table (SELECT * from patterncosts) ')
+		if i == 'p':
 			res = cur.execute("SELECT * from patterncosts")
 			for row in res:
 				print(row)
@@ -108,7 +115,7 @@ if __name__ == '__main__':
 	if DEBUG: print(f'maxrss_delta: {maxrss_delta}\t{rawMaxRSStoPrettyString(maxrss_delta)}')
 	
 	if DEBUG: print(f'pid: {pid}')
-	if DEBUG: print(f'current rss from \'ps -o rss= $PID\': {current_rss}')
+	if DEBUG: print(f'current rss from \'ps -o rss= {pid}\': {current_rss}')
 	
 	
 #	print('\n')
