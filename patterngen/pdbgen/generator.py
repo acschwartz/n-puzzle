@@ -4,6 +4,7 @@ from collections import deque
 from dbtools import db
 from pdbgen.moves import *
 from sqlite3 import IntegrityError
+from pdbgen.encoding import decode8puzzle
 
 
 def makeInitialNode(ptiles, emptytile, goalstate, encode):
@@ -15,6 +16,7 @@ def makeInitialNode(ptiles, emptytile, goalstate, encode):
 	return encoding+bytes([0, emptyTileLocation, 255]), len(encoding)
 
 def makeNode(encodedPattern, stateinfo):
+#	print(f'makeNode: {decode8puzzle(encodedPattern)}, {stateinfo}')
 	info = [stateinfo['cost'], stateinfo['emptyTileLocation'], stateinfo['undo']]
 	return encodedPattern+bytes(info) # TODO: maybe could optimize
 
@@ -38,9 +40,10 @@ def generatePatternDatabase(info, log, dbfile=None, moves=MOVE_FUNCTIONS, opp_mo
 	
 	# Visited entries stored in database
 	visitedCount = 0
-	con, cur, dbfile = db.initDB(log, dbfile)
-#	tables = db.createTables(cur, dim*dim, log)
-	tables = db.createTables(cur, dim*dim, log)
+	con, dbfile = db.initDB(log, dbfile)
+	cur = con.cursor()
+	
+	tables = db.createTables(con, dim*dim, log)
 	log.debug(f'\nTables created: {tuple(enumerate(tables))}\n')
 
 	# Begin Generating Pattern Database
@@ -49,7 +52,7 @@ def generatePatternDatabase(info, log, dbfile=None, moves=MOVE_FUNCTIONS, opp_mo
 	
 	while queue:
 		node = queue.popleft()
-		log.debug(f'Queue size: {len(queue)}')
+#		log.debug(f'Queue size: {len(queue)}')
 		pattern, nodeinfo = splitNode(node, len_pattern_encoding)
 		
 #		log.debug(f'\n\n=========== POPPED! Node off Queue ==============')
@@ -61,7 +64,7 @@ def generatePatternDatabase(info, log, dbfile=None, moves=MOVE_FUNCTIONS, opp_mo
 		for child_pattern, childinfo in children:
 			table = tables[childinfo['emptyTileLocation']]
 #			log.debug(f"Checking table {table} for pattern {decode(child_pattern)} (empty tile loc: {childinfo['emptyTileLocation']})")
-			if not db.checkRowExists(cur, table, child_pattern):
+			if not db.checkRowExists(con, table, child_pattern):
 				queue.append(makeNode(child_pattern, childinfo))
 #				log.debug(f'\tChild pattern {child_pattern} not in db; added to queue.')
 #			else: log.debug(f'\tChild pattern {child_pattern} already in db.')
@@ -70,12 +73,12 @@ def generatePatternDatabase(info, log, dbfile=None, moves=MOVE_FUNCTIONS, opp_mo
 		try:
 			tbl = tables[nodeinfo['emptyTileLocation']]
 			c = nodeinfo['cost']
-			db.insert(cur, tbl, pattern, c)
+			db.insert(con, tbl, pattern, c)
 			visitedCount += 1
 #			log.debug(f"\nNode fully explored; added ({pattern}, {c}) to table {tbl}")
 		except IntegrityError as exc:
 #			log.debug(f'\n\n~~~~~~~\nTried to insert ({pattern}, {c}) into table: {tbl}')
-#			log.debug(f'Entry already exists? {db.checkRowExists(cur, tbl, pattern)}')
+#			log.debug(f'Entry already exists? {db.checkRowExists(con, tbl, pattern)}')
 #			log.debug(f'Executing query: SELECT * from {tbl} where pattern = {pattern}')
 #			res = cur.execute("SELECT * from %s where %s = ?"%(tbl, 'pattern'), (pattern,))
 #			log.debug(f'Results: ')
@@ -84,9 +87,9 @@ def generatePatternDatabase(info, log, dbfile=None, moves=MOVE_FUNCTIONS, opp_mo
 			pass
 		
 #		log.debug(f"Explored: {visitedCount}\n")
-#		log.debug(f'~~~~~~~~ Queue: ~~~~~~')
-#		import pprint
-#		pprint.pp(queue, indent=2)
+##		log.debug(f'~~~~~~~~ Queue: ~~~~~~')
+##		import pprint
+##		pprint.pp(queue, indent=2)
 #		log.debug(f'~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
 		
 		if visitedCount % 10000 == 0:
@@ -104,7 +107,7 @@ def generatePatternDatabase(info, log, dbfile=None, moves=MOVE_FUNCTIONS, opp_mo
 
 
 def generateChildren(pattern, stateinfo, dim, ptiles, moves, opp_moves, encode, decode, log):
-#	from pdbgen.moves import DIRECTIONS as DIRS	# for DEBUGGING only
+	from pdbgen.moves import DIRECTIONS as DIRS	# for DEBUGGING only
 #	log.debug('\n\n ---- generateChildren -----')
 	
 	emptyTileLocation = stateinfo['emptyTileLocation']
@@ -128,7 +131,7 @@ def generateChildren(pattern, stateinfo, dim, ptiles, moves, opp_moves, encode, 
 			continue
 		new_emptyTileLocation = m(emptyTileLocation, dim)
 #		log.debug(f'New empty tile location: {new_emptyTileLocation}')
-		if new_emptyTileLocation:
+		if new_emptyTileLocation is not None:
 			child = list(decoded_pattern)
 			childinfo = {}
 			childinfo['emptyTileLocation'] = new_emptyTileLocation
@@ -157,4 +160,4 @@ def generateChildren(pattern, stateinfo, dim, ptiles, moves, opp_moves, encode, 
 		moveID += 1
 	
 #	log.debug(f'\nFinished generating children: \n{children}')
-	return children
+	return tuple(children)

@@ -39,8 +39,8 @@ def setup_parser():
     parser.add_argument('-r', action='store_true', help='random node ordering (for IDA*)')
     parser.add_argument('-g', action='store_true', help='greedy search')
     parser.add_argument('-u', action='store_true', help='uniform-cost search')
-    parser.add_argument('-f', help='heuristic function', choices=list(heuristics.KV.keys()), default='pdb')
-    parser.add_argument('-pdb', help='pattern database as heuristic function', choices=list(pdb.PDBINFO.keys()))
+    parser.add_argument('-f', help='heuristic function', choices=list(heuristics.KV.keys()))
+#    parser.add_argument('-pdb', help='pattern database as heuristic function', choices=list(pdb.PDBINFO.keys()))
     parser.add_argument('-s', help='goal state', choices=list(goal_states.KV.keys()), default='zero_first')
     parser.add_argument('-steps', dest='showsteps', action='store_true', help='show solution steps')
     parser.add_argument('-p', action='store_true', help='pretty print solution steps')
@@ -65,13 +65,10 @@ def get_input(altargs=None):
         parser.parse_args(args)
         return None
     
-    if args.f == 'pdb' and not args.pdb:
+    if not args.f:
         print('parser: please specify heuristic function or pattern database to use')
         return None
     
-    if args.pdb and args.f != 'pdb':
-        print('parser: choose EITHER a heuristic function (-f) OR a pattern database (-pdb)')
-        return None
     
     if args.file: 
         data = args.file.read().splitlines()
@@ -118,10 +115,10 @@ def get_input(altargs=None):
             for item in row:
                 puzzle1d.append(item)
     
-    if args.pdb:
-        validator = is_valid_pdb(args.pdb, args.s, size)
-        if validator is not True:
-            print('parser: invalid pdb/puzzle combo,', validator)
-            return None
+#    if args.pdb:
+#        validator = is_valid_pdb(args.pdb, args.s, size)
+#        if validator is not True:
+#            print('parser: invalid pdb/puzzle combo,', validator)
+#            return None
         
     return (tuple(puzzle1d), size, args)

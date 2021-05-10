@@ -12,10 +12,6 @@ from pdbgen import moves
 from pdbgen.parser import parseArgs
 from pdbgen import patterns
 
-#mmaybe remove later
-from pprint import pp as pp
-
-
 RUN_ID = strftime(f'%y%m%d-%H%M%S')
 OUTPUT_DIRECTORY = 'output/'
 
@@ -51,4 +47,4 @@ if __name__ == '__main__':
 	dbfile, n_tables, n_entries = generator.generatePatternDatabase(info, log, base_filename_with_path)
 	
 	logger.printStats(log, t_start, m_start, dbfile, n_tables, n_entries, title='Stats')
-	log.debug(f'logfile: logfile')
+	log.debug(f'logfile: {logfile}')

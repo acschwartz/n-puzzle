@@ -10,11 +10,11 @@ def initDB(logger, db_file=None):
 	con = sqlite3.connect(db_file)
 	
 	logger.debug(f'Opened connection with database: {db_file}')
+	return con, db_file
+
+
+def createTables(con, n_tables, logger, base_name='PatternCosts_EmptyTileLocation_'):
 	cur = con.cursor()
-	return con, cur, db_file
-
-
-def createTables(cur, n_tables, logger, base_name='PatternCosts_EmptyTileLocation_'):
 	tablenames = []
 	for n in range(0, n_tables):
 		tablename = f'{base_name}{n}'
@@ -22,7 +22,7 @@ def createTables(cur, n_tables, logger, base_name='PatternCosts_EmptyTileLocatio
 		cur.execute('''
 		CREATE TABLE %s(
 			pattern BLOB PRIMARY KEY,
-			cost INTEGER
+			cost INTEGER NOT NULL
 			) WITHOUT ROWID;
 		'''%tablename)
 		logger.debug('Success!')
@@ -30,13 +30,15 @@ def createTables(cur, n_tables, logger, base_name='PatternCosts_EmptyTileLocatio
 	return tablenames
 
 
-def insert(cur, table, pattern, cost):
+def insert(con, table, pattern, cost):
+	cur = con.cursor()
 	cur.execute("""INSERT INTO %s(pattern, cost) 
 						VALUES (?,?);"""%table, (pattern, cost))
 
 
-def checkRowExists(cur, tablename, value, attribute='pattern'):
+def checkRowExists(con, tablename, value, attribute='pattern'):
 	# gonna assume the table and attribute exist, etc
+	cur = con.cursor()
 	cur.execute("SELECT EXISTS ( SELECT * from %s where %s = ?)"%(tablename, attribute), (value,))
 	exists = cur.fetchone()[0]
 	return bool(exists)
