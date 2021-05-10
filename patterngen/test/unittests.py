@@ -7,6 +7,8 @@ from timeit import timeit
 import inspect
 myself = lambda: inspect.stack()[1][3]
 
+from dbtools import db
+
 DEBUG = False
 TIMEIT = False
 
@@ -178,6 +180,64 @@ class TestStubs(unittest.TestCase):
 		self.assertEqual(decodebytes(b4, True), (12,1,4,5,14,9,10,0))
 
 
+class DatabaseTestsInMemory(unittest.TestCase):
+	def __init__(self, *args, **kwargs):
+		super(DatabaseTestsInMemory, self).__init__(*args, **kwargs)
+		
+	def test_initDB_memory(self):
+		con, cur = db.initDB(':memory:')
+		self.assertIsNotNone(con)
+		self.assertIsNotNone(cur)
+		con.close()
+	
+	def test_createTables_memory(self):
+		con, cur = db.initDB(':memory:')
+		tablenames = db.createTables(cur, n_tables=2, base_name='table')
+		self.assertEqual(set(tablenames), set(['table0', 'table1']))
+		con.close()
+	
+	def test_insert(self):
+		con, cur = db.initDB(':memory:')
+		tablenames = db.createTables(cur, n_tables=1, base_name='table')
+		
+		table = tablenames[0]
+		data = ( (bytes([1]), 21), (bytes([2]), 22), (bytes([255]), 99))
+		for pattern, cost in data:
+			db.insert(cur, table, pattern, cost)
+		
+		cur.execute("SELECT * from %s"%table)
+		results = set(cur.fetchall())
+		expected_results = set(data)
+		self.assertEqual(results, expected_results)
+		con.close()
+	# TODO: what happens when insert duplicate value?
+	
+	
+	def test_checkRowExists(self):
+		con, cur = db.initDB(':memory:')
+		tablenames = db.createTables(cur, n_tables=1, base_name='table')
+		
+		table = tablenames[0]
+		data = ( (bytes([1]), 21), (bytes([2]), 22), (bytes([255]), 99))
+		for pattern, cost in data:
+			db.insert(cur, table, pattern, cost)
+			
+		exists1 = db.checkRowExists(cur, table, data[2][0], attribute='pattern')
+		self.assertTrue(exists1)
+		exists2 = db.checkRowExists(cur, table, bytes(2), attribute='pattern')
+		self.assertFalse(exists2)
+		con.close()
+
+#class DatabaseTests(unittest.TestCase):
+#	def __init__(self, *args, **kwargs):
+#		super(DatabaseTests, self).__init__(*args, **kwargs)
+#		from dbtools import db
+#		self.con, self.cur = db.initDB()
+#		self.assertIsNotNone(self.con)
+#		self.assertIsNotNone(self.cur)
+#	
+#	def test_1(self):
+#		pass
 
 ##==============================================================================================##
 if __name__ == '__main__':
