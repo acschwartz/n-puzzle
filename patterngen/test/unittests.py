@@ -9,6 +9,7 @@ myself = lambda: inspect.stack()[1][3]
 
 from dbtools import db
 from pdbgen import logger
+from pdbgen import encoding
 
 DEBUG = False
 TIMEIT = False
@@ -252,13 +253,34 @@ class DatabaseTestsInMemory(unittest.TestCase):
 #	def test_1(self):
 #		pass
 
-#class LoggerTests(unittest.TestCase):
-#	def test_logging(self):
-#		log, logfile = logger.initLogger(logfile='test/testlog.log')
-#		
-#		log.debug('debug message. it should not be printed to the logfile')
-#		log.log(15, 'level 15. it should go to stdout only, not the logfile')
-#		log.info('info message. this should go to stdout AND BE PRINTED TO THE LOGFILE')
+class LoggerTests(unittest.TestCase):
+	def test_logging(self):
+		log, logfile = logger.initLogger(logfile='test/testlog.log')
+		
+		log.debug('debug message. it should not be printed to the logfile')
+		log.log(15, 'level 15. it should go to stdout only, not the logfile')
+		log.info('info message. this should go to stdout AND BE PRINTED TO THE LOGFILE')
+
+class TestEncoding(unittest.TestCase):
+	def __init__(self, *args, **kwargs):
+		super(TestEncoding, self).__init__(*args, **kwargs)
+		self.eightpuzzles = (
+			{ 'pattern': (1,2,3,4,5,6,7,8), 'encoding': b'\x12\x34\x56\x78' },
+			{ 'pattern': (0,6,2,7,4,3,8,1), 'encoding': b'\x06\x27\x43\x81' },
+			{ 'pattern': (8,0,7,3,1,6,5,4), 'encoding': b'\x80\x73\x16\x54' },
+			{ 'pattern': (8,4,7,3,1,6,5,0), 'encoding': b'\x84\x73\x16\x50' },
+		)
+	
+	def test_encode8puzzle(self):
+		puzzles = self.eightpuzzles
+		res = []
+		for p in puzzles:
+			res.append(encoding.encode8puzzle(p['pattern']))
+		
+		for i, e in enumerate(res):
+			self.assertEqual(e, puzzles[i]['encoding'])
+			
+	
 		
 
 ##==============================================================================================##

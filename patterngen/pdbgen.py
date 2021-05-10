@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 ##==============================================================================================##
+import sys
 from time import strftime
 
 from helpers.memorytools import *
@@ -17,6 +18,19 @@ from pprint import pp as pp
 RUN_ID = strftime(f'%y%m%d-%H%M%S')
 OUTPUT_DIRECTORY = 'output/'
 
+##==============================================================================================##
+def handle_exception(exc_type, exc_value, exc_traceback):
+# Source: https://stackoverflow.com/questions/6234405/logging-uncaught-exceptions-in-python
+	if issubclass(exc_type, KeyboardInterrupt):
+		sys.__excepthook__(exc_type, exc_value, exc_traceback)
+		return
+	
+	log.critical("\nUncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+	log.info('\n')
+	
+sys.excepthook = handle_exception
+##==============================================================================================##
+
 
 ##==============================================================================================##
 #		M A I N
@@ -28,4 +42,5 @@ if __name__ == '__main__':
 	
 	log, logfile = logger.initLogger()
 
+	
 	
