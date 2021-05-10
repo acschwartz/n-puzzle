@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 
 from resource import getrusage, RUSAGE_SELF
+from os import getpid
+import subprocess
 
+def getRSS(pid=None):
+	if not pid:
+		pid = getpid()
+	cmd_get_current_rss = f'ps -o rss= {pid}'
+	output = subprocess.check_output(cmd_get_current_rss, shell=True)
+	return int(output)
 
 def getMaxRSS():
 	return getrusage(RUSAGE_SELF).ru_maxrss

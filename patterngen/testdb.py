@@ -59,7 +59,7 @@ if __name__ == '__main__':
 	if datasetName in ['hexstrings', 'string_repr_tuples_of_ints', 'string_repr_tuples_whole_puzzle']:
 		cur.execute('''
 		CREATE TABLE patterncosts(
-			pstring TEXT PRIMARY KEY,
+			pattern TEXT PRIMARY KEY,
 			cost INTEGER
 			) WITHOUT ROWID;
 		''')
@@ -67,7 +67,7 @@ if __name__ == '__main__':
 	elif datasetName == 'ints_repr_hexvalues':
 		cur.execute('''
 		CREATE TABLE patterncosts(
-			pstring INTEGER PRIMARY KEY,
+			pattern INTEGER PRIMARY KEY,
 			cost INTEGER
 			) WITHOUT ROWID;
 		''')
@@ -75,7 +75,7 @@ if __name__ == '__main__':
 	elif datasetName in ['binary_blob', 'tuples_len8_pickled']:
 		cur.execute('''
 		CREATE TABLE patterncosts(
-			pstring BLOB PRIMARY KEY,
+			pattern BLOB PRIMARY KEY,
 			cost INTEGER
 			) WITHOUT ROWID;
 		''')
@@ -86,7 +86,7 @@ if __name__ == '__main__':
 	
 	for key in DICT:
 	#	cur.execute(f'INSERT INTO patterncosts VALUES ({key}, {DICT[key]})')	# <-- didn't work for strings
-		cur.execute("""INSERT INTO patterncosts(pstring, cost) 
+		cur.execute("""INSERT INTO patterncosts(pattern, cost) 
 							VALUES (?,?);""", (key, DICT[key]))
 	
 	if DEBUG: print(f'current rss before del DICT: {getRSS()}')
@@ -103,6 +103,46 @@ if __name__ == '__main__':
 	res = cur.execute("SELECT * from patterncosts LIMIT 1")
 	for row in res:
 		example_row = row
+	
+	if DEBUG:
+		try:
+			blob = b'\xfe\xff\x08\x06\x0f\x0f\x08\x06\x02'
+			res = cur.execute("SELECT * from patterncosts where pattern=?", (blob,))
+			print(f'\nres = {res}')
+			for row in res:
+				print(f'row = {row}')
+		except:
+			pass
+	
+	if DEBUG:
+		def checkExists(cur, tablename, attribute, value):
+			if DEBUG: print('\nHello from checkExists()!')
+			res = cur.execute("SELECT EXISTS ( SELECT * from %s where %s = ?)"%(tablename, attribute), (value,))
+			print(f'\nres = {res}')
+#			for row in res:
+#				print(f'row = {row}')
+#				# row = (0,) if exists returned true
+			exists = res.fetchone()[0]
+			print(bool(exists))
+			if DEBUG: print('Goodbye from checkExists()!\n')
+			
+		checkExists(cur, 'patterncosts', 'pattern', example_row[0])
+	
+	if DEBUG:
+		blob = b'\xfe\xff\x08\x06\x0f\x0f\x08\x06\x02'
+		res = cur.execute("SELECT EXISTS ( SELECT * from patterncosts where pattern= ? )", (blob,))
+		print(f'\nres = {res}')
+		for row in res:
+			print(f'row = {row}')
+			# row = (0,) if exists returned true
+	
+	if DEBUG:
+		existing_blob = example_row[0]
+		res = cur.execute("SELECT EXISTS ( SELECT * from patterncosts where pattern=?)", (existing_blob,))
+		print(f'\nres = {res}')
+		for row in res:
+			print(f'row = {row}')
+			# row = (1,) if exists returned true
 	
 	if DEBUG:
 		i = input('press p if you want to see the table (SELECT * from patterncosts) ')
@@ -122,3 +162,4 @@ if __name__ == '__main__':
 	print(f'\nPrimary key type: {datasetName}\t\te.g. {example_row}')
 	print(f'{prettyTime(time_delta)} to insert {n_entries:,} entries')
 	print(f'memory used (to store DB): {rawMaxRSStoPrettyString(current_rss)}')
+	
