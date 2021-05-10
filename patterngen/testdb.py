@@ -97,9 +97,11 @@ if __name__ == '__main__':
 		example_row = row
 	
 	if DEBUG:
-		res = cur.execute("SELECT * from patterncosts")
-		for row in res:
-			print(row)
+		input = ('press p to print the table (SELECT * from patterncosts)')
+		if input == 'p':
+			res = cur.execute("SELECT * from patterncosts")
+			for row in res:
+				print(row)
 	
 	if DEBUG: print(f'maxrss_start: {maxrss_start}\t{rawMaxRSStoPrettyString(maxrss_start)}')
 	if DEBUG: print(f'maxrss_after_populate_table: {maxrss_after_populate_table}\t{rawMaxRSStoPrettyString(maxrss_after_populate_table)}')
