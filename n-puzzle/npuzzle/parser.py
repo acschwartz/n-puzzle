@@ -59,6 +59,7 @@ def get_input(altargs=None):
     else:
         args = parser.parse_args()
     
+    print(f'\nget_input: args received by parser: {args}\n')
 
     if not (args.file or args.commas or args.ints):
         args = ['-h']

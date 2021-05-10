@@ -13,9 +13,8 @@ from npuzzle import parser
 from npuzzle import heuristics
 from npuzzle import goal_states
 from npuzzle.pdb import pdb
+import sqlite3
 
-global PDB_CONNECTION
-PDB_CONNECTION = None
 
 
 def pretty_print_steps(steps, size):
@@ -84,11 +83,19 @@ def verbose_info(args, puzzle, goal_state, size, PDB_CONNECTION):
 #########################################################################################
 
 def main(arglist=None):
+    global PDB_CONNECTION
+
     # if None passed, uses sys.argv[1:], else use custom args
     if arglist:
+        print(f'\n{__name__}: args received from function call: {arglist}\n')
+        if isinstance(arglist[0], sqlite3.Connection):
+            print('DB connected already!')
+            PDB_CONNECTION = arglist.pop(0)
+            print(PDB_CONNECTION)
         data = parser.get_input(arglist)
     else:
         data = parser.get_input()
+        print(f'\n{__name__}: args received from command line: {data}\n')
         
     if not data:
         return None
@@ -109,7 +116,6 @@ def main(arglist=None):
     if args.u:
         HEURISTIC = heuristics.uniform_cost
     
-    global PDB_CONNECTION
     if args.f.startswith('pdb_') and not PDB_CONNECTION:
         pdbtype = args.f[4:]
         PDB_CONNECTION = pdb.initDB(pdbtype)
@@ -191,8 +197,19 @@ def main(arglist=None):
 #    if success and args.v:
 #        visualizer(steps, size)
 
-    PDB_CONNECTION.close()
+#    PDB_CONNECTION.close()
     
-if __name__ == '__main__':    
+if __name__ == '__main__':  
+    # find '-f' in argsv without doing parseargs - just 'peeking' to pre-set up the DB
+    args = sys.argv[1:]
+    print(args)
+    heuristic = args[(args.index('-f')+1)]
+    if heuristic.startswith('pdb_'):
+        pdbname = heuristic[4:]
+        # actually I don't know if I need the above... lol
+        
+    global PDB_CONNECTION
+    PDB_CONNECTION = None
+    
     main(sys.argv[1:])
     
