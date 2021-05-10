@@ -8,3 +8,10 @@ def encode8puzzle(pattern):
 		encoding[floor(i/2)] += n*(1<<(4*(~i&1)))
 		i+=1
 	return bytes(encoding)
+
+def decode8puzzle(bytestr):
+	decoded = []
+	for n in bytestr:
+		decoded.append((n//16) % 16)
+		decoded.append(n%16)
+	return tuple(decoded)

@@ -281,6 +281,16 @@ class TestEncoding(unittest.TestCase):
 			self.assertEqual(e, puzzles[i]['encoding'])
 			
 	
+	def test_decode8puzzle(self):
+		puzzles = self.eightpuzzles
+		res = []
+		for p in puzzles:
+			res.append(encoding.decode8puzzle(p['encoding']))
+			
+		for i, e in enumerate(res):
+			self.assertEqual(e, puzzles[i]['pattern'])
+			
+	
 		
 
 ##==============================================================================================##
