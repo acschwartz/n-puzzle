@@ -22,6 +22,7 @@ generate_dataset= {'ints_repr_hexvalues': dummyvalues.ints_repr_hexvalues,
 			'tuples_len8_pickled': dummyvalues.tuples_len8_pickled,
 			'string_repr_tuples_of_ints': dummyvalues.string_repr_tuples_of_ints,
 			'string_repr_tuples_whole_puzzle': dummyvalues.string_repr_tuples_whole_puzzle,
+			'binary_blob': dummyvalues.binary_blob,
 		}
 
 def parseArgs():
@@ -71,7 +72,7 @@ if __name__ == '__main__':
 			) WITHOUT ROWID;
 		''')
 	
-	elif datasetName in ['tuples_len8_pickled']:
+	elif datasetName in ['binary_blob', 'tuples_len8_pickled']:
 		cur.execute('''
 		CREATE TABLE patterncosts(
 			pstring BLOB PRIMARY KEY,
@@ -88,9 +89,9 @@ if __name__ == '__main__':
 		cur.execute("""INSERT INTO patterncosts(pstring, cost) 
 							VALUES (?,?);""", (key, DICT[key]))
 	
-	if DEBUG: print(f'from os: current rss before del DICT: {getRSS()}')
+	if DEBUG: print(f'current rss before del DICT: {getRSS()}')
 	del DICT
-	if DEBUG: print(f'from os: current rss after del DICT: {getRSS()}')
+	if DEBUG: print(f'current rss after del DICT: {getRSS()}')
 	
 	time_delta = timeDelta(time_start)
 	maxrss_after_populate_table = getMaxRSS()
@@ -118,10 +119,6 @@ if __name__ == '__main__':
 	if DEBUG: print(f'current rss from \'ps -o rss= {pid}\': {current_rss}')
 	
 	
-#	print('\n')
-#	print(f'\n{SEPARATOR_SM}')
 	print(f'\nPrimary key type: {datasetName}\t\te.g. {example_row}')
-#	print(SEPARATOR_SM)
 	print(f'{prettyTime(time_delta)} to insert {n_entries:,} entries')
 	print(f'memory used (to store DB): {rawMaxRSStoPrettyString(current_rss)}')
-#	print(SEPARATOR)

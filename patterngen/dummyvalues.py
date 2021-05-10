@@ -24,7 +24,6 @@ def ints_repr_hexvalues(n_entries, max_cost=100):
 		ints_repr_hexvalues[next_key] = cost
 	return ints_repr_hexvalues
 
-#if DEBUG: pp(ints_repr_hexvalues)
 ###==============================================================================================##
 
 
@@ -39,7 +38,6 @@ def hexstrings(n_entries, max_cost=100):
 		hexstrings[next_key] = cost
 	return hexstrings
 
-#if DEBUG: pp(hexstrings)
 ###==============================================================================================##
 
 def hexstr_to_int_tuple(hexstr):
@@ -48,8 +46,6 @@ def hexstr_to_int_tuple(hexstr):
 		
 	lst = [int(hexstr[i], 16) for i in range(len(hexstr))]
 	return tuple(lst)
-
-#if DEBUG: pp(hexstr_to_int_tuple(hex(first_key)))
 
 ###==============================================================================================##
 ## e.g. tuple pickled into a bytestring:
@@ -65,7 +61,6 @@ def tuples_len8_pickled(n_entries, max_cost=100):
 		tuples_len8_pickled[next_key] = cost
 	return tuples_len8_pickled
 
-#if DEBUG: pp(tuples_len8_pickled)
 ###==============================================================================================##
 
 ###==============================================================================================##
@@ -80,7 +75,6 @@ def string_repr_tuples_of_ints (n_entries, max_cost=100):
 		string_repr_tuples_of_ints[next_key] = cost
 	return string_repr_tuples_of_ints 
 	
-#if DEBUG: pp(string_repr_tuples_of_ints)
 
 ###==============================================================================================##
 ## e.g. '(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)' representing the whole puzzle
@@ -93,5 +87,29 @@ def string_repr_tuples_whole_puzzle(n_entries, max_cost=100):
 		string_repr_tuples_whole_puzzle[next_key] = cost
 	return string_repr_tuples_whole_puzzle
 		
-#if DEBUG: pp(string_repr_tuples_whole_puzzle)
+##==============================================================================================##
+
+###==============================================================================================##
+## e.g. 'b'\x00\x03\x07\x0b\x0c\r\x0e\x0f'' representing (0, 3, 7, 9, 11, 12, 13, 14, 15)
+def binary_blob(n_entries, max_cost=100):
+	from random import randint
+	
+	dictionary = {}
+	first_key = bytes([0]*9)
+	key_mutable = [0]*len(first_key)
+	
+	NUM_ENTRIES = 0
+	while True:
+		for i in range(len(first_key)):
+			if NUM_ENTRIES > n_entries:
+				return dictionary
+			key_mutable[i] = randint(0, 15)
+			next_key = bytes(key_mutable)
+			if next_key in dictionary:
+				continue
+			else:
+				NUM_ENTRIES += 1
+				cost = NUM_ENTRIES % max_cost
+				dictionary[next_key] = cost
+		
 ##==============================================================================================##
