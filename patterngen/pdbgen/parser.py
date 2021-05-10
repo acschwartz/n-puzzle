@@ -8,8 +8,7 @@ def initParser():
 #	parser.add_argument('pattern', help='choose a pattern', choices=list(PATTERN_INFO.keys()), default='full8puzzle')
 	
 	# for now, while working with default only
-	parser.add_argument('-p', dest='pattern', help='choose a pattern', choices=list(PATTERN_INFO.keys()))
-
+	parser.add_argument(dest='pattern', help='choose a pattern', choices=list(PATTERN_INFO.keys()))
 	return parser
 
 def parseArgs():

@@ -25,7 +25,7 @@ def makeNode(encodedPattern, stateinfo):
 def splitNode(node, len_encoded_pattern):
 # returns encoded pattern, cost, location of empty tile, undo move
 #	return node[:len_encoded_pattern], node[len_encoded_pattern], node[len_encoded_pattern+1], node[len_encoded_pattern+2]
-	return node[:len_encoded_pattern], {'cost': node[len_encoded_pattern], 'emptyTileLocation': node[len_encoded_pattern+1], 'undo': node[len_encoded_pattern+2]}
+	return node[:len_encoded_pattern], {'c': node[len_encoded_pattern], 'e': node[len_encoded_pattern+1], 'u': node[len_encoded_pattern+2]}
 
 
 def generatePatternDatabase(info, log, dbfile=None, moves=MOVE_FUNCTIONS, opp_moves=OPP_MOVE_IDs):
