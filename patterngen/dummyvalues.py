@@ -16,11 +16,12 @@
 ###==============================================================================================##
 ## e.g.  935124720  (representing '0x37bcdef0')
 def ints_repr_hexvalues(n_entries, max_cost=100):
-	first_key = 935124720
+	#first_key = 935124720 # (representing '0x37bcdef0')
+	first_key = 4260149040 # (representing '0xfdecb730' which is the numerically biggest repr for this pattern)
 	ints_repr_hexvalues = {}
 	for n in range(n_entries):
 		cost = n % max_cost
-		next_key = first_key + n
+		next_key = first_key - n
 		ints_repr_hexvalues[next_key] = cost
 	return ints_repr_hexvalues
 
