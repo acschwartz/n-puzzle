@@ -38,15 +38,17 @@ sys.excepthook = handle_exception
 ##==============================================================================================##
 if __name__ == '__main__':
 	pname = parseArgs()
-	print(f'pname: {pname}')
-	print(f'RUN_ID: {RUN_ID}')
-	
-	log, logfile = logger.initLogger()
-	
 	info = patterns.PATTERN_INFO[pname]
+	base_filename = f'{pname}_pdb_{RUN_ID}'
+	base_filename_with_path = f'{OUTPUT_DIRECTORY}{base_filename}'
+
+	log, logfile = logger.initLogger(base_filename_with_path)
+	logger.printHeader(log, pname, RUN_ID, base_filename)
 	
-#	print(encode(ptiles))
-#	print(decode(encode(ptiles)))
+	t_start = pCounter()
+	m_start = getMaxRSS()
 	
-	generator.generatePatternDatabase(info, log, RUN_ID)
+	dbfile, n_tables, n_entries = generator.generatePatternDatabase(info, log, base_filename_with_path)
 	
+	logger.printStats(log, t_start, m_start, dbfile, n_tables, n_entries, title='Stats')
+	log.debug(f'logfile: logfile')

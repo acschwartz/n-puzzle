@@ -4,12 +4,14 @@ import sqlite3
 def initDB(logger, db_file=None):
 	if not db_file:
 		db_file = ':memory:'
+	else:
+		db_file = ''.join([db_file, '.db'])
 	
 	con = sqlite3.connect(db_file)
 	
 	logger.debug(f'Opened connection with database: {db_file}')
 	cur = con.cursor()
-	return con, cur
+	return con, cur, db_file
 
 
 def createTables(cur, n_tables, logger, base_name='PatternCosts_EmptyTileLocation_'):
