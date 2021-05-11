@@ -90,6 +90,6 @@ KV = {
         'hamming':      hamming,
         'gaschnig':     gaschnig,
         'manhattan':    manhattan,
-        'lc':    linear_conflicts,
+        'linearconflicts':    linear_conflicts,
         'pdb_full8puzzle': pdb_Query_full8puzzle,
 }

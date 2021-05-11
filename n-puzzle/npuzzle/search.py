@@ -31,9 +31,9 @@ def get_children(data, size):     # returns CHILDREN
 #    shuffle(res)
     return res
 
-
+global a_star_nodes_generated
 def a_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST, PDB_CONNECTION):
-    
+    global a_star_nodes_generated
     counter = count()
     pqueue = [(0, next(counter), init_state, 0, None)]
             # (f, gen_order,     node,       g, parent)
@@ -56,8 +56,8 @@ def a_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST, PDB_
                 path.append(parent)
                 parent = explored[parent]
             path.reverse()
-            nodes_generated = len(frontier) + len(explored)
-            return (True, path, {'space':nodes_generated, 'time':nodes_generated})
+            a_star_nodes_generated = len(frontier) + len(explored)
+            return (True, path, {'space':a_star_nodes_generated, 'time':a_star_nodes_generated})
         
         if node in explored:
             continue  #prune
@@ -87,8 +87,8 @@ def a_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST, PDB_
             heappush(pqueue, (h_child + g_child_thispath, next(counter), child, g_child_thispath, node))
         #\endfor
                 
-    nodes_generated = len(frontier) + len(explored)
-    return (False, [], {'space':nodes_generated, 'time':nodes_generated})
+    a_star_nodes_generated = len(frontier) + len(explored)
+    return (False, [], {'space':a_star_nodes_generated, 'time':a_star_nodes_generated})
                     
 
 

@@ -5,7 +5,7 @@ import resource
 import tracemalloc
 from time import perf_counter
 #from npuzzle.visualizer import visualizer
-from npuzzle.search import a_star_search, ida_star_search
+from npuzzle import search
 from npuzzle.is_solvable import is_solvable
 from npuzzle import colors
 from npuzzle.colors import color
@@ -13,7 +13,10 @@ from npuzzle import parser
 from npuzzle import heuristics
 from npuzzle import goal_states
 from npuzzle.pdb import pdb
+from npuzzle import timeout
 import sqlite3
+
+colors.enabled = True
 
 
 
@@ -69,15 +72,19 @@ def verbose_info(args, puzzle, goal_state, size, PDB_CONNECTION):
             'initial state:': str(puzzle),
             'final state:': str(goal_state)}
     for k,v in opts2.items():
-        print(color(opt_color, k), v)
+            print(color(opt_color, k), v)
+
    
     # NOTE: removed because it wasn't vibing with my handling of the pdb's.. worry bout it later (TODO)
     if is_solvable(puzzle, goal_state, size):
         print(color('blue2', 'heuristic scores for initial state'))
         for k,v in heuristics.KV.items():
-            print(color('blue2', '  - ' + k + '\t:'), v(puzzle, goal_state, size, PDB_CONNECTION))
+            try:
+                print(color('blue2', '  - ' + k + '\t:'), v(puzzle, goal_state, size, PDB_CONNECTION))
+            except:
+                continue
 
-    print(color('red2', 'search algorithm:'), ('IDA* w/ random node ordering (IDA*_R)' if args.r else 'IDA*') if args.ida else 'A*')
+    print(color('red2', 'search algorithm:'), ('IDA* w/ random node ordering (IDA*-R)' if args.r else 'IDA*') if args.ida else 'A*')
 
 
 #########################################################################################
@@ -92,16 +99,17 @@ def main(arglist=None):
             print('DB connected already!')
             PDB_CONNECTION = arglist.pop(0)
             print(PDB_CONNECTION)
+        else:
+            PDB_CONNECTION = None
         data = parser.get_input(arglist)
     else:
         data = parser.get_input()
         print(f'\n{__name__}: args received from command line: {data}\n')
+        PDB_CONNECTION = None
         
     if not data:
         return None
     puzzle, size, args = data
-    if args.c:
-        colors.enabled = True
 
     if args.ida:
         args.g = False
@@ -139,13 +147,32 @@ def main(arglist=None):
         else:
             maxrss_before_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 #            print(color('red', 'max rss before search:'), maxrss_before_search)
-    
 
+
+    # -------- SEARCH --------- #
     t_before_search = perf_counter()
+    if args.tmin:
+        TIMEOUT_SEC = args.tmin * 60 
+        timeout.setAlarm(TIMEOUT_SEC)
+    res = None
     if args.ida:
-        res = ida_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST, RANDOM_NODE_ORDER, PDB_CONNECTION)
+        try:
+            res = search.ida_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST, RANDOM_NODE_ORDER, PDB_CONNECTION)
+            timeout.turnOffAlarm()
+        except timeout.TimeOutException:
+            print(f'Search timed out after {args.tmin} minutes')
+            print(f'Nodes generated: {search.ida_star_nodes_generated}')
+            res = (False, None, {'space':None, 'time':search.ida_star_nodes_generated})
+            timeout.turnOffAlarm()
     else:
-        res = a_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST, PDB_CONNECTION)
+        try:
+            res = search.a_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST, PDB_CONNECTION)
+            timeout.turnOffAlarm()
+        except timeout.TimeOutException:
+            print(f'Search timed out after {args.tmin} minutes')
+            print(f'Nodes generated: {search.a_star_nodes_generated}')
+            res = (False, None, {'space':search.a_star_nodes_generated, 'time':search.a_star_nodes_generated})
+            timeout.turnOffAlarm()
     t_search = perf_counter() - t_before_search
     
     success, steps, complexity = res
@@ -196,8 +223,11 @@ def main(arglist=None):
     print(color('magenta','time complexity:'), complexity['time'], 'nodes generated')
 #    if success and args.v:
 #        visualizer(steps, size)
-
-#    PDB_CONNECTION.close()
+    
+    try:
+        PDB_CONNECTION.close()
+    except:
+        pass
     
 if __name__ == '__main__':  
     # find '-f' in argsv without doing parseargs - just 'peeking' to pre-set up the DB
