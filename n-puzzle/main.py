@@ -258,8 +258,8 @@ def main(arglist=None):
 #            # should prob throw exception but this is thrown together ¯\_(ツ)_/¯
 #        peak *= nodesize
 #        print(color('red', 'peak memory use (calculated): '), bytes_to_human_readable_string(peak))
-    print(color('magenta2','space complexity:'), complexity['space'], 'nodes in memory')
-    print(color('green2','time complexity:'), complexity['time'], 'nodes generated')
+    print(color('magenta2','space complexity:'), f"{complexity['space']:,}", 'nodes in memory')
+    print(color('green2','time complexity:'), f"{complexity['time']:,}", 'nodes generated')
     print(color('green2','search duration:') + ' %.4f second(s)' % (t_search))
     fmt = '%d' + color('green2',' nodes generated, ') + '%.8f' + color('green',' second(s) per node')
     print(fmt % (complexity['time'], t_search / max(complexity['time'],1) ))
