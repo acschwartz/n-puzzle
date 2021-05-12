@@ -119,7 +119,7 @@ def main(arglist=None):
     receivedDBConnectionAsArgument = False
     try:
         if arglist:
-            print(f'\n{__name__}: args received from function call: {arglist}\n')
+#            print(f'\n{__name__}: args received from function call: {arglist}\n')
             if isinstance(arglist[0], sqlite3.Connection):
                 print('DB connected already!')
                 PDB_CONNECTION = arglist.pop(0)
@@ -300,14 +300,14 @@ def main(arglist=None):
     # -------- POPULATE RESULTSET --------#
     resultSet = {
         'init': str(puzzle),
-        'solFound': True if success else False,  # none if failed, False if not found, True if found
+        'foundSol': True if success else False,  # none if failed, False if not found, True if found
         'timedOut': searchTimedOut,
         'goal': args.s,
-        'runtime_s': f'{t_search:.3f}',
-        'nodeGen': res[2]['time'],
+        'runtime_sec': f'{t_search:.3f}',
+        'nodes_gen': res[2]['time'],
         'algo': 'IDA*' if args.ida else 'A*', # for knowing which is time and space complexity
         'sol_len': sol_len,
-        'max_path': (ida_star_max_path_length if args.ida else sol_len),
+        'max_path_len': (ida_star_max_path_length if args.ida else sol_len),
         # don't include memory measurement probbaly
     }
     # -------- POPULATE RESULTSET --------#

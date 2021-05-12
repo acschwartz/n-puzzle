@@ -7,6 +7,7 @@ import os
 import sys
 import traceback
 import inspect
+import json
 
 from copy import copy
 from math import ceil, floor
@@ -22,7 +23,6 @@ from npuzzle import logger
 colors.enabled = True
 RUN_ID = strftime(f'%b%d-%Y_%I-%M-%S%p')
 OUTPUT_DIRECTORY = 'output/'
-
 
 
 
@@ -250,10 +250,10 @@ if __name__ == '__main__':
 		
 		##~~~~~~~~~~~~~~~~~~ Initialize INPUT File & Display Choice ~~~~~~~~~~~~~~~~~~~~~~
 		if wrapperArgs.batch:
-			f = wrapperArgs.batch	# is already opened for you by parser!
-			input_filename = f.name
-			batchlines = [line.strip() for line in f]
-			f.close()
+			fi = wrapperArgs.batch	# is already opened for you by parser!
+			input_filename = fi.name
+			batchlines = [line.strip() for line in fi]
+			fi.close()
 			
 			print(color('blue2', f'\N{WRAPPED PRESENT} Input: '), color('green2', f'{input_filename} '), f'({len(batchlines)} lines)')
 			outputToFile = True
@@ -270,6 +270,7 @@ if __name__ == '__main__':
 		if outputToFile:
 			initDirectory(OUTPUT_DIRECTORY)
 			output_filename = f'{OUTPUT_DIRECTORY}{stripFilename(input_filename)}__{RUN_ID}.json'
+			fo = open(output_filename, 'w')
 			print(color('blue2', f'\N{WRAPPED PRESENT} Output: '), f'{output_filename}')
 			
 			logfile = f'{OUTPUT_DIRECTORY}{stripFilename(input_filename)}__{RUN_ID}.log'
@@ -284,7 +285,7 @@ if __name__ == '__main__':
 		
 		
 		
-		
+		resultsDictionary = {}
 		
 		##=====================  FRESH INPUT FOR SOLVER  ===========================
 		while 1:
@@ -448,24 +449,36 @@ if __name__ == '__main__':
 						print(f'\n{SEPARATOR_DOTS}\n')
 						
 					
-					def printFooter():
+					def printFooter(log):
+						def printAndOrLog(line, log=log, doNotPrint=False):
+							if log:
+								log.info(line)
+							if not doNotPrint:
+								print(line)
+						
 #						print('\N{CHEQUERED FLAG}')
-						print(f'\n\n finished  in  {secondsToWhatever(perf_counter()-t_start)}')
-						print(f'{SEPARATOR_DOTS}\n')
+						t_elaps = secondsToWhatever(perf_counter()-t_start)
+						printAndOrLog(f'\n\n processed {n_processed} inputs in  {t_elaps}')
+						printAndOrLog(f'{SEPARATOR_DOTS}\n')
 						
 						if n_fail:
 							print(" \u274C", color('red2', f'{n_fail}'), color('white', 'of'), color('red2', f'{num_lines}'), color('white', 'inputs'), color('red2','failed'), color('white', '(had errors)'))
+							printAndOrLog(f'  {n_fail} or {num_lines} inputs failed (had errors)', doNotPrint=True)
 							if n_success:
 								print("  \u2714", color('green2', f'{n_success}'), color('white', 'of'), color('green2', f'{num_lines}'), color('white','inputs processed successfully'))
+								printAndOrLog(f'  {n_success} or {num_lines} inputs processed successfully', doNotPrint=True)
 							
 						else: # success only
 							print(" \u2705", color('green2', f'{n_success}'), color('white', 'of'), color('green2', f'{num_lines}'), color('white','inputs processed successfully'))
+							printAndOrLog(f'  {n_success} or {num_lines} inputs processed successfully', doNotPrint=True)
 											
 	#					print(f'\n time elapsed: {secondsToWhatever(perf_counter()-t_start)}')
 						print(color('blue2', '\n\n OUTPUT (RESULT) FILE: '), color('white2', f'{output_filename} '))
 						print(color('blue2', f'\N{MEMO} LOGFILE: '), f'{logfile}')	# or \N{SPIRAL NOTE PAD}
 						
-						print(f'{SEPARATOR_DOTS}')
+						printAndOrLog(f'{SEPARATOR_DOTS}')
+						
+							
 					
 					try:
 						num_lines = len(batchlines)
@@ -490,9 +503,16 @@ if __name__ == '__main__':
 								n_success += 1
 							else:
 								n_fail += 1
+							
+							if success is not None:
+								resultsDictionary[n_processed] = resultSet.copy()
+							
 							print('\n')
 						
-						printFooter()
+						if outputToFile:
+							json.dump(resultsDictionary, fo, allow_nan=True, indent=4, sort_keys=True)
+							print(color('magenta2', '------> wrote results to Json file'))
+						printFooter(log)
 						break
 					except Exception as exc:
 						printException(exc, lineno())
@@ -525,8 +545,13 @@ if __name__ == '__main__':
 	#		print(color('white', 'SQLite connection closed. Bye!'))
 		else:
 			print()
-	
+
+		
+		if outputToFile:
+			fo.close()
 	
 	##### THIS TRY BLOCK ENCASES WHOLE PROGRAM #####
 	except Exception as exc:
 		printException(exc, lineno())
+		if outputToFile:
+			fo.close()
