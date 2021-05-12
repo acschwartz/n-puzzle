@@ -88,14 +88,14 @@ def callSolver(args, silent=False):
 		print(color('magenta2', centerOnLine(f' CALLING SOLVER ', MAX_LINE_LENGTH, paddingChar='.')))
 		print()
 	try:
-		success, logheader = solver(args)
+		success, logheader, resultSet = solver(args)
 	except Exception as exc:
 		printException(exc, lineno())
-		return False, None
+		return None, None, None
 	except SystemExit as s:
 		printException(s, lineno())
-		return False, None
-	return success, logheader
+		return None, None, None
+	return success, logheader, resultSet
 
 def lineno():
 	"""Returns the current line number in the program."""
@@ -480,7 +480,7 @@ if __name__ == '__main__':
 							argsThisRun.extend(puzzle)
 							printRunHeader()
 							print(f'DEBUG: calling solver from {lineno()}')
-							success, logheader = callSolver(argsThisRun, silent=True)
+							success, logheader, resultSet = callSolver(argsThisRun, silent=True)
 							if log and not wroteLogHeaderInfo:
 								logger.printLogHeader(log, RUN_ID, input_filename, output_filename, logheader['psize'], logheader['algo'], logheader['heur'], logheader['timeout_s'], logheader['goal'])
 								wroteLogHeaderInfo = True
@@ -504,7 +504,7 @@ if __name__ == '__main__':
 				else:
 					try:
 						print(f'DEBUG: calling solver from {lineno()}')
-						success, logheader = callSolver(ARGSLIST)
+						success, logheader, resultSet = callSolver(ARGSLIST)
 						if log and not wroteLogHeaderInfo:
 							log.printLogHeader(log, RUN_ID, input_filename, output_filename, logheader['psize'], logheader['algo'], logheader['heur'], logheader['timeout_s'], logheader['goal'])
 							wroteLogHeaderInfo = True

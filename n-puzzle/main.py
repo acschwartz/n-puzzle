@@ -151,6 +151,13 @@ def main(arglist=None):
     }
     #---------------------------------------------------#
     
+    #----------------------- INIT RESULTSET ---------#
+    
+    resultSet = {}
+    
+    #---------------------------------------------------#
+    
+    
 
     if args.ida:
         args.g = False
@@ -174,7 +181,7 @@ def main(arglist=None):
     verbose_info(args, puzzle, goal_state, size, PDB_CONNECTION)
     if not is_solvable(puzzle, goal_state, size):
         print(color('red','this puzzle is not solvable'))
-        return (None, logheader)
+        return (None, logheader, resultSet)
     
     # code snippet for making IDA* memory profiling work on linux
     # problem: tracemalloc prohibitively slow, and maxrss doesn't capture it
@@ -201,11 +208,13 @@ def main(arglist=None):
         timeout.setAlarm(TIMEOUT_SEC)
         logheader['timeout_s'] = TIMEOUT_SEC
     res = None
+    searchTimedOut = False
     if args.ida:
         try:
             res = ida_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST, RANDOM_NODE_ORDER, PDB_CONNECTION)
             timeout.turnOffAlarm()
         except timeout.TimeOutException:
+            searchTimedOut = True
             print(f'Search timed out after {TIMEOUT_SEC} seconds ({secToMin(TIMEOUT_SEC)} mins)')
             from npuzzle.search import ida_star_nodes_generated, ida_star_max_path_length
             print(f'Nodes generated: {ida_star_nodes_generated}')
@@ -216,6 +225,7 @@ def main(arglist=None):
             res = a_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST, PDB_CONNECTION)
             timeout.turnOffAlarm()
         except timeout.TimeOutException:
+            searchTimedOut = True
             print(color('red2', f'Search timed out after {TIMEOUT_SEC} seconds ({secToMin(TIMEOUT_SEC)} mins)'))
             from npuzzle.search import a_star_nodes_generated
             print(f'Nodes generated: {a_star_nodes_generated}')
@@ -224,6 +234,7 @@ def main(arglist=None):
     t_search = perf_counter() - t_before_search
     
     success, steps, complexity = res
+    from npuzzle.search import ida_star_nodes_generated, ida_star_max_path_length, a_star_nodes_generated
     
     if not USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE:
         if args.tracemalloc:
@@ -281,7 +292,28 @@ def main(arglist=None):
         except:
             pass
     
-    return ((True if success else False), logheader)
+    if steps:
+        sol_len= max(len(steps) - 1, 0)
+    else:
+        steps = 0
+        sol_len = 0
+    # -------- POPULATE RESULTSET --------#
+    resultSet = {
+        'init': str(puzzle),
+        'solFound': True if success else False,  # none if failed, False if not found, True if found
+        'timedOut': searchTimedOut,
+        'goal': args.s,
+        'runtime_s': f'{t_search:.3f}',
+        'nodeGen': res[2]['time'],
+        'algo': 'IDA*' if args.ida else 'A*', # for knowing which is time and space complexity
+        'sol_len': sol_len,
+        'max_path': (ida_star_max_path_length if args.ida else sol_len),
+        # don't include memory measurement probbaly
+    }
+    # -------- POPULATE RESULTSET --------#
+    
+    print(resultSet)
+    return ((True if success else False), logheader, resultSet)
 
     
 if __name__ == '__main__':  

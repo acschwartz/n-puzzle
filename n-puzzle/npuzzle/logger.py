@@ -19,24 +19,6 @@ def initLogger(logfile):
 
 
 
-#def generateStats(t_start, maxrss_start, dbfile, tables, n_entries):
-#	stats = dict()
-#	stats['database file'] = dbfile
-#	stats['entries collected'] = n_entries
-#	stats['platform'] = platform
-#	t_delta = pCounter() - t_start
-#	m_delta = getMaxRSS() - maxrss_start
-#	stats['time_raw'] = f'{t_delta:.2f}'
-#	stats['memory_raw'] = m_delta
-#	stats['time'] = prettyTime(t_delta)
-#	stats['memory'] = prettyMemory(m_delta)
-#	return stats
-
-
-
-
-
-
 def printLogHeader(logger, run_id, input_file, result_file, pdim, algo, heur, timeout_sec, gstate):
 	def secondsToWhatever(seconds):
 		h=seconds//3600
@@ -78,7 +60,7 @@ def printLogHeader(logger, run_id, input_file, result_file, pdim, algo, heur, ti
 
 
 
-#def printStats(logger, t_start, maxrss_start, dbfile, tables, n_entries, title=None ):
+#def logResults(logger, t_start, maxrss_start, dbfile, tables, n_entries, title=None ):
 #	stats = generateStats(t_start, maxrss_start, dbfile, tables, n_entries)
 #	
 #	stats_as_strings = sorted([ f'{key} : {stats[key]}' for key in stats ])
@@ -97,3 +79,6 @@ def printLogHeader(logger, run_id, input_file, result_file, pdim, algo, heur, ti
 #		logger.info(f'   {i}     {t}')
 #	logger.info(SECTION_SEPARATOR)
 #	return
+	
+
+#def resulttts():
