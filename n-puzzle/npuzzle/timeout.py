@@ -6,6 +6,7 @@ import signal
 import time
 
 class TimeOutException(Exception):
+	print('>> TimeOutException raised')
 	pass
 	
 def alarm_handler(signum, frame):

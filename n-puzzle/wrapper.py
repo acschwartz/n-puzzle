@@ -16,10 +16,11 @@ from main import main as solver
 from npuzzle.pdb import pdb
 from npuzzle import colors
 from npuzzle.colors import color
+from npuzzle import logger
 
 
 colors.enabled = True
-RUN_ID = strftime(f'%b%d-%Y-%I:%M:%S%p')
+RUN_ID = strftime(f'%b%d-%Y_%I-%M-%S%p')
 OUTPUT_DIRECTORY = 'output/'
 
 
@@ -61,24 +62,9 @@ SEPARATOR_DASH = '-' * MAX_LINE_LENGTH
 SEPARATOR_EQ = '=' * MAX_LINE_LENGTH
 SEPARATOR_STAR = '*' * MAX_LINE_LENGTH
 SEPARATOR_TILDE = '~' * MAX_LINE_LENGTH
-
 MINI_SEP_DOTS = centerOnLine('. '*12, MAX_LINE_LENGTH)
 
 
-	
-##==============================================================================================##
-def handle_exception(exc_type, exc_value, exc_traceback):
-# Source: https://stackoverflow.com/questions/6234405/logging-uncaught-exceptions-in-python
-	if issubclass(exc_type, KeyboardInterrupt):
-		sys.__excepthook__(exc_type, exc_value, exc_traceback)
-		return
-	
-	print("============= UNHANDLED EXCEPTION ========")
-#	log.critical("\nUncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
-#	log.info('\n')
-	
-sys.excepthook = handle_exception
-##==============================================================================================##
 
 	
 
@@ -102,15 +88,14 @@ def callSolver(args, silent=False):
 		print(color('magenta2', centerOnLine(f' CALLING SOLVER ', MAX_LINE_LENGTH, paddingChar='.')))
 		print()
 	try:
-		success = solver(args)
-		print(success)
+		success, logheader = solver(args)
 	except Exception as exc:
 		printException(exc, lineno())
-		return False
+		return False, None
 	except SystemExit as s:
 		printException(s, lineno())
-		return False
-	return True
+		return False, None
+	return success, logheader
 
 def lineno():
 	"""Returns the current line number in the program."""
@@ -273,6 +258,7 @@ if __name__ == '__main__':
 			print(color('blue2', f'\N{WRAPPED PRESENT} Input: '), color('green2', f'{input_filename} '), f'({len(batchlines)} lines)')
 			outputToFile = True
 			
+			
 		else:
 			print(color('blue2', f'\n* Input: '), 'manual')
 			outputToFile = False  # TODO: for now!
@@ -283,10 +269,17 @@ if __name__ == '__main__':
 		##~~~~~~~~~~~~~~~~~~ Initialize OUTPUT File & Display Choice ~~~~~~~~~~~~~~~~~~~~~~
 		if outputToFile:
 			initDirectory(OUTPUT_DIRECTORY)
-			output_filename = f'{OUTPUT_DIRECTORY}{RUN_ID}_{stripFilename(input_filename)}.json'  # TODO: extension? .json?
+			output_filename = f'{OUTPUT_DIRECTORY}{stripFilename(input_filename)}__{RUN_ID}.json'
 			print(color('blue2', f'\N{WRAPPED PRESENT} Output: '), f'{output_filename}')
+			
+			logfile = f'{OUTPUT_DIRECTORY}{stripFilename(input_filename)}__{RUN_ID}.log'
+			log = logger.initLogger(logfile)
+			print(color('blue2', f'\N{MEMO} Log: '), f'{logfile}')	# or \N{SPIRAL NOTE PAD}
 		else:
 			print(color('blue2', f'\n* Output:'), 'stdout')
+			print(color('blue2', f'\n* Log:'), color('red', 'none'))
+			logfile = None
+			log = None
 		
 		
 		
@@ -320,6 +313,9 @@ if __name__ == '__main__':
 			if wrapperArgs.pdb:
 				ARGSLIST.append(PDB_CONNECTION)
 				ARGSLIST.extend(['-f', ''.join(['pdb_', wrapperArgs.pdb])])
+			
+			
+			wroteLogHeaderInfo = False
 			
 			while 1:
 				printArgs(ARGSLIST)
@@ -445,6 +441,8 @@ if __name__ == '__main__':
 						
 						print(color('blue2', f'\nINPUT:'), f'{input_filename}')
 						print(color('blue2', f'\nOUTPUT:'), f'{output_filename}')
+						print(color('blue2', f'\n\N{MEMO} LOG: '), f'{logfile}')	# or \N{SPIRAL NOTE PAD}
+						
 #						print(f'\n{SEPARATOR_DASH}')
 						printArgs(argsThisRun)
 						print(f'\n{SEPARATOR_DOTS}\n')
@@ -464,7 +462,9 @@ if __name__ == '__main__':
 							print(" \u2705", color('green2', f'{n_success}'), color('white', 'of'), color('green2', f'{num_lines}'), color('white','inputs processed successfully'))
 											
 	#					print(f'\n time elapsed: {secondsToWhatever(perf_counter()-t_start)}')
-						print(color('blue2', '\n\n OUTPUT FILE: '), color('white2', f'{output_filename} '))
+						print(color('blue2', '\n\n OUTPUT (RESULT) FILE: '), color('white2', f'{output_filename} '))
+						print(color('blue2', f'\N{MEMO} LOGFILE: '), f'{logfile}')	# or \N{SPIRAL NOTE PAD}
+						
 						print(f'{SEPARATOR_DOTS}')
 					
 					try:
@@ -480,9 +480,13 @@ if __name__ == '__main__':
 							argsThisRun.extend(puzzle)
 							printRunHeader()
 							print(f'DEBUG: calling solver from {lineno()}')
-							success = callSolver(argsThisRun, silent=True)
+							success, logheader = callSolver(argsThisRun, silent=True)
+							if log and not wroteLogHeaderInfo:
+								logger.printLogHeader(log, RUN_ID, input_filename, output_filename, logheader['psize'], logheader['algo'], logheader['heur'], logheader['timeout_s'], logheader['goal'])
+								wroteLogHeaderInfo = True
+								
 							n_processed += 1
-							if success is True:
+							if success is True: # doesn't handle unsolvable puzzles lol
 								n_success += 1
 							else:
 								n_fail += 1
@@ -500,7 +504,10 @@ if __name__ == '__main__':
 				else:
 					try:
 						print(f'DEBUG: calling solver from {lineno()}')
-						callSolver(ARGSLIST)
+						success, logheader = callSolver(ARGSLIST)
+						if log and not wroteLogHeaderInfo:
+							log.printLogHeader(log, RUN_ID, input_filename, output_filename, logheader['psize'], logheader['algo'], logheader['heur'], logheader['timeout_s'], logheader['goal'])
+							wroteLogHeaderInfo = True
 						continue
 					except Exception as exc:
 						printException(exc, lineno())

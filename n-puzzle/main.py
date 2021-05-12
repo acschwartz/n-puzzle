@@ -75,31 +75,35 @@ def color_yes_no(v):
 
 def verbose_info(args, puzzle, goal_state, size, PDB_CONNECTION):
     opts1 = {
-            'greedy search:': args.g,
-            'uniform cost search:': args.u,
+#            'greedy search:': args.g,
+#            'uniform cost search:': args.u,
 #            'visualizer:': args.v,
             'solvable:': is_solvable(puzzle, goal_state, size)
             }
-    opt_color = 'cyan2'
+    opt_color = 'white'
     for k,v in opts1.items():
         print(color(opt_color, k), color_yes_no(v))
-
-    opts2 = {'heuristic function:': color('green2', args.f),
+    
+    for k,v in {'heuristic function:': color('cyan2', args.f)}.items():
+            print(color('red', k), v)
+    
+    opts2 = {#'heuristic function:': color('green2', args.f),
 #            'pdb:': color('green2', args.pdb if args.pdb else 'None'),
-            'puzzle size:': str(size),
+#            'puzzle size:': str(size),
             'solution type:': color('green2', args.s),
             'initial state:': str(puzzle),
-            'final state:': str(goal_state)}
+#            'final state:': str(goal_state)}
+             }
     for k,v in opts2.items():
             print(color(opt_color, k), v)
 
    
     # NOTE: removed because it wasn't vibing with my handling of the pdb's.. worry bout it later (TODO)
     if is_solvable(puzzle, goal_state, size):
-        print(color('blue2', 'heuristic scores for initial state'))
+        print(color('blue', 'heuristic scores for initial state'))
         for k,v in heuristics.KV.items():
             try:
-                print(color('blue2', '  - ' + k + '\t:'), v(puzzle, goal_state, size, PDB_CONNECTION))
+                print(color('blue', '  - ' + k + '\t:'), v(puzzle, goal_state, size, PDB_CONNECTION))
             except:
                 continue
 
@@ -133,8 +137,20 @@ def main(arglist=None):
 
 
     if not data:
-        return None
+        return (None, None, None)
     puzzle, size, args = data
+
+    #------------------------- SET UP LOG INFO ---------#
+    logheader = {
+        'psize': size,
+        'algo': 'IDA*' if args.ida else 'A*',
+        'heur': args.f,
+        'timeout_s': 'None',
+        'goal': args.s
+        
+    }
+    #---------------------------------------------------#
+    
 
     if args.ida:
         args.g = False
@@ -158,7 +174,7 @@ def main(arglist=None):
     verbose_info(args, puzzle, goal_state, size, PDB_CONNECTION)
     if not is_solvable(puzzle, goal_state, size):
         print(color('red','this puzzle is not solvable'))
-        return None
+        return (None, logheader)
     
     # code snippet for making IDA* memory profiling work on linux
     # problem: tracemalloc prohibitively slow, and maxrss doesn't capture it
@@ -179,9 +195,11 @@ def main(arglist=None):
     if args.tmin:
         TIMEOUT_SEC = minToSec(args.tmin)
         timeout.setAlarm(TIMEOUT_SEC)
+        logheader['timeout_s'] = TIMEOUT_SEC
     if args.tsec:
         TIMEOUT_SEC = args.tsec
         timeout.setAlarm(TIMEOUT_SEC)
+        logheader['timeout_s'] = TIMEOUT_SEC
     res = None
     if args.ida:
         try:
@@ -198,7 +216,7 @@ def main(arglist=None):
             res = a_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST, PDB_CONNECTION)
             timeout.turnOffAlarm()
         except timeout.TimeOutException:
-            print(f'Search timed out after {TIMEOUT_SEC} seconds ({secToMin(TIMEOUT_SEC)} mins)')
+            print(color('red2', f'Search timed out after {TIMEOUT_SEC} seconds ({secToMin(TIMEOUT_SEC)} mins)'))
             from npuzzle.search import a_star_nodes_generated
             print(f'Nodes generated: {a_star_nodes_generated}')
             res = (False, None, {'space':a_star_nodes_generated, 'time':a_star_nodes_generated})
@@ -211,8 +229,8 @@ def main(arglist=None):
         if args.tracemalloc:
             peak = tracemalloc.get_traced_memory()[1]
             tracemalloc.stop()
-            print(color('red', 'peak memory use (tracemalloc): '), bytes_to_human_readable_string(peak))
-            print(color('red2', 'memory per node: '), f"{bytes_to_human_readable_string(peak/complexity['time'])}")
+            print(color('magenta', 'peak memory use (tracemalloc): '), bytes_to_human_readable_string(peak))
+            print(color('magenta', 'memory per node: '), f"{bytes_to_human_readable_string(peak/complexity['time'])}")
 
         else:
             maxrss_after_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -223,8 +241,8 @@ def main(arglist=None):
             MAXRSS_UNIT_COEFFICIENT = 1024 if sys.platform != 'darwin' else 1
             maxrss_delta = maxrss_after_search-maxrss_before_search * MAXRSS_UNIT_COEFFICIENT
             maxrss_delta_pretty = bytes_to_human_readable_string(maxrss_delta)
-            print(color('red', 'peak memory use (Δ maxrss): '), maxrss_delta_pretty)
-            print(color('red', 'memory per node: '), f"{bytes_to_human_readable_string(maxrss_delta/complexity['time'])}")
+            print(color('magenta', 'peak memory use (Δ maxrss): '), maxrss_delta_pretty)
+            print(color('magenta', 'memory per node: '), f"{bytes_to_human_readable_string(maxrss_delta/complexity['time'])}")
 #    else:
 #        # NOTE: !!! only implemented for manhattan and LC heuristics
 #        peak = complexity['space']  # nodes in memory
@@ -238,12 +256,13 @@ def main(arglist=None):
 #            # should prob throw exception but this is thrown together ¯\_(ツ)_/¯
 #        peak *= nodesize
 #        print(color('red', 'peak memory use (calculated): '), bytes_to_human_readable_string(peak))
-
-    print(color('yellow','search duration:') + ' %.4f second(s)' % (t_search))
-    fmt = '%d' + color('yellow',' nodes generated, ') + '%.8f' + color('yellow',' second(s) per node')
+    print(color('magenta2','space complexity:'), complexity['space'], 'nodes in memory')
+    print(color('green2','time complexity:'), complexity['time'], 'nodes generated')
+    print(color('green2','search duration:') + ' %.4f second(s)' % (t_search))
+    fmt = '%d' + color('green2',' nodes generated, ') + '%.8f' + color('green',' second(s) per node')
     print(fmt % (complexity['time'], t_search / max(complexity['time'],1) ))
     if success:
-        print(color('green','length of solution:'), max(len(steps) - 1, 0))
+        print(color('yellow2','length of solution:'), max(len(steps) - 1, 0))
         if args.showsteps or args.p:
             print(color('green', 'initial state and solution steps:'))
             if args.p:
@@ -253,8 +272,6 @@ def main(arglist=None):
                     print(s)
     else:
         print(color('red','solution not found'))
-    print(color('magenta','space complexity:'), complexity['space'], 'nodes in memory')
-    print(color('magenta','time complexity:'), complexity['time'], 'nodes generated')
 #    if success and args.v:
 #        visualizer(steps, size)
     
@@ -263,6 +280,8 @@ def main(arglist=None):
             PDB_CONNECTION.close()
         except:
             pass
+    
+    return ((True if success else False), logheader)
 
     
 if __name__ == '__main__':  
