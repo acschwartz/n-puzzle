@@ -14,6 +14,7 @@ from npuzzle import heuristics
 from npuzzle import goal_states
 from npuzzle.pdb import pdb
 from npuzzle import timeout
+from npuzzle.platform_info import prettyMemory
 import sqlite3
 import argparse
 
@@ -41,15 +42,6 @@ def pretty_print_steps(steps, size):
     print('%s' % (20*decor,))
 
 
-def bytes_to_human_readable_string(size,precision=2):
-# SOURCE: https://stackoverflow.com/questions/5194057/better-way-to-convert-file-sizes-in-python/14822210
-# http://code.activestate.com/recipes/578019-bytes-to-human-human-to-bytes-converter/
-    suffixes=['B','KB','MB','GB','TB']
-    suffixIndex = 0
-    while size > 1024 and suffixIndex < 4:
-        suffixIndex += 1 #increment the index of the suffix
-        size = size/1024.0 #apply the division
-    return "%.*f%s"%(precision,size,suffixes[suffixIndex])
 
 def secToMin(seconds):
     return seconds/60
@@ -240,8 +232,8 @@ def main(arglist=None):
         if args.tracemalloc:
             peak = tracemalloc.get_traced_memory()[1]
             tracemalloc.stop()
-            print(color('magenta', 'peak memory use (tracemalloc): '), bytes_to_human_readable_string(peak))
-            print(color('magenta', 'memory per node: '), f"{bytes_to_human_readable_string(peak/complexity['time'])}")
+            print(color('magenta', 'peak memory use (tracemalloc): '), prettyMemory(peak))
+            print(color('magenta', 'memory per node: '), f"{prettyMemory(peak/complexity['time'])}")
 
         else:
             maxrss_after_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -249,11 +241,10 @@ def main(arglist=None):
             
             # on macOS ('darwin'), max_rss reported in bytes
             # on linux, in kB
-            MAXRSS_UNIT_COEFFICIENT = 1024 if sys.platform != 'darwin' else 1
-            maxrss_delta = maxrss_after_search-maxrss_before_search * MAXRSS_UNIT_COEFFICIENT
-            maxrss_delta_pretty = bytes_to_human_readable_string(maxrss_delta)
+            maxrss_delta = maxrss_after_search-maxrss_before_search
+            maxrss_delta_pretty = prettyMemory(maxrss_delta)
             print(color('magenta', 'peak memory use (Δ maxrss): '), maxrss_delta_pretty)
-            print(color('magenta', 'memory per node: '), f"{bytes_to_human_readable_string(maxrss_delta/complexity['time'])}")
+            print(color('magenta', 'memory per node: '), f"{prettyMemory(maxrss_delta/complexity['time'])}")
 #    else:
 #        # NOTE: !!! only implemented for manhattan and LC heuristics
 #        peak = complexity['space']  # nodes in memory
