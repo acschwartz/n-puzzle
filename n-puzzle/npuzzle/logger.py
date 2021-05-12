@@ -4,6 +4,9 @@ import logging
 from helpers.memorytools import *
 from helpers.timetools import *
 from sys import stdout, platform
+from npuzzle.platform_info import getSystemInfo
+import json
+
 SECTION_SEPARATOR = '=========================================================================='
 
 def initLogger(logfile):
@@ -43,16 +46,22 @@ def printLogHeader(logger, run_id, input_file, result_file, pdim, algo, heur, ti
 	logger.info(f'Puzzle: {puzzlesize}')
 	logger.info(f'\nSEARCH ALGORITHM: \t{algo}')
 	logger.info(f'HEURISTIC: \t\t{heur}')
-	logger.info(f'Timeout: \t\t{secondsToWhatever(timeout_sec)}')
+	if timeout_sec is not None:
+		logger.info(f'Timeout: \t\t{secondsToWhatever(timeout_sec)}')
+	else:
+		logger.info(f'Timeout: \t\t{str(timeout_sec)}')
 	logger.info(f'\nGoal state: {gstate}')
 	logger.info(f'{SECTION_SEPARATOR}\n')
+	logger.info(f' \nSYSTEM:')
+	logger.info(getSystemInfo())
+	logger.info(f'{SECTION_SEPARATOR}\n')
 	
-	logger.info('''NOTE:
-	For A*:
+	logger.info('''note:
+	for A*:
 	  - space complexity = nodes generated
 	  - time complexity = nodes generated
 		
-	For IDA*:
+	for IDA*:
 	  - space complexity = max path length
 	  - time complexity: nodes generated''')
 	logger.info(f'\n{SECTION_SEPARATOR}\n')

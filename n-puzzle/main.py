@@ -143,9 +143,9 @@ def main(arglist=None):
     #------------------------- SET UP LOG INFO ---------#
     logheader = {
         'psize': size,
-        'algo': 'IDA*' if args.ida else 'A*',
+        'algo': ('IDA*-R' if args.r else 'IDA*') if args.ida else 'A*',
         'heur': args.f,
-        'timeout_s': 'None',
+        'timeout_s': None,
         'goal': args.s
         
     }
@@ -303,7 +303,7 @@ def main(arglist=None):
         'foundSol': True if success else False,  # none if failed, False if not found, True if found
         'timedOut': searchTimedOut,
         'goal': args.s,
-        'runtime_sec': f'{t_search:.3f}',
+        'runtime_sec': t_search,
         'nodes_gen': res[2]['time'],
         'algo': 'IDA*' if args.ida else 'A*', # for knowing which is time and space complexity
         'sol_len': sol_len,

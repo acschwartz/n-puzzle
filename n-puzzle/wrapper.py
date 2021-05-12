@@ -18,9 +18,11 @@ from npuzzle.pdb import pdb
 from npuzzle import colors
 from npuzzle.colors import color
 from npuzzle import logger
+from npuzzle import platform_info
 
 
 colors.enabled = True
+global RUN_ID
 RUN_ID = strftime(f'%b%d-%Y_%I-%M-%S%p')
 OUTPUT_DIRECTORY = 'output/'
 
@@ -174,6 +176,7 @@ if __name__ == '__main__':
 		wrapperParser = argparse.ArgumentParser()
 		wrapperParser.add_argument('-pdb', help='pattern database as heuristic function', choices=list(pdb.PDBINFO.keys()))
 		wrapperParser.add_argument('-b', '-batch', dest='batch', help='batch input from file', type=argparse.FileType('r'))
+		wrapperParser.add_argument('-o', help='specify output filename')
 		wrapperArgs = wrapperParser.parse_args()
 		PDB_CONNECTION = None
 		
@@ -198,7 +201,8 @@ if __name__ == '__main__':
 		
 		##~~~~~~~~~~~~~~~~~~~ Display & Initialize WRAPPER Settings ~~~~~~~~~~~~~~~~~~~~~~
 		redNone = color('red', 'none')
-		
+		if wrapperArgs.o:
+			RUN_ID = ''.join([wrapperArgs.o, '___', RUN_ID])
 		print(color('white', f'Wrapper instance {RUN_ID}'))
 #		'SETTINGS \N{HAMMER AND WRENCH}'
 		print()
@@ -269,11 +273,17 @@ if __name__ == '__main__':
 		##~~~~~~~~~~~~~~~~~~ Initialize OUTPUT File & Display Choice ~~~~~~~~~~~~~~~~~~~~~~
 		if outputToFile:
 			initDirectory(OUTPUT_DIRECTORY)
-			output_filename = f'{OUTPUT_DIRECTORY}{stripFilename(input_filename)}__{RUN_ID}.json'
+			if wrapperArgs.o:
+				output_filename = f'{OUTPUT_DIRECTORY}{RUN_ID}.json'
+			else:
+				output_filename = f'{OUTPUT_DIRECTORY}{stripFilename(input_filename)}__{RUN_ID}.json'
 			fo = open(output_filename, 'w')
 			print(color('blue2', f'\N{WRAPPED PRESENT} Output: '), f'{output_filename}')
 			
-			logfile = f'{OUTPUT_DIRECTORY}{stripFilename(input_filename)}__{RUN_ID}.log'
+			if wrapperArgs.o:
+				logfile = f'{OUTPUT_DIRECTORY}{RUN_ID}.log'
+			else:
+				logfile = f'{OUTPUT_DIRECTORY}{stripFilename(input_filename)}__{RUN_ID}.log'
 			log = logger.initLogger(logfile)
 			print(color('blue2', f'\N{MEMO} Log: '), f'{logfile}')	# or \N{SPIRAL NOTE PAD}
 		else:
@@ -286,7 +296,7 @@ if __name__ == '__main__':
 		
 		
 		resultsDictionary = {}
-		
+		maxrss_start = platform_info.getMaxRSS()
 		##=====================  FRESH INPUT FOR SOLVER  ===========================
 		while 1:
 			ARGSLIST = []
@@ -440,8 +450,8 @@ if __name__ == '__main__':
 #						print(SEPARATOR_TILDE)
 						
 						
-						print(color('blue2', f'\nINPUT:'), f'{input_filename}')
-						print(color('blue2', f'\nOUTPUT:'), f'{output_filename}')
+						print(color('blue2', f'\n\N{INBOX TRAY} INPUT:'), f'{input_filename}')
+						print(color('blue2', f'\n\N{OUTBOX TRAY} OUTPUT:'), f'{output_filename}')
 						print(color('blue2', f'\n\N{MEMO} LOG: '), f'{logfile}')	# or \N{SPIRAL NOTE PAD}
 						
 #						print(f'\n{SEPARATOR_DASH}')
@@ -456,9 +466,8 @@ if __name__ == '__main__':
 							if not doNotPrint:
 								print(line)
 						
-#						print('\N{CHEQUERED FLAG}')
 						t_elaps = secondsToWhatever(perf_counter()-t_start)
-						printAndOrLog(f'\n\n processed {n_processed} inputs in  {t_elaps}')
+						printAndOrLog(f'\n\n \N{CHEQUERED FLAG} processed {n_processed} inputs in  {t_elaps}')
 						printAndOrLog(f'{SEPARATOR_DOTS}\n')
 						
 						if n_fail:
@@ -466,18 +475,20 @@ if __name__ == '__main__':
 							printAndOrLog(f'  {n_fail} or {num_lines} inputs failed (had errors)', doNotPrint=True)
 							if n_success:
 								print("  \u2714", color('green2', f'{n_success}'), color('white', 'of'), color('green2', f'{num_lines}'), color('white','inputs processed successfully'))
-								printAndOrLog(f'  {n_success} or {num_lines} inputs processed successfully', doNotPrint=True)
+								printAndOrLog(f'  {n_success} of {num_lines} inputs processed successfully', doNotPrint=True)
 							
 						else: # success only
 							print(" \u2705", color('green2', f'{n_success}'), color('white', 'of'), color('green2', f'{num_lines}'), color('white','inputs processed successfully'))
-							printAndOrLog(f'  {n_success} or {num_lines} inputs processed successfully', doNotPrint=True)
+							printAndOrLog(f'  {n_success} of {num_lines} inputs processed successfully', doNotPrint=True)
 											
 	#					print(f'\n time elapsed: {secondsToWhatever(perf_counter()-t_start)}')
-						print(color('blue2', '\n\n OUTPUT (RESULT) FILE: '), color('white2', f'{output_filename} '))
+						print(color('blue2', "\n\n   OUTPUT FILE: "), color('white2', f'{output_filename} '))
 						print(color('blue2', f'\N{MEMO} LOGFILE: '), f'{logfile}')	# or \N{SPIRAL NOTE PAD}
 						
 						printAndOrLog(f'{SEPARATOR_DOTS}')
 						
+						printAndOrLog(f'Max RSS (of wrapper and all runs): {platform_info.prettyMemory(platform_info.getMaxRSS()-maxrss_start)}')
+						printAndOrLog(f'Keep in mind all results are held in memory and are dumped to json at the end.  ')
 							
 					
 					try:
@@ -494,24 +505,24 @@ if __name__ == '__main__':
 							printRunHeader()
 							print(f'DEBUG: calling solver from {lineno()}')
 							success, logheader, resultSet = callSolver(argsThisRun, silent=True)
-							if log and not wroteLogHeaderInfo:
+							if log and resultSet and not wroteLogHeaderInfo:
 								logger.printLogHeader(log, RUN_ID, input_filename, output_filename, logheader['psize'], logheader['algo'], logheader['heur'], logheader['timeout_s'], logheader['goal'])
 								wroteLogHeaderInfo = True
 								
 							n_processed += 1
-							if success is True: # doesn't handle unsolvable puzzles lol
+							if success is not None:
 								n_success += 1
 							else:
 								n_fail += 1
 							
-							if success is not None:
+							if resultSet:
 								resultsDictionary[n_processed] = resultSet.copy()
-							
+								# NOTE:  FAILED RUNS ARE NOT RECORDED TO LOG OR REUSLTS RN!
 							print('\n')
 						
 						if outputToFile:
 							json.dump(resultsDictionary, fo, allow_nan=True, indent=4, sort_keys=True)
-							print(color('magenta2', '------> wrote results to Json file'))
+							print(color('magenta2', '------> successfully wrote results to Json file!'))
 						printFooter(log)
 						break
 					except Exception as exc:
