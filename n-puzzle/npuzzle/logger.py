@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
 import logging
-from helpers.memorytools import *
-from helpers.timetools import *
+from platform_info import *
 from sys import stdout, platform
 from npuzzle.platform_info import getSystemInfo
 import json
