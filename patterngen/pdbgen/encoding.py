@@ -18,12 +18,8 @@ def decode8puzzle(bytestr):
 		decoded.append(n%16)
 	return tuple(decoded)
 
-#def encode15puzzle_fringe(pattern):
-## includes the location of the empty tile because there is room for it anyway
-## (digit in the byte string not used by any pattern tiles
-## e.g. a pattern like this: [0,3,7,11,12,13,14,15] ---> b'\x03\x7b\xcd\xef'
 
-def encode15puzzle_fringe(pattern):	# odd length pattern
+def encode15puzzle_fringe_DummyTile(pattern):	# odd length pattern
 # e.g. 	pattern2 = [3,7,0,12,13,14,15] ---> b'\x13\x70\xcd\xef'
 # this is an odd-length pattern and the left-most 1 in the encoding is a dummy -
 # it will be cleaved off during decoding.
@@ -44,7 +40,7 @@ def encode15puzzle_fringe(pattern):	# odd length pattern
 	return bytes(encoding)
 
 
-def decode15puzzle_fringe(bytestr):
+def decode15puzzle_fringe_DummyTile(bytestr):
 # e.g. 	pattern2 = b'\x13\x70\xcd\xef' ---> [3,7,0,12,13,14,15]
 	decoded = []
 	for n in bytestr:
