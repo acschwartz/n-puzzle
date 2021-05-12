@@ -207,7 +207,7 @@ def main(arglist=None):
             timeout.turnOffAlarm()
         except timeout.TimeOutException:
             searchTimedOut = True
-            print(f'Search timed out after {TIMEOUT_SEC} seconds ({secToMin(TIMEOUT_SEC)} mins)')
+            print(color('red2', f' \N{NO ENTRY SIGN}\N{STOPWATCH} Search timed out after {TIMEOUT_SEC} seconds ({secToMin(TIMEOUT_SEC)} mins !)'))
             from npuzzle.search import ida_star_nodes_generated, ida_star_max_path_length
             print(f'Nodes generated: {ida_star_nodes_generated}')
             res = (False, None, {'space':ida_star_max_path_length, 'time':ida_star_nodes_generated})
@@ -218,7 +218,7 @@ def main(arglist=None):
             timeout.turnOffAlarm()
         except timeout.TimeOutException:
             searchTimedOut = True
-            print(color('red2', f'Search timed out after {TIMEOUT_SEC} seconds ({secToMin(TIMEOUT_SEC)} mins)'))
+            print(color('red2', f' \N{NO ENTRY SIGN}\N{STOPWATCH} Search timed out after {TIMEOUT_SEC} seconds ({secToMin(TIMEOUT_SEC)} mins !)'))
             from npuzzle.search import a_star_nodes_generated
             print(f'Nodes generated: {a_star_nodes_generated}')
             res = (False, None, {'space':a_star_nodes_generated, 'time':a_star_nodes_generated})
@@ -264,16 +264,17 @@ def main(arglist=None):
     fmt = '%d' + color('green2',' nodes generated, ') + '%.8f' + color('green',' second(s) per node')
     print(fmt % (complexity['time'], t_search / max(complexity['time'],1) ))
     if success:
+        print(color('yellow', '\N{GLOWING STAR} solution found '))
         print(color('yellow2','length of solution:'), max(len(steps) - 1, 0))
         if args.showsteps or args.p:
-            print(color('green', 'initial state and solution steps:'))
+            print(color('green', '\N{FOOTPRINTS} initial state and solution steps:'))
             if args.p:
                 pretty_print_steps(steps, size)
             else:
                 for s in steps:
                     print(s)
     else:
-        print(color('red','solution not found'))
+        print(color('red','\N{THUMBS DOWN SIGN} solution not found'))
 #    if success and args.v:
 #        visualizer(steps, size)
     
@@ -291,7 +292,7 @@ def main(arglist=None):
     # -------- POPULATE RESULTSET --------#
     resultSet = {
         'init': str(puzzle),
-        'foundSol': True if success else False,  # none if failed, False if not found, True if found
+        'foundSol': success,  # none if failed, False if not found, True if found
         'timedOut': searchTimedOut,
         'goal': args.s,
         'runtime_sec': t_search,
@@ -304,7 +305,7 @@ def main(arglist=None):
     # -------- POPULATE RESULTSET --------#
     
     print(resultSet)
-    return ((True if success else False), logheader, resultSet)
+    return (success, logheader, resultSet)
 
     
 if __name__ == '__main__':  

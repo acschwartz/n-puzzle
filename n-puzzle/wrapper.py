@@ -91,13 +91,14 @@ def callSolver(args, silent=False):
 		print()
 	try:
 		success, logheader, resultSet = solver(args)
+		return success, logheader, resultSet
 	except Exception as exc:
 		printException(exc, lineno())
 		return None, None, None
 	except SystemExit as s:
 		printException(s, lineno())
 		return None, None, None
-	return success, logheader, resultSet
+	
 
 def lineno():
 	"""Returns the current line number in the program."""

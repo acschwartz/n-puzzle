@@ -6,7 +6,6 @@ import signal
 import time
 
 class TimeOutException(Exception):
-	print('>> TimeOutException raised')
 	pass
 	
 def alarm_handler(signum, frame):
@@ -17,7 +16,8 @@ def loop(n):
 	for sec in range(n):
 		print("sec {}".format(sec))
 		time.sleep(1)
-		
+
+# Sets handler
 signal.signal(signal.SIGALRM, alarm_handler)
 
 def setAlarm(seconds):
