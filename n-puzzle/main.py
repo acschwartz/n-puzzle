@@ -5,7 +5,7 @@ import resource
 import tracemalloc
 from time import perf_counter
 #from npuzzle.visualizer import visualizer
-from npuzzle import search
+from npuzzle.search import a_star_search, ida_star_search
 from npuzzle.is_solvable import is_solvable
 from npuzzle import colors
 from npuzzle.colors import color
@@ -15,6 +15,7 @@ from npuzzle import goal_states
 from npuzzle.pdb import pdb
 from npuzzle import timeout
 import sqlite3
+import argparse
 
 colors.enabled = True
 
@@ -50,6 +51,24 @@ def bytes_to_human_readable_string(size,precision=2):
         size = size/1024.0 #apply the division
     return "%.*f%s"%(precision,size,suffixes[suffixIndex])
 
+def secToMin(seconds):
+    return seconds/60
+
+def minToSec(minutes):
+    return minutes*60
+
+def KBtoBytes(kb):
+    return kb * 1024.0
+
+def bytesToKB(bytes):
+    return bytes / 1024.0
+
+def standardizeMemoryToBytes(memValReturnedByOS):
+    if sys.platform.beginswith('darwin'):
+        print('-----hello from macOS;-----')
+        return memValReturnedByOS # as bytes
+    else:
+        return KBtoBytes(memValReturnedByOS)
 
 def color_yes_no(v):
     return color('green', 'YES') if v else color('red', 'NO')
@@ -93,20 +112,26 @@ def main(arglist=None):
     global PDB_CONNECTION
 
     # if None passed, uses sys.argv[1:], else use custom args
-    if arglist:
-        print(f'\n{__name__}: args received from function call: {arglist}\n')
-        if isinstance(arglist[0], sqlite3.Connection):
-            print('DB connected already!')
-            PDB_CONNECTION = arglist.pop(0)
-            print(PDB_CONNECTION)
+    receivedDBConnectionAsArgument = False
+    try:
+        if arglist:
+            print(f'\n{__name__}: args received from function call: {arglist}\n')
+            if isinstance(arglist[0], sqlite3.Connection):
+                print('DB connected already!')
+                PDB_CONNECTION = arglist.pop(0)
+                print(PDB_CONNECTION)
+                receivedDBConnectionAsArgument = True
+            else:
+                PDB_CONNECTION = None
+            data = parser.get_input(arglist)
         else:
+            data = parser.get_input()
+            print(f'\n{__name__}: args received from command line: {data}\n')
             PDB_CONNECTION = None
-        data = parser.get_input(arglist)
-    else:
-        data = parser.get_input()
-        print(f'\n{__name__}: args received from command line: {data}\n')
-        PDB_CONNECTION = None
-        
+    except Exception as exc:
+        raise RuntimeError
+
+
     if not data:
         return None
     puzzle, size, args = data
@@ -133,45 +158,50 @@ def main(arglist=None):
     verbose_info(args, puzzle, goal_state, size, PDB_CONNECTION)
     if not is_solvable(puzzle, goal_state, size):
         print(color('red','this puzzle is not solvable'))
-        sys.exit(0)
+        return None
     
     # code snippet for making IDA* memory profiling work on linux
     # problem: tracemalloc prohibitively slow, and maxrss doesn't capture it
     # NOTE: !!!!!! only implemented for 15-puzzle
-    USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE = (size == 4) and (sys.platform == 'linux') and (args.ida)
-#    USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE = False
+#    USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE = (size == 4) and (sys.platform == 'linux') and (args.ida)
+    USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE = False
     
     if not USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE:
         if args.tracemalloc:
             tracemalloc.start()
         else:
             maxrss_before_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-#            print(color('red', 'max rss before search:'), maxrss_before_search)
+            print(color('white', 'max rss before search:'), maxrss_before_search)
 
 
     # -------- SEARCH --------- #
     t_before_search = perf_counter()
     if args.tmin:
-        TIMEOUT_SEC = args.tmin * 60 
+        TIMEOUT_SEC = minToSec(args.tmin)
+        timeout.setAlarm(TIMEOUT_SEC)
+    if args.tsec:
+        TIMEOUT_SEC = args.tsec
         timeout.setAlarm(TIMEOUT_SEC)
     res = None
     if args.ida:
         try:
-            res = search.ida_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST, RANDOM_NODE_ORDER, PDB_CONNECTION)
+            res = ida_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST, RANDOM_NODE_ORDER, PDB_CONNECTION)
             timeout.turnOffAlarm()
         except timeout.TimeOutException:
-            print(f'Search timed out after {args.tmin} minutes')
-            print(f'Nodes generated: {search.ida_star_nodes_generated}')
-            res = (False, None, {'space':None, 'time':search.ida_star_nodes_generated})
+            print(f'Search timed out after {TIMEOUT_SEC} seconds ({secToMin(TIMEOUT_SEC)} mins)')
+            from npuzzle.search import ida_star_nodes_generated, ida_star_max_path_length
+            print(f'Nodes generated: {ida_star_nodes_generated}')
+            res = (False, None, {'space':ida_star_max_path_length, 'time':ida_star_nodes_generated})
             timeout.turnOffAlarm()
     else:
         try:
-            res = search.a_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST, PDB_CONNECTION)
+            res = a_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST, PDB_CONNECTION)
             timeout.turnOffAlarm()
         except timeout.TimeOutException:
-            print(f'Search timed out after {args.tmin} minutes')
-            print(f'Nodes generated: {search.a_star_nodes_generated}')
-            res = (False, None, {'space':search.a_star_nodes_generated, 'time':search.a_star_nodes_generated})
+            print(f'Search timed out after {TIMEOUT_SEC} seconds ({secToMin(TIMEOUT_SEC)} mins)')
+            from npuzzle.search import a_star_nodes_generated
+            print(f'Nodes generated: {a_star_nodes_generated}')
+            res = (False, None, {'space':a_star_nodes_generated, 'time':a_star_nodes_generated})
             timeout.turnOffAlarm()
     t_search = perf_counter() - t_before_search
     
@@ -182,28 +212,32 @@ def main(arglist=None):
             peak = tracemalloc.get_traced_memory()[1]
             tracemalloc.stop()
             print(color('red', 'peak memory use (tracemalloc): '), bytes_to_human_readable_string(peak))
+            print(color('red2', 'memory per node: '), f"{bytes_to_human_readable_string(peak/complexity['time'])}")
+
         else:
             maxrss_after_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-#            print(color('red', 'max rss after search: '), maxrss_after_search)
+            print(color('white', 'max rss after search: '), maxrss_after_search)
             
             # on macOS ('darwin'), max_rss reported in bytes
             # on linux, in kB
             MAXRSS_UNIT_COEFFICIENT = 1024 if sys.platform != 'darwin' else 1
-            maxrss_delta = bytes_to_human_readable_string((maxrss_after_search-maxrss_before_search) * MAXRSS_UNIT_COEFFICIENT, 2)
-            print(color('red', 'peak memory use (Δ maxrss): '), maxrss_delta)
-    else:
-        # NOTE: !!! only implemented for manhattan and LC heuristics
-        peak = complexity['space']  # nodes in memory
-        if args.f == 'manhattan':
-            nodesize = 1.4 * 1024  #kB to bytes
-        elif args.f == 'conflicts' or args.f == 'lc':
-            nodesize = 3.0 * 1024  #kB to bytes
-        else:
-            print('main: linux memory workaround not implemented')
-            nodesize = 0
-            # should prob throw exception but this is thrown together ¯\_(ツ)_/¯
-        peak *= nodesize
-        print(color('red', 'peak memory use (calculated): '), bytes_to_human_readable_string(peak))
+            maxrss_delta = maxrss_after_search-maxrss_before_search * MAXRSS_UNIT_COEFFICIENT
+            maxrss_delta_pretty = bytes_to_human_readable_string(maxrss_delta)
+            print(color('red', 'peak memory use (Δ maxrss): '), maxrss_delta_pretty)
+            print(color('red', 'memory per node: '), f"{bytes_to_human_readable_string(maxrss_delta/complexity['time'])}")
+#    else:
+#        # NOTE: !!! only implemented for manhattan and LC heuristics
+#        peak = complexity['space']  # nodes in memory
+#        if args.f == 'manhattan':
+#            nodesize = 1.5 * 1024  #kB to bytes
+#        elif args.f == 'conflicts' or args.f == 'lc':
+#            nodesize = 3.0 * 1024  #kB to bytes
+#        else:
+#            print('main: linux memory workaround not implemented')
+#            nodesize = 0
+#            # should prob throw exception but this is thrown together ¯\_(ツ)_/¯
+#        peak *= nodesize
+#        print(color('red', 'peak memory use (calculated): '), bytes_to_human_readable_string(peak))
 
     print(color('yellow','search duration:') + ' %.4f second(s)' % (t_search))
     fmt = '%d' + color('yellow',' nodes generated, ') + '%.8f' + color('yellow',' second(s) per node')
@@ -224,10 +258,12 @@ def main(arglist=None):
 #    if success and args.v:
 #        visualizer(steps, size)
     
-    try:
-        PDB_CONNECTION.close()
-    except:
-        pass
+    if not receivedDBConnectionAsArgument:
+        try:
+            PDB_CONNECTION.close()
+        except:
+            pass
+
     
 if __name__ == '__main__':  
     # find '-f' in argsv without doing parseargs - just 'peeking' to pre-set up the DB

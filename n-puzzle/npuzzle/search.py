@@ -32,6 +32,7 @@ def get_children(data, size):     # returns CHILDREN
     return res
 
 global a_star_nodes_generated
+a_star_nodes_generated = 0
 def a_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST, PDB_CONNECTION):
     global a_star_nodes_generated
     counter = count()
@@ -41,7 +42,7 @@ def a_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST, PDB_
         # frontier = {node: (g, h)}
     explored = {}
         # explored = {node: parent}
-
+    a_star_nodes_generated = len(frontier)+len(explored)
     '''
     There is a frontier set AND a priority queue for this reason:
     https://docs.python.org/3/library/heapq.html#priority-queue-implementation-notes
@@ -70,6 +71,7 @@ def a_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST, PDB_
         g_child_thispath = g_node + TRANSITION_COST
         children = get_children(node, size)
         for child in children:
+            a_star_nodes_generated += 1
             if child in explored:
                 #prune
                 continue
@@ -87,7 +89,6 @@ def a_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST, PDB_
             heappush(pqueue, (h_child + g_child_thispath, next(counter), child, g_child_thispath, node))
         #\endfor
                 
-    a_star_nodes_generated = len(frontier) + len(explored)
     return (False, [], {'space':a_star_nodes_generated, 'time':a_star_nodes_generated})
                     
 
@@ -97,12 +98,18 @@ Each iteration of IDA* is a complete depth-first search that keeps track of the 
 Since at any point IDA* is performing a depth-first search, the memory requirement of the algorithm is linear in the solution depth.
 '''
 global ida_star_nodes_generated
+ida_star_nodes_generated = 0
+global ida_star_max_path_length
+ida_star_max_path_length = 0
 def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST, RANDOM_NODE_ORDER, PDB_CONNECTION):
     
     def DFS(path, g, f_limit):
         global ida_star_nodes_generated
         ida_star_nodes_generated += 1
         # Note: while I would normally consider the above to count "nodes expanded", since the line of code is executed when a node is expanded. However, after some research, it looks that this implementation features backtracking, where only one node is generated at a time (and uses O(m) memory instead of O(bm). Therefore the above count is correct.
+        
+        global ida_star_max_path_length
+        ida_star_max_path_length = max(len(path)-1, ida_star_max_path_length)
         
         node = path[0]
         f_node = g + HEURISTIC(node, goal_state, size, PDB_CONNECTION)
@@ -129,8 +136,9 @@ def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST, RA
                 path.popleft()  # when that child's subtree is fully explored... pop it back off to backtrack up the path
         return False, min_fcost_exceeding_limit
             
-    
+    global ida_star_max_path_length
     global ida_star_nodes_generated
+    ida_star_max_path_length = 0
     ida_star_nodes_generated = 0
     f_limit = HEURISTIC(init_state, goal_state, size, PDB_CONNECTION)
     
@@ -142,10 +150,10 @@ def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST, RA
         
         if searchresults['goal_found'] is True:
             path.reverse()
-            return (True, path, {'space':len(path), 'time':ida_star_nodes_generated})
+            return (True, path, {'space':ida_star_max_path_length, 'time':ida_star_nodes_generated})
         
         elif searchresults['goal_found'] is False and searchresults['min_fcost_over_limit'] is inf:
-            return (False, [], {'space':len(path), 'time':ida_star_nodes_generated}) 
+            return (False, [], {'space':ida_star_max_path_length, 'time':ida_star_nodes_generated}) 
         else:
             f_limit = searchresults['min_fcost_over_limit']
 

@@ -33,16 +33,17 @@ def is_valid_pdb(pdb_name, goal_state, size):
     return True
 
 def setup_parser():
-    parser = argparse.ArgumentParser(description='n-puzzle solver <3')
+    parser = argparse.ArgumentParser(description='n-puzzle solver ')
 #    parser.add_argument('-c', action='store_false', help='no colors', default=True)
-    parser.add_argument('-f', help='heuristic function', choices=list(heuristics.KV.keys()))
+    parser.add_argument('-f', help='heuristic function', choices=list(heuristics.KV.keys()), default="manhattan")
     parser.add_argument('-ida', action='store_true', help='ida* search (default is A*)')
     parser.add_argument('-r', action='store_true', help='random node ordering (for IDA*)')
-    parser.add_argument('-tmin', '-t', dest='tmin', action='store', type=int, help='timeout (minutes)')
+    parser.add_argument('-tmin', '-tm', dest='tmin', metavar='MINUTES', action='store', type=int, help='timeout (minutes)')
+    parser.add_argument('-tsec', '-ts', dest='tsec', metavar='SECONDS', action='store', type=int, help='timeout (seconds)')
     parser.add_argument( '-str', '--str', dest='commas', action = 'store', type = str, help = 'input passed as string in form: \(1,2,3..\), \"(1,2,3,..)\", 1,2,3,.., \"1,2,3,..\" (commas required)' )
     parser.add_argument('-file', '--file', help='input file containing a single puzzle', type=argparse.FileType('r'))
     parser.add_argument( '-ints', '--ints', metavar='N', action = 'store', nargs='*', type = int, help = 'input passed as cli args: 0 1 2 3 ...' )
-    parser.add_argument('-tracemalloc', '--tracemalloc', '-tm', '--tm', dest='tracemalloc', action='store_true', help='use tracemalloc to profile memory (default: resource module maxrss)')
+    parser.add_argument('-tracemalloc', '--tracemalloc', dest='tracemalloc', action='store_true', help='use tracemalloc to profile memory (default: resource module maxrss)')
     parser.add_argument('-g', action='store_true', help='greedy search')
     parser.add_argument('-u', action='store_true', help='uniform-cost search')
 #    parser.add_argument('-pdb', help='pattern database as heuristic function', choices=list(pdb.PDBINFO.keys()))
@@ -55,6 +56,7 @@ def setup_parser():
 
 def get_input(altargs=None):
     parser = setup_parser()
+    
     if altargs:
         args = parser.parse_args(altargs)
     else:
@@ -71,6 +73,9 @@ def get_input(altargs=None):
         print('parser: please specify heuristic function or pattern database to use')
         return None
     
+    if args.tmin and args.tsec:
+        print('parser: please enter timeout in either minutes OR seconds')
+        return None
     
     if args.file: 
         data = args.file.read().splitlines()
