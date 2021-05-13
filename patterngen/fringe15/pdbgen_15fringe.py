@@ -11,14 +11,15 @@
 import sys
 from time import strftime
 
-from helpers.memorytools import *
-from helpers.timetools import *
+from patterngen.helpers.memorytools import *
+from patterngen.helpers.timetools import *
 
-from pdbgen import generator
-from pdbgen import logger
-from pdbgen import moves
-from pdbgen.parser import parseArgs
-from pdbgen import patterns
+from patterngen.pdbgen import logger
+from patterngen.pdbgen import moves
+from patterngen.pdbgen.parser import parseArgs
+from patterngen.pdbgen import patterns
+import fringe15generator
+
 
 RUN_ID = strftime(f'%y%m%d-%H%M%S')
 OUTPUT_DIRECTORY = 'output/'

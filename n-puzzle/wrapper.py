@@ -5,15 +5,14 @@ import sqlite3
 import re
 import os
 import sys
-import traceback
-import inspect
 import json
+#import textwrap	# TODO: https://programmer.help/blogs/python-3-standard-library-textwarp-text-wrapping-and-filling.html
 
 from copy import copy
 from math import ceil, floor
 from time import strftime, perf_counter
 
-from main import main as solver
+from solver import main as solver
 from npuzzle.pdb import pdb
 from npuzzle import colors
 from npuzzle.colors import color
@@ -56,7 +55,7 @@ def centerOnLine(text, maxlinelength, constructString=True, paddingChar=' '):
 #	print(''.join([bar_Complete, bar_Incomplete]))
 
 
-MAX_LINE_LENGTH = 72
+MAX_LINE_LENGTH = 80
 INDENT = ' ' * 6
 SM_INDENT = ' ' * 2
 SEPARATOR_DOTS = '.' * MAX_LINE_LENGTH
@@ -98,29 +97,6 @@ def callSolver(args, silent=False):
 	except SystemExit as s:
 		printException(s, lineno())
 		return None, None, None
-	
-
-def lineno():
-	"""Returns the current line number in the program."""
-	return inspect.currentframe().f_back.f_lineno
-
-def printException(exc, lineno):
-	print()
-	exc_name = type(exc).__name__
-	title = f'exception caught by {os.path.basename(__file__)} line {lineno} '
-	print(color('white', title))
-	header = centerOnLine('  E X C E P T I O N  ', MAX_LINE_LENGTH, paddingChar='*')
-	redSeparator = color('red2', centerOnLine(f'X', MAX_LINE_LENGTH, paddingChar='X'))
-
-	print(f'{redSeparator}')
-	print(color('red2', header))
-	print(f'{redSeparator}')
-	print(color('red', f' \n\N{NO ENTRY SIGN}  {exc_name} : '), color('red', str(exc)))
-	print()
-	print(color('white', traceback.format_exc()))
-	print('\nStack:')
-	traceback.print_stack()
-	print(f'\n{redSeparator}')
 
 
 def sec_to_hours(seconds):
@@ -156,9 +132,10 @@ SET UP EACH EXPERIMENT:
 
 if __name__ == '__main__':
 	
-	def printArgs(listofargs):
-#		argsEmojiSet = ['\N{SPEECH BALLOON}', '\N{ABACUS}']
-		print(color('blue2', f'\n\N{WRAPPED PRESENT} ARGS:'), color('green', f'{[a for a in listofargs if not isinstance(a, sqlite3.Connection)]}'))
+	def printArgs(listofargs, prefix=''):
+#		argsEmojiSet = ['\N{SPEECH BALLOON}', '\N{ABACUS}, \N{HEAVY PLUS SIGN}, \N{WRAPPED PRESENT}']
+		prefix = '\N{HEAVY PLUS SIGN}'
+		print(color('blue2', f'\n{prefix} ARGS:'), color('green', f'{[a for a in listofargs if not isinstance(a, sqlite3.Connection)]}'))
 	
 	def exitIfExit(inpt):
 		inpt = inpt.strip()
@@ -198,17 +175,13 @@ if __name__ == '__main__':
 		print(f'{INDENT}verbose:  type -h  [or --help]')
 		print(f'{SEPARATOR_DASH}')
 		
-		
-		
 		##~~~~~~~~~~~~~~~~~~~ Display & Initialize WRAPPER Settings ~~~~~~~~~~~~~~~~~~~~~~
 		redNone = color('red', 'none')
 		if wrapperArgs.o:
 			RUN_ID = ''.join([wrapperArgs.o, '___', RUN_ID])
 		print(color('white', f'Wrapper instance {RUN_ID}'))
-#		'SETTINGS \N{HAMMER AND WRENCH}'
-		print()
-#		print(f'{MINI_SEP_DOTS}')
-#		print(color('yellow2', centerOnLine('\N{WRAPPED PRESENT}  YOUR WRAP:  \N{WRAPPED PRESENT}   ', MAX_LINE_LENGTH)))
+#		
+		
 		# TODO: word- SETTINGS? PARAMETERS??? CONFIGURATIONS?
 #		print(color('yellow', centerOnLine(f'{RUN_ID}', MAX_LINE_LENGTH)))
 #		print(color('white', centerOnLine('(persist until exit) ', MAX_LINE_LENGTH)))
@@ -235,7 +208,7 @@ if __name__ == '__main__':
 	
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~ Show DB Connection ~~~~~~~~~~~~~~~~~~~~~~~~~~
 		if PDB_CONNECTION:
-			print('initialized', color('white', str(PDB_CONNECTION)), ' \u2714', '\u2714')
+			print('\N{LINK SYMBOL} initialized', color('white', str(PDB_CONNECTION)), '\N{HANDSHAKE}', ' \u2714', '\u2714')
 		
 #		print(f'\n{MINI_SEP_DOTS}')
 		
@@ -249,7 +222,7 @@ if __name__ == '__main__':
 		if wrapperArgs.pdb:
 			print(color('blue2', f'\n\N{WRAPPED PRESENT} PDB: '), displaypdb)
 		else:
-			print(color('blue2', f'\n* PDB: '), displaypdb)
+			print(color('blue2', f'\n\N{HEAVY MINUS SIGN} PDB: '), displaypdb)
 			
 		
 		
@@ -265,7 +238,7 @@ if __name__ == '__main__':
 			
 			
 		else:
-			print(color('blue2', f'\n* Input: '), 'manual')
+			print(color('blue2', f'\N{HEAVY MINUS SIGN} Input: '), 'manual')
 			outputToFile = False  # TODO: for now!
 #			print(color('red2', '\nNo input file selected.')) #, ' (optional)')
 #			print(color('yellow', 'To use a file for batch input of puzzles, restart the program \nand use flag -b from the command line.'))
@@ -286,10 +259,10 @@ if __name__ == '__main__':
 			else:
 				logfile = f'{OUTPUT_DIRECTORY}{stripFilename(input_filename)}__{RUN_ID}.log'
 			log = logger.initLogger(logfile)
-			print(color('blue2', f'\N{MEMO} Log: '), f'{logfile}')	# or \N{SPIRAL NOTE PAD}
+			print(color('blue2', f'\N{MEMO} Log: '), f'{logfile}')
 		else:
-			print(color('blue2', f'\n* Output:'), 'stdout')
-			print(color('blue2', f'\n* Log:'), color('red', 'none'))
+			print(color('blue2', f'\N{HEAVY MINUS SIGN} Output:'), 'stdout')
+			print(color('blue2', f'\N{HEAVY MINUS SIGN} Log:'), color('red', 'none'))
 			logfile = None
 			log = None
 		
@@ -306,7 +279,8 @@ if __name__ == '__main__':
 #			print(f'{SEPARATOR_EQ}')
 #			print('\n')
 			
-#			solverEmojiSet = [ '\N{ROBOT FACE}', '\N{BRAIN}',  '\N{RAT}',  '\N{ABACUS}',  u"\U0001F50D", u"\U0001F50E" ,'\N{DIRECT HIT}', '\N{JIGSAW PUZZLE PIECE}']
+			solverEmojiSet = [ '\N{ROBOT FACE}', '\N{BRAIN}',  '\N{RAT}',  '\N{ABACUS}',  
+				u"\U0001F50D", u"\U0001F50E" ,'\N{DIRECT HIT}', '\N{JIGSAW PUZZLE PIECE}']
 #			for emoji in solverEmojiSet:
 #				print(color('yellow2', centerOnLine(f'{emoji} ENTER ARGUMENTS FOR SOLVER {emoji} \n', MAX_LINE_LENGTH)))
 			
@@ -436,8 +410,6 @@ if __name__ == '__main__':
 			if (wrapperArgs.pdb and len(ARGSLIST) > 3) or (not wrapperArgs.pdb and len(ARGSLIST) > 0) or (wrapperArgs.batch):
 				if wrapperArgs.batch:
 					def printRunHeader():
-#						print(f'\n\n{SEPARATOR_TILDE}')
-#						print(color('magenta', f'\n\n{SEPARATOR_STAR}'))
 						print(color('magenta', f'{SEPARATOR_DOTS}'))
 						print()
 						txt = [''.join((' '*2, "\N{RUNNER} \N{RUNNER} \N{RUNNER}  RUNNING SOLVER:     ")), f' {n_processed+1} / {num_lines} ', f'\u23f3 {secondsToWhatever(perf_counter()-t_start)} ']
@@ -447,8 +419,7 @@ if __name__ == '__main__':
 						
 						print(''.join((label, blankspace, timeElapsed)))
 						print(color('magenta', f'\n{SEPARATOR_DOTS}'))
-#						print(color('magenta', f'{SEPARATOR_STAR}'))
-#						print(SEPARATOR_TILDE)
+
 						
 						
 						print(color('blue2', f'\n\N{INBOX TRAY} INPUT:'), f'{input_filename}')
@@ -468,7 +439,7 @@ if __name__ == '__main__':
 								print(line)
 						
 						t_elaps = secondsToWhatever(perf_counter()-t_start)
-						printAndOrLog(f'\n\n \N{CHEQUERED FLAG} processed {n_processed} inputs in  {t_elaps}')
+						printAndOrLog(f'\n\n\N{CHEQUERED FLAG} processed {n_processed} inputs in  {t_elaps}')
 						printAndOrLog(f'{SEPARATOR_DOTS}\n')
 						
 						if n_fail:
@@ -490,7 +461,13 @@ if __name__ == '__main__':
 						
 						printAndOrLog(f'Max RSS (of wrapper and all runs): {platform_info.prettyMemory(platform_info.getMaxRSS()-maxrss_start)}')
 						printAndOrLog(f'Keep in mind all results are held in memory and are dumped to json at the end.  ')
-							
+					
+					def writeOutput():
+						if outputToFile:
+							json.dump(resultsDictionary, fo, allow_nan=True, indent=4, sort_keys=True)
+							print(color('blue2', "... successfully wrote results to Json file \u270D\uFE0F"))
+						printFooter(log)
+						
 					
 					try:
 						num_lines = len(batchlines)
@@ -521,14 +498,10 @@ if __name__ == '__main__':
 								# NOTE:  FAILED RUNS ARE NOT RECORDED TO LOG OR REUSLTS RN!
 							print('\n')
 						
-						if outputToFile:
-							json.dump(resultsDictionary, fo, allow_nan=True, indent=4, sort_keys=True)
-							print(color('magenta2', '------> successfully wrote results to Json file!'))
-						printFooter(log)
+						writeOutput()
 						break
 					except Exception as exc:
 						printException(exc, lineno())
-#						printFooter()
 						continue
 					except SystemExit as sysex:
 						printException(sysex, lineno())
