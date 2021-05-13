@@ -1,6 +1,7 @@
 from npuzzle import goal_states
 from npuzzle.pdb import pdb
 from npuzzle.pdb.eightpuzzle.full8puzzle import full8puzzle
+from npuzzle.pdb.eightpuzzle.subprof15 import subprof15
 
 def uniform_cost(puzzle, goal_state, size, db=None):
     return 0
@@ -85,6 +86,12 @@ def pdb_Query_full8puzzle(state, goal_state, size, db_connection):
     cost = pdb.queryPDB(table, pattern, db_connection)
     return cost
 
+def pdb_Query_8puzzleSubproblemOf15Puzzle(state, goal_state, size, db_connection):
+    table, pattern = subprof15.convertToQueryable(state)
+    cost = pdb.queryPDB(table, pattern, db_connection)
+    return cost
+
+
 
 KV = {
         'hamming':      hamming,
@@ -92,4 +99,5 @@ KV = {
         'manhattan':    manhattan,
         'lc':    linear_conflicts,
         'pdb_full8puzzle': pdb_Query_full8puzzle,
+        'pdb_8SubPrOf15': pdb_Query_8puzzleSubproblemOf15Puzzle,
 }

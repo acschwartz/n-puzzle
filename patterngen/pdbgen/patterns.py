@@ -14,13 +14,13 @@ PATTERN_INFO = {
 				'pattern tiles': (3, 7, 11, 12, 13, 14, 15),
 				'goal state': (0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15),
 				'empty tile': 0,
-				'encode': encode15puzzle_fringe,
-				'decode': decode15puzzle_fringe,
+				'encode': encode15puzzle_fringe_DummyTile,
+				'decode': decode15puzzle_fringe_DummyTile,
 				},
 	'full8puzzle': {
 		# 0  1  2
-		# 4  5  6
-		# 8  9 10
+		# 3  4  5
+		# 6  7  8
 				'dim': 3,
 				'pattern tiles': (1, 2, 3, 4, 5, 6, 7, 8),
 				'goal state': (0, 1, 2, 3, 4, 5, 6, 7, 8),
@@ -43,3 +43,18 @@ PATTERN_INFO = {
 				},
 }
 ##==============================================================================================##
+
+#8puzzle subproblem mapping of tiles to normal tiles
+#
+#'goal state': (0, 1, 2, 3, 4, 5, 6, 7, 8),
+#			  (0, 1, 2, 4, 5, 6, 8, 9, 10),
+#
+#normal8puzzle : 8puzzlesubproblem
+#0 : 0 -> 0
+#1 : 1 -> 1
+#2 : 2 -> 2
+#3 : 4 -> 3
+#4 : 5 -> 4
+#6 : 8 -> 6
+#7 : 9 -> 7
+#8 : 10 -> 8

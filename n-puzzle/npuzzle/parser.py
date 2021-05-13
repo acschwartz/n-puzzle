@@ -3,6 +3,8 @@ from npuzzle import heuristics
 from npuzzle import pdb
 from npuzzle import goal_states
 from math import sqrt
+from npuzzle.pdb.eightpuzzle import subprof15
+
 
 def is_valid_input(data):
     if len(data[0]) != 1:
@@ -25,12 +27,12 @@ def is_valid_input(data):
         return 'puzzle tiles must be in range from 0 to SIZE**2-1'
     return True
 
-def is_valid_pdb(pdb_name, goal_state, size):
-    if size != pdb.PDBINFO[pdb_name]['size']:
-        return 'mismatched sizes'
-    if goal_state != pdb.PDBINFO[pdb_name]['goal_state']:
-        return 'mismatched goal states'
-    return True
+#def is_valid_pdb(pdb_name, goal_state, size):
+#    if size != pdb.PDBINFO[pdb_name]['size']:
+#        return 'mismatched sizes'
+#    if goal_state != pdb.PDBINFO[pdb_name]['goal_state']:
+#        return 'mismatched goal states'
+#    return True
 
 def setup_parser():
     parser = argparse.ArgumentParser(description='n-puzzle @ 42 fremont')
@@ -114,6 +116,12 @@ def get_input(altargs=None):
         for row in puzzle:
             for item in row:
                 puzzle1d.append(item)
+    
+    if args.f == 'pdb_8SubPrOf15':
+        v, msg = validatePuzzle(tuple(puzzle1d), size, args)
+        if not v:
+            print(f'parser: {msg}')
+            return None
     
 #    if args.pdb:
 #        validator = is_valid_pdb(args.pdb, args.s, size)
