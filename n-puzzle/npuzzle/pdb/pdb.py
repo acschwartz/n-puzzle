@@ -6,7 +6,7 @@ from npuzzle.pdb.eightpuzzle.subprof15 import subprof15
 
 
 def initDB(pdbtype):
-	print(f'_____ calling initDB_____')
+#	print(f'_____ calling initDB_____')
 	info = PDBINFO[pdbtype]
 	dbfile = info['dbfile']
 	connection = sqlite3.connect(dbfile)	
