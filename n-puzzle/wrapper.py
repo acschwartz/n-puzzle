@@ -234,8 +234,8 @@ if __name__ == '__main__':
 		print(color('white', f'\nBindings '))
 	
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~ Show DB Connection ~~~~~~~~~~~~~~~~~~~~~~~~~~
-#		if PDB_CONNECTION:
-#			print('initialized', color('white', str(PDB_CONNECTION)), ' \u2714', '\u2714')
+		if PDB_CONNECTION:
+			print('initialized', color('white', str(PDB_CONNECTION)), ' \u2714', '\u2714')
 		
 #		print(f'\n{MINI_SEP_DOTS}')
 		

@@ -28,7 +28,7 @@ PATTERN_INFO = {
 				'encode': encode8puzzle,
 				'decode': decode8puzzle,
 				},
-	'8puzzlesubproblem': {
+	'8puzzlesubproblem': { # subprof15
 	# subproblem of 15-puzzle when fringe pattern in target position
 	# maps to 8-puzzle solutions
 		# 0  1  2

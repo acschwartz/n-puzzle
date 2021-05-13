@@ -99,5 +99,5 @@ KV = {
         'manhattan':    manhattan,
         'linearconflicts':    linear_conflicts,
         'pdb_full8puzzle': pdb_Query_full8puzzle,
-        'pdb_8SubPrOf15': pdb_Query_8puzzleSubproblemOf15Puzzle,
+        'pdb_8SubPrOf15': pdb_Query_full8puzzle,  # because it's converted in main.py before being sent to search
 }

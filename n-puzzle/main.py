@@ -13,7 +13,7 @@ from npuzzle import parser
 from npuzzle import heuristics
 from npuzzle import goal_states
 from npuzzle.pdb import pdb
-from npuzzle.pdb.eightpuzzle import subprof15
+from npuzzle.pdb.eightpuzzle.subprof15 import subprof15
 from npuzzle import timeout
 from npuzzle.platform_info import prettyMemory
 import sqlite3
@@ -319,7 +319,11 @@ def main(arglist=None):
     }
     # -------- POPULATE RESULTSET --------#
     
-    print(resultSet)
+    print(color('white2', '\n\nReturning (success, logheader, resultSet)'))
+    print(color('white2', '\nsuccess:'), f'{success}')
+    print(color('white2', '\nlogheader:'), f'\n{logheader}')
+    print(color('white2', '\nresultSet:'), f'\n{resultSet}')
+    
     return (success, logheader, resultSet)
 
     

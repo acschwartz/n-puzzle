@@ -3,7 +3,7 @@ from npuzzle import heuristics
 from npuzzle import pdb
 from npuzzle import goal_states
 from math import sqrt
-from npuzzle.pdb.eightpuzzle import subprof15
+from npuzzle.pdb.eightpuzzle.subprof15 import subprof15
 
 
 def is_valid_input(data):
@@ -125,7 +125,7 @@ def get_input(altargs=None):
                 puzzle1d.append(item)
     
     if args.f == 'pdb_8SubPrOf15':
-        v, msg = validatePuzzle(tuple(puzzle1d), size, args)
+        v, msg = subprof15.validatePuzzle(tuple(puzzle1d), size, args)
         if not v:
             print(f'parser: {msg}')
             return None
