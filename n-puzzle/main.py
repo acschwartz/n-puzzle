@@ -13,6 +13,7 @@ from npuzzle import parser
 from npuzzle import heuristics
 from npuzzle import goal_states
 from npuzzle.pdb import pdb
+from npuzzle.pdb.eightpuzzle import subprof15
 
 global PDB_CONNECTION
 PDB_CONNECTION = None
@@ -57,7 +58,7 @@ def verbose_info(args, puzzle, goal_state, size, PDB_CONNECTION):
             'greedy search:': args.g,
             'uniform cost search:': args.u,
 #            'visualizer:': args.v,
-            'solvable:': is_solvable(puzzle, goal_state, size)
+            'solvable:': is_solvable(puzzle, goal_state, size)              # TODO: SHOULD HAVE OOP.... isInstance...
             }
     opt_color = 'cyan2'
     for k,v in opts1.items():
@@ -113,8 +114,14 @@ def main(arglist=None):
     if args.f.startswith('pdb_') and not PDB_CONNECTION:
         pdbtype = args.f[4:]
         PDB_CONNECTION = pdb.initDB(pdbtype)
-        
     
+    if args.f == 'pdb_8SubPrOf15':
+        print(f'REAL init state: {puzzle}')
+        print(f"REAL goal state: {subprof15.PUZZLE_INFO['goal_state']}: {subprof15.PUZZLE_INFO['goal state repr']}")
+        print(f'Being remapped to 8-puzzle so can be solved... then will turn back..... ') # TODO: make this clean plug-in later
+        puzzle = subprof15.PUZZLE_INFO['encode'](puzzle)
+        
+        
     goal_state = goal_states.KV[args.s](size)
     verbose_info(args, puzzle, goal_state, size, PDB_CONNECTION)
     if not is_solvable(puzzle, goal_state, size):
@@ -143,6 +150,11 @@ def main(arglist=None):
     t_search = perf_counter() - t_before_search
     
     success, steps, complexity = res
+    
+    if args.f == 'pdb_8SubPrOf15':
+        decode = subprof15.PUZZLE_INFO['decode']
+        puzzle = decode(puzzle)
+        steps = [decode(state) for state in steps]
     
     if not USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE:
         if args.tracemalloc:
@@ -183,7 +195,11 @@ def main(arglist=None):
                 pretty_print_steps(steps, size)
             else:
                 for s in steps:
-                    print(s)
+                    if args.f == 'pdb_8SubPrOf15':
+                        print(color('magenta', f'{s}'), '   <--->   ', color('yellow', f"{subprof15.PUZZLE_INFO['encode'](s)}"))
+                    else:
+                        print(s)
+
     else:
         print(color('red','solution not found'))
     print(color('magenta','space complexity:'), complexity['space'], 'nodes in memory')

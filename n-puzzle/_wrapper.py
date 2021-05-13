@@ -2,7 +2,7 @@
 
 import argparse
 import main
-from npuzzle import pdb
+from npuzzle.pdb import pdb
 from npuzzle import colors
 colors.enabled = True
 from npuzzle.colors import color
