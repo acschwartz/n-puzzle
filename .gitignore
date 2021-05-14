@@ -56,7 +56,7 @@ coverage.xml
 *.pot
 
 # Django stuff:
-*.log
+# *.log   --- using .log for my logs which I need... maybe not the most ideal decision hmm
 local_settings.py
 db.sqlite3
 db.sqlite3-journal

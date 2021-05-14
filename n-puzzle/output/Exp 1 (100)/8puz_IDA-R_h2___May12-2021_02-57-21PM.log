@@ -1,0 +1,50 @@
+==========================================================================
+Run ID: 8puz_IDA-R_h2___May12-2021_02-57-21PM
+Input file: input/100_random_8puzzles.txt
+Result file: output/8puz_IDA-R_h2___May12-2021_02-57-21PM.json
+==========================================================================
+
+Puzzle: 8-puzzle
+
+SEARCH ALGORITHM: 	IDA*-R
+HEURISTIC: 		manhattan
+Timeout: 		None
+
+Goal state: zero_first
+==========================================================================
+
+ 
+SYSTEM:
+{
+  "platform": "Darwin",
+  "platform-release": "19.6.0",
+  "platform-version": "Darwin Kernel Version 19.6.0: Tue Nov 10 00:10:30 PST 2020; root:xnu-6153.141.10~1/RELEASE_X86_64",
+  "architecture": "x86_64",
+  "hostname": "Annies-MacBook-Pro.local",
+  "ip-address": "127.0.0.1",
+  "mac-address": "4c:32:75:9a:ca:0b",
+  "processor": "i386",
+  "ram": "8 GB"
+}
+==========================================================================
+
+note:
+	for A*:
+	  - space complexity = nodes generated
+	  - time complexity = nodes generated
+		
+	for IDA*:
+	  - space complexity = max path length
+	  - time complexity: nodes generated
+
+==========================================================================
+
+
+
+ 🏁 processed 100 inputs in  4.53 s
+........................................................................
+
+  100 of 100 inputs processed successfully
+........................................................................
+Max RSS (of wrapper and all runs): 508.00KB
+Keep in mind all results are held in memory and are dumped to json at the end.  
