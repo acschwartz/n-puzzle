@@ -105,6 +105,11 @@ emoji = [
 	'\u2328\uFE0F\N{Fire}',
 	'\N{Reversed Hand with Middle Finger Extended}', # MIDDLE FINGER lol
 	'\N{Personal Computer}\N{Reversed Hand with Middle Finger Extended}',
+    '\u2328\uFE0F\u26A0\uFE0F', #keyboard + warning
+    '\u2328\uFE0F\U0001F447', # keyboard + finger press
+    '\u2328\uFE0F\u203C\uFE0F', # keyboard + !!
+    '\u2328\uFE0F\u2757\uFE0F', # keyboard + !
+    '\u2328\uFE0F\U0001F6D1', # keyboard + stop sign
 #	'\N{}',
 #	'\N{}',
 #	'\N{}',
@@ -114,19 +119,10 @@ emoji = [
 ]
 
 
-#printGridlike(num_cols, rowSepStr, ):
-printable = ''
-for i, em in enumerate(emoji):
-    if i % 5 == 0:
-        printable = ''.join([printable, '\n\n\n'])
-    printable = ''.join([printable, f'\t {em}'])
-printable = printable+'\n'
-print(printable)
-
 
 ExceptionEmojis = [ 
 	'\N{NO ENTRY SIGN}',
-	'\u26A0\uFE0F',  # {WARNING} (which prints as dingbat)
+	'\u26A0\uFE0F',  # {WARNING}/caution (which prints as dingbat)
 #	'\U0001f92c',  # CUSSIN' MAD FACE
 #	'\u2049\uFE0F', #'u\N{EXCLAMATION QUESTION MARK}', (o/w dingbat)
 	'\N{SOS}',  
@@ -176,3 +172,16 @@ solverEmojiSet = [
     '\N{DIRECT HIT}',
     '\N{JIGSAW PUZZLE PIECE}'
 ]
+
+
+
+
+if __name__ == '__main__':
+    #printGridlike(num_cols, rowSepStr, ):
+    printable = ''
+    for i, em in enumerate(emoji):
+        if i % 5 == 0:
+            printable = ''.join([printable, '\n\n\n'])
+        printable = ''.join([printable, f'\t {em}'])
+    printable = printable+'\n'
+    print(printable)
