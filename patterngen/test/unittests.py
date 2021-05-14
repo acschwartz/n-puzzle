@@ -328,7 +328,7 @@ class TestEncoding(unittest.TestCase):
 		print(decode(pattern))
 		print(nodeinfo)
 	
-	def test_encode15puzzle_fringe(self):
+	def test_encode15puzzle_fringe_DummyTile(self):
 		pname = '15puzzle_fringe'
 		ptiles = patterns.PATTERN_INFO[pname]['pattern tiles']
 		goalstate = patterns.PATTERN_INFO[pname]['goal state']
@@ -336,21 +336,21 @@ class TestEncoding(unittest.TestCase):
 		encode = patterns.PATTERN_INFO[pname]['encode']
 		decode = patterns.PATTERN_INFO[pname]['decode']
 	
-	def test_encode15puzzle_fringe(self):
+	def test_encode15puzzle_fringe_DummyTile(self):
 		puzzles = self.fifteenpuzzles_fringe
 		res = []
 		for p in puzzles:
-			res.append(encoding.encode15puzzle_fringe(p['pattern']))
+			res.append(encoding.encode15puzzle_fringe_DummyTile(p['pattern']))
 			
 		for i, e in enumerate(res):
 			self.assertEqual(e, puzzles[i]['encoding'])
 			
 			
-	def test_decode15puzzle_fringe(self):
+	def test_decode15puzzle_fringe_DummyTile(self):
 		puzzles = self.fifteenpuzzles_fringe
 		res = []
 		for p in puzzles:
-			res.append(encoding.decode15puzzle_fringe(p['encoding']))
+			res.append(encoding.decode15puzzle_fringe_DummyTile(p['encoding']))
 			
 		for i, e in enumerate(res):
 			self.assertEqual(e, puzzles[i]['pattern'])
@@ -367,6 +367,32 @@ class TestEncoding(unittest.TestCase):
 		pattern, nodeinfo = generator.splitNode(initnode, len_encoded_pattern)
 		print(decode(pattern))
 		print(nodeinfo)
+		
+	def test_convertState_8pzSubProb_MapTilesTo8Puzzle(self):
+		subpr_goalstate_asStateNotPattern = (0, 1, 2, 4, 5, 6, 8, 9, 10)
+		eightpuzzle_goalstate_asStateNotPattern = (0, 1, 2, 3, 4, 5, 6, 7, 8)
+		self.assertEqual(eightpuzzle_goalstate_asStateNotPattern, tuple(encoding.convertState_8pzSubProb_MapTilesTo8Puzzle(subpr_goalstate_asStateNotPattern)))
+	
+	def test_convertState_8puzzle_ReMapTiles_ToSubproblem(self):
+		subpr_goalstate_asStateNotPattern = (0, 1, 2, 4, 5, 6, 8, 9, 10)
+		eightpuzzle_goalstate_asStateNotPattern = (0, 1, 2, 3, 4, 5, 6, 7, 8)
+		self.assertEqual(tuple(encoding.convertState_8puzzle_ReMapTiles_ToSubproblem(eightpuzzle_goalstate_asStateNotPattern)), tuple(subpr_goalstate_asStateNotPattern))
+	
+	def test_makeInitialNode_8puzzlesubproblem(self):
+		subpr_goalstate_asStateNotPattern = (0, 1, 2, 4, 5, 6, 8, 9, 10)
+		eightpuzzle_goalstate_asStateNotPattern = (0, 1, 2, 3, 4, 5, 6, 7, 8)
+		
+		ptiles = patterns.PATTERN_INFO['8puzzlesubproblem']['pattern tiles']
+		goalstate = patterns.PATTERN_INFO['full8puzzle']['goal state']
+		emptytile = patterns.PATTERN_INFO['full8puzzle']['empty tile']
+		encode = patterns.PATTERN_INFO['full8puzzle']['encode']
+		decode = patterns.PATTERN_INFO['full8puzzle']['decode']
+		generator.makeInitialNode(ptiles, emptytile, <#goalstate#>, <#encode#>)
+		
+		
+		
+		self.assertEqual(tuple(encoding.convertState_8puzzle_ReMapTiles_ToSubproblem(eightpuzzle_goalstate_asStateNotPattern)), tuple(subpr_goalstate_asStateNotPattern))
+		
 		
 
 ##==============================================================================================##

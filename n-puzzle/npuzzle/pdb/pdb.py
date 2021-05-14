@@ -2,10 +2,11 @@
 #from time import perf_counter
 import sqlite3
 from npuzzle.pdb.eightpuzzle.full8puzzle import full8puzzle
+from npuzzle.pdb.eightpuzzle.subprof15 import subprof15
 
 
 def initDB(pdbtype):
-	print(f'_____ calling initDB_____')
+#	print(f'_____ calling initDB_____')
 	info = PDBINFO[pdbtype]
 	dbfile = info['dbfile']
 	connection = sqlite3.connect(dbfile)	
@@ -23,10 +24,9 @@ def queryPDB(tablename, pattern, connection):
 
 
 
-
-
 PDBINFO = {
 	'full8puzzle': full8puzzle.PUZZLE_INFO,
+	'8SubPrOf15': subprof15.PUZZLE_INFO,
 #	'15fringe': {
 #			'file': 	'npuzzle/pdb/15puzzle/4732363__15fringe_database.pickle',
 #			'size':		4,
