@@ -319,7 +319,7 @@ def solver(arglist=None):
                             print(s)
     
         else:
-            print(color('red','\N{THUMBS DOWN SIGN} solution not found'))
+            print(color('red',' \N{THUMBS DOWN SIGN} solution not found'))
     #    if success and args.v:
     #        visualizer(steps, size)
         

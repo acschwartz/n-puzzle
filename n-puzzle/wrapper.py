@@ -172,8 +172,8 @@ if __name__ == '__main__':
                         color('green2', f'{args_filtered}'))
             else:
                 print(
-                    color('yellow2', f'\n  {args_deco}   args:\t'),
-                    color('red2', ' '.join(args_filtered))
+                    color('white2', f'\n  {args_deco}  args:\t'),
+                    color('yellow2', ' '.join(args_filtered))
                 )
                 
         
@@ -253,10 +253,12 @@ if __name__ == '__main__':
             if wrapperArgs.o:
                 RUN_ID = ''.join([wrapperArgs.o, '___', RUN_ID])
             print(
-                    color( 'red2', 
-                            f' \N{LABEL}:  {RUN_ID}\n'),
+                    color('red',
+                            f' \N{WRAPPED PRESENT}  wrapper id: '),
+                    color( 'yellow2', 
+                            f'{RUN_ID}\n\n'),
                     color('white',
-                            f'\N{RIBBON}  wrapping:  ')
+                            f'\N{RIBBON}  bundling params:  ')
 #                    f'\N{SQUARED ID} wrapper instance: {RUN_ID}'
                 ) # alt deco: \N{SQUARED ID} \N{LABEL}
     
@@ -549,31 +551,66 @@ if __name__ == '__main__':
                         # like this nested within several loops... 
                         # TODO: please fix! <3
                         def printRunHeader():
-                            print(color('magenta', f'{SEPARATOR_DOT}'))
-                            print()
+
+#                            txt = [
+#                                ''.join((
+#                                    ' '*2, 
+#                                    "\N{RUNNER} \N{RUNNER} \N{RUNNER}"\
+#                                    " RUNNING SOLVER:     ")
+#                                ),
+#                                f' {n_processed+1} / {num_lines} ', 
+#                                '\u23f3 '\
+#                                f'{secondsToWhatever(perf_counter()-t_start)}'
+#                            ]
+#                            
+#                            label = ''.join(
+#                                (color
+#                                    ('magenta2', txt[0]), 
+#                                    color('cyan2', txt[1])
+#                                ))
+#                            blankspace = ' '*(len(SEPARATOR_DOT)-5-len(''.join(txt)))
+#                            timeElapsed = color('blue', txt[2])
+#                            
+#                            print(''.join((label, blankspace, timeElapsed)))
+                            
+                            # TODO: THIS FORMATTING IDEA IS CUTE BUT I DON'T HAVE TIME FOR IT 
+#                            text = [
+#                                f'{n_processed+1} / {num_lines}',
+#                                color('blue', f'  \u23f3  {secondsToWhatever(perf_counter()-t_start)}'),
+#                                f'\N{RIBBON} \u2715 \N{PACKAGE} \u27f6 \N{WRAPPED PRESENT}',
+#                                color(
+#                                    'white2', 
+#                                    f'wrapper: \N{RIBBON} \u2715 \N{PACKAGE}  '\
+#                                    f'\u27f6  solver(\N{WRAPPED PRESENT})'),
+#                                color(
+#                                    'white2', 
+#                                    f'wrapper ( \N{RIBBON} \u2715 \N{PACKAGE} )  '\
+#                                    f'\u27f6  \N{WRAPPED PRESENT};  solver(\N{WRAPPED PRESENT})'),
+#                            ]
+#                            for t in text:
+#                                print(t)
+                        
+                            print(color('white', f'{SEPARATOR_DOT}\n'))
+                            
                             txt = [
-                                ''.join((
-                                    ' '*2, 
-                                    "\N{RUNNER} \N{RUNNER} \N{RUNNER}  "\
-                                    "RUNNING SOLVER:     ")
-                                ),
-                                f' {n_processed+1} / {num_lines} ', 
-                                '\u23f3 '\
-                                f'{secondsToWhatever(perf_counter()-t_start)}'
+                                ['white', '   > > > > >    '],
+                                ['white2', 'SEARCHING   '],
+                                ['magenta2', f'{n_processed+1} / {num_lines}'],
+                                ['blue2', f'\u23f3  {secondsToWhatever(perf_counter()-t_start)}']
                             ]
                             
-                            label = ''.join(
-                                (color
-                                    ('magenta2', txt[0]), 
-                                    color('cyan2', txt[1])
-                                ))
-                            blankspace = ' '*(len(SEPARATOR_DOT)-5-len(''.join(txt)))
-                            timeElapsed = color('blue', txt[2])
+                            placeholder = ''.join([ele[1] for ele in txt][:-1])
                             
-                            print(''.join((label, blankspace, timeElapsed)))
-                            print(color('magenta', f'\n{SEPARATOR_DOT}'))
-    
-                        
+                            blankspace = ' ' * ( len(SEPARATOR_DOT) 
+                                                - len(placeholder) 
+                                                - len(txt[3][1]) -6 )
+                            
+                            colorized = [color(ele[0], ele[1]) for ele in txt]
+                            line_ = ''.join(colorized[:-1]+[blankspace]+colorized[-1:])
+                            print(line_)
+                            
+                            print(color('white', f'\n{SEPARATOR_DOT}'))
+                            
 #                            print(
 #                                color('blue2', f'\n \N{INPUT SYMBOL FOR NUMBERS}  INPUT:\t'),
 #                                color('green2', f'{input_filename}'))
@@ -583,16 +620,32 @@ if __name__ == '__main__':
 #                                f'{logfile}') 
 #                            print(f'{SEPARATOR_DASH}\n')
                             
+
+                            # TODO: THIS IS SO FKN CUTE BUT DEAL WITH IT LATER!!!! LOL
+#                            print(color('white2', f'\n   wrapper'), 
+#                                  color('white', '(\N{RIBBON} \u2715 \N{PACKAGE} )  \u27f6  \N{WRAPPED PRESENT}\n'))
+                            
                             print(
-                                color('blue', f'\n  \N{LABEL}   label:\t'),
-                                color('white2', (f'{RUN_ID}')))
+                                color('white', f'\n  \N{RIBBON}  bundle\t'),
+                                color('red2', (f'{RUN_ID}')))
+                            
                             print(
-                                color('blue', f'\n  \N{INPUT SYMBOL FOR NUMBERS}  inputs:\t'),
-                                color('green2', f'{input_filename}'))
+                                color('white', f'\n  \N{PACKAGE}  input\t'),
+                                color('green2', f'{input_filename}'),
+                                color('white', f'\t('),
+                                color('cyan2', f'{n_processed+1}'),
+                                color('white', f'of'),
+                                color('cyan2', f'{num_lines}'),
+                                color('white', ')')
+                            )
                             
                             
+                            print(color('white', f'\n{SEPARATOR_DOT}'))
+                            
+                            print(color('white', '\n Calling solver with '))
                             printArgs(argsThisRun, areWrapped=True)
-                            print(f'\n{SEPARATOR_DOT}\n')
+                            print(color('white2', f'\n{SEPARATOR_DOT}\n'))
+                            
                             
                         
                         def printFooter(log):
