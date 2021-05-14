@@ -1,0 +1,48 @@
+==========================================================================
+Run ID: 35more_4_of4__IDA-R_h2__t15___May14-2021_05-52-59AM
+Input file: input/35_of_k100__10xor20xor25/k35_4_of_4.txt
+Result file: output/35more_4_of4__IDA-R_h2__t15___May14-2021_05-52-59AM.json
+==========================================================================
+
+Puzzle: 15-puzzle
+
+SEARCH ALGORITHM: 	IDA*-R
+HEURISTIC: 		manhattan
+Timeout: 		15 m
+
+Goal state: zero_first
+==========================================================================
+
+ 
+SYSTEM:
+{
+  "platform": "Linux",
+  "platform-release": "5.4.0-66-generic",
+  "platform-version": "#74-Ubuntu SMP Wed Jan 27 22:54:38 UTC 2021",
+  "architecture": "x86_64",
+  "hostname": "csel-kh4250-19",
+  "ip-address": "127.0.0.1",
+  "mac-address": "25:21:cc:72:25:0e",
+  "processor": "x86_64",
+  "ram": "31 GB"
+}
+==========================================================================
+
+note:
+	for A*:
+	  - space complexity = nodes generated
+	  - time complexity = nodes generated
+		
+	for IDA*:
+	  - space complexity = max path length
+	  - time complexity: nodes generated
+
+==========================================================================
+
+ Processed 8 inputs in  1.0 h 10.0 m 5.86 s
+................................................................................
+
+  8 of 8 inputs processed successfully
+................................................................................
+Max RSS (of wrapper and all runs): 332.00KB
+Keep in mind all results are held in memory and are dumped to json at the end.  
