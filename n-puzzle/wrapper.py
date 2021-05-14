@@ -6,18 +6,24 @@ import re
 import os
 import sys
 import json
-#import textwrap	# TODO: https://programmer.help/blogs/python-3-standard-library-textwarp-text-wrapping-and-filling.html
+#import textwrap
+# TODO: https://programmer.help/blogs/python-3-standard-library-textwarp-text-wrapping-and-filling.html
 
 from copy import copy
 from math import ceil, floor
 from time import strftime, perf_counter
 
-from solver import main as solver
+from formatting import colors
+from formatting.colors import color
+from formatting.exceptions import *
+from formatting import stringtools as st
+from formatting.txt_elements import *
+
 from npuzzle.pdb import pdb
-from npuzzle import colors
-from npuzzle.colors import color
 from npuzzle import logger
 from npuzzle import platform_info
+
+from solver import solver
 
 
 colors.enabled = True
@@ -27,99 +33,111 @@ OUTPUT_DIRECTORY = 'output/'
 
 
 
-#====================# FORMATTING  #====================#
-def centerOnLine(text, maxlinelength, constructString=True, paddingChar=' '):
-# NOTE this is wonky if you already have the colors appended to the string,
-# or if you use any whitespace chars other than spaces (\t, \n, etc)
-# it messes up the count.
-# therefore it also returns the numbers you need to construct the string yourself
-	emptyspace = maxlinelength-len(text)
-	leftpadding = int(floor(emptyspace/2))
-	rightpadding = int(ceil(emptyspace/2))
-	
-	if constructString:
-		return ''.join((paddingChar*leftpadding, text, paddingChar*rightpadding))
-	else:
-		return leftpadding, rightpadding
-
-
-#	WRONG. lol
-#def printProgressBar(completed, total, linelength, chComplete='+', colorComplete='green2', chIncomplete='-', colorIncomplete='white'):
-#	percentComplete = completed / total
-#	strComplete = chComplete * int(ceil(percentComplete*linelength))
-#	strIncomplete = chIncomplete * int((1 - percentComplete)*linelength)
-#	if len(strComplete)+len(strIncomplete) > linelength:
-#		strIncomplete = strIncomplete[:-1]
-#	bar_Complete = color(colorComplete, strComplete)
-#	bar_Incomplete = color(colorIncomplete, strIncomplete)
-#	print(''.join([bar_Complete, bar_Incomplete]))
-
-
-MAX_LINE_LENGTH = 80
-INDENT = ' ' * 6
-SM_INDENT = ' ' * 2
-SEPARATOR_DOTS = '.' * MAX_LINE_LENGTH
-SEPARATOR_DASH = '-' * MAX_LINE_LENGTH
-SEPARATOR_EQ = '=' * MAX_LINE_LENGTH
-SEPARATOR_STAR = '*' * MAX_LINE_LENGTH
-SEPARATOR_TILDE = '~' * MAX_LINE_LENGTH
-MINI_SEP_DOTS = centerOnLine('. '*12, MAX_LINE_LENGTH)
-
-
-
-	
-
 def initDirectory(dir):
-	if not os.path.exists(dir):
-		os.mkdir(dir)
-		print(f'\nDirectory created: {dir}')
-	return
-
-def stripFilename(fname):
-	f = fname.split('/')
-	f = f[-1]
-	f = f.split('.')
-	f = f[0]
-	return f
+    if not os.path.exists(dir):
+        os.mkdir(dir)
+        print(f'\nDirectory created: {dir}')
+    return
 
 
 def callSolver(args, silent=False):
-	if not silent: 
-		print()
-		print(color('magenta2', centerOnLine(f' CALLING SOLVER ', MAX_LINE_LENGTH, paddingChar='.')))
-		print()
-	try:
-		success, logheader, resultSet = solver(args)
-		return success, logheader, resultSet
-	except Exception as exc:
-		printException(exc, lineno())
-		return None, None, None
-	except SystemExit as s:
-		printException(s, lineno())
-		return None, None, None
+    announcement = ''.join(
+        ['\n', 
+          st.center_by_padding( 
+                f' CALLING SOLVER ', 
+                MAX_LINE_LENGTH, 
+                padding_char='.'), 
+         '\n']
+    )   
+    
+    if not silent: 
+        print(color('magenta2', announcement))
+    
+    try:
+        print( color('yellow',
+                    f'DEBUG: wrapper | callSolver| line {lineno()} |'\
+                    'calling solver ...')
+        )
+        outcome = solver(args)
+        
+        print(color('yellow',
+                    f'DEBUG: wrapper | callSolver| line {lineno()} |'\
+                    f'solver returned: {outcome}')
+        )
+        
+        if outcome:
+            return outcome
+        
+        else:
+            # ??????????????
+            # it this gonna throw an exception
+            pass
+            
+    except SystemExit as ext:
+        print(color('yellow',
+                    f'DEBUG: wrapper | callSolver| line {lineno()} |'\
+                    'caught SystemExit as ext...')
+        )
+        print(color('yellow',
+                    f'DEBUG: wrapper | callSolver| line {lineno()} |'\
+                    'calling printException ...')
+        )
+        printException(ext, lineno())
+        
+        print(color('yellow',
+                    f'DEBUG: wrapper | callSolver| line {lineno()} |'
+                    'calling clean_up_and_exit...')
+        )
+        clean_up_and_exit()
+        
+    except Exception as exc:
+        print(color('yellow',
+                    f'DEBUG: wrapper | callSolver| line {lineno()} |'\
+                    'caught Exception as exc')
+        )
+        print(color('yellow',
+                    f'DEBUG: wrapper | callSolver| line {lineno()} |'\
+                    'calling printException...')
+        )
+        printException(exc, lineno())
+        
+        
+        print(color('yellow',
+                    f'DEBUG: wrapper | callSolver| line {lineno()} |'\
+                    'No cleanup call.')
+        )
+        print(color('yellow',
+                    f'DEBUG: wrapper | callSolver| line {lineno()} |'\
+                    'Did not execute explicit return statement. '\
+                    'What happens next?'))
+#        return #None, None, None 
+#        # this will throw exeption that I can't unpack an iterable
+#        # with value None........ hmmmmmm ......
+
 
 
 def sec_to_hours(seconds):
 # SOURCE: https://stackoverflow.com/questions/775049/how-do-i-convert-seconds-to-hours-minutes-and-seconds
-	h=seconds//3600
-	m=(seconds%3600)//60
-	s=(seconds%3600)%60
-	return f'{h} h {m} m {s:.2f} s'
+    h=seconds//3600
+    m=(seconds%3600)//60
+    s=(seconds%3600)%60
+    return f'{h} h {m} m {s:.2f} s'
 secondsToHours = sec_to_hours
 
+
 def secondsToWhatever(seconds):
-	h=seconds//3600
-	m=(seconds%3600)//60
-	s=(seconds%3600)%60
-	t_string = ''
-	if h > 0:
-		t_string = ''.join([t_string, f'{h} h'])
-	if m > 0:
-		t_string = ''.join([t_string, f' {m} m'])
-	if s > 0:
-		t_string = ''.join([t_string, f' {s:.2f} s'])
-	t_string = t_string.strip()
-	return t_string
+    h=seconds//3600
+    m=(seconds%3600)//60
+    s=(seconds%3600)%60
+    t_string = ''
+    if h > 0:
+        t_string = ''.join([t_string, f'{h} h'])
+    if m > 0:
+        t_string = ''.join([t_string, f' {m} m'])
+    if s > 0:
+        t_string = ''.join([t_string, f' {s:.2f} s'])
+    t_string = t_string.strip()
+    return t_string
 
 '''
 SET UP EACH EXPERIMENT:
@@ -131,412 +149,575 @@ SET UP EACH EXPERIMENT:
 '''
 
 if __name__ == '__main__':
-	
-	def printArgs(listofargs, prefix=''):
-#		argsEmojiSet = ['\N{SPEECH BALLOON}', '\N{ABACUS}, \N{HEAVY PLUS SIGN}, \N{WRAPPED PRESENT}']
-		prefix = '\N{HEAVY PLUS SIGN}'
-		print(color('blue2', f'\n{prefix} ARGS:'), color('green', f'{[a for a in listofargs if not isinstance(a, sqlite3.Connection)]}'))
-	
-	def exitIfExit(inpt):
-		inpt = inpt.strip()
-		exit_substrings = ['q', 'exi', 'wxi', 'xit', 'eit', 'ecit', 'xig', 'evit', 'eci', 'xif', 'xot', 'ex']
-		if any(s in inpt for s in exit_substrings):
-			if PDB_CONNECTION:
-				PDB_CONNECTION.close()
-#				print('SQLite connection closed. Bye!')
-			sys.exit(0)
-	
-	#---------------------------------------------#
-	##### THIS TRY BLOCK ENCASES WHOLE PROGRAM ####
-	# TODO: I wonder if I need the blocks within it then? :/
-	try:
-			
-		wrapperParser = argparse.ArgumentParser()
-		wrapperParser.add_argument('-pdb', help='pattern database as heuristic function', choices=list(pdb.PDBINFO.keys()))
-		wrapperParser.add_argument('-b', '-batch', dest='batch', help='batch input from file', type=argparse.FileType('r'))
-		wrapperParser.add_argument('-o', help='specify output filename')
-		wrapperArgs = wrapperParser.parse_args()
-		PDB_CONNECTION = None
-		
+    
+    def printArgs(listofargs, prefix=''):
+        def hideDB(lst):
+            return [a for a in listofargs 
+                    if not isinstance(a, sqlite3.Connection)]
 
-		#~~~~~~~~~~~~~~~~~~~~~ Program Header & Instructions ~~~~~~~~~~~~~~~~~~~~~
-		
-		print(f'\n{SEPARATOR_EQ}')
-		print(color('red2', ' \N{WRAPPED PRESENT} wrapper:'), color('yellow', 'use to call n-puzzle'), color('yellow2', 'solver'), color('yellow', 'on batches of inputs'))
-		print(f'{SEPARATOR_EQ}')
-		INDENT = ' ' * 6
-		print(f' \u21a9 TO', color('red2', 'EXIT')+':', 'type', color('white2', 'exit'), 'or', color('white2', 'q'))
-		print(SEPARATOR_DASH)
-#		print(color('white2', '\N{DOOR} TO'), color('red2', 'EXIT:'),  'type', color('white2', 'exit'))
-		print('- help with', color('white2', 'wrapper'), f'args:\n  (command line)')
-		print(f'{INDENT}wrapper.py -h  [or --help]')
-		print('- help with', color('white2', 'solver'), f'args:\n  (inside wrapper)')
-		print(f'{INDENT}concise:  type h  [or help]')
-		print(f'{INDENT}verbose:  type -h  [or --help]')
-		print(f'{SEPARATOR_DASH}')
-		
-		##~~~~~~~~~~~~~~~~~~~ Display & Initialize WRAPPER Settings ~~~~~~~~~~~~~~~~~~~~~~
-		redNone = color('red', 'none')
-		if wrapperArgs.o:
-			RUN_ID = ''.join([wrapperArgs.o, '___', RUN_ID])
-		print(color('white', f'Wrapper instance {RUN_ID}'))
-#		
-		
-		# TODO: word- SETTINGS? PARAMETERS??? CONFIGURATIONS?
-#		print(color('yellow', centerOnLine(f'{RUN_ID}', MAX_LINE_LENGTH)))
-#		print(color('white', centerOnLine('(persist until exit) ', MAX_LINE_LENGTH)))
-		
-		##~~~~~~~~~~~~~~~~ Initialize PDB & Display Choice ~~~~~~~~~~~~~~~~~~~~~~
 
-		if wrapperArgs.pdb:
-			# Connect to Database!
-			PDB_CONNECTION = pdb.initDB(wrapperArgs.pdb)
-			displaypdb = color('green2', wrapperArgs.pdb)
-			
-			
-		else:
-			wrapperArgs.pdb = None
-			displaypdb = redNone
-#			print(color('red2', '\nNo pdb selected.')) #, ' (optional)')
-#			print(color('yellow', 'If you meant to select a PDB, restart the program and use flag -pdb \nfrom the command line.'))
-#			print(color('yellow', ''.join(('PDB options: ', str(tuple(pdb.PDBINFO.keys()))))))
-		
-#		print(color('yellow2', 'Configuration:'))
-		
-		
-		print(color('white', f'\nBindings '))
-	
-		#~~~~~~~~~~~~~~~~~~~~~~~~~~ Show DB Connection ~~~~~~~~~~~~~~~~~~~~~~~~~~
-		if PDB_CONNECTION:
-			print('\N{LINK SYMBOL} initialized', color('white', str(PDB_CONNECTION)), '\N{HANDSHAKE}', ' \u2714', '\u2714')
-		
-#		print(f'\n{MINI_SEP_DOTS}')
-		
-		
-#		print()
-#		print(centerOnLine('.  .  .  .', MAX_LINE_LENGTH-1))
-#		print()
-#		print(color('white2', 'SETUP:'))
-		
-#		print(color('blue2', f'\n\N{WRAPPED PRESENT} PDB: '), displaypdb)
-		if wrapperArgs.pdb:
-			print(color('blue2', f'\n\N{WRAPPED PRESENT} PDB: '), displaypdb)
-		else:
-			print(color('blue2', f'\n\N{HEAVY MINUS SIGN} PDB: '), displaypdb)
-			
-		
-		
-		##~~~~~~~~~~~~~~~~~~ Initialize INPUT File & Display Choice ~~~~~~~~~~~~~~~~~~~~~~
-		if wrapperArgs.batch:
-			fi = wrapperArgs.batch	# is already opened for you by parser!
-			input_filename = fi.name
-			batchlines = [line.strip() for line in fi]
-			fi.close()
-			
-			print(color('blue2', f'\N{WRAPPED PRESENT} Input: '), color('green2', f'{input_filename} '), f'({len(batchlines)} lines)')
-			outputToFile = True
-			
-			
-		else:
-			print(color('blue2', f'\N{HEAVY MINUS SIGN} Input: '), 'manual')
-			outputToFile = False  # TODO: for now!
-#			print(color('red2', '\nNo input file selected.')) #, ' (optional)')
-#			print(color('yellow', 'To use a file for batch input of puzzles, restart the program \nand use flag -b from the command line.'))
-	
-		
-		##~~~~~~~~~~~~~~~~~~ Initialize OUTPUT File & Display Choice ~~~~~~~~~~~~~~~~~~~~~~
-		if outputToFile:
-			initDirectory(OUTPUT_DIRECTORY)
-			if wrapperArgs.o:
-				output_filename = f'{OUTPUT_DIRECTORY}{RUN_ID}.json'
-			else:
-				output_filename = f'{OUTPUT_DIRECTORY}{stripFilename(input_filename)}__{RUN_ID}.json'
-			fo = open(output_filename, 'w')
-			print(color('blue2', f'\N{WRAPPED PRESENT} Output: '), f'{output_filename}')
-			
-			if wrapperArgs.o:
-				logfile = f'{OUTPUT_DIRECTORY}{RUN_ID}.log'
-			else:
-				logfile = f'{OUTPUT_DIRECTORY}{stripFilename(input_filename)}__{RUN_ID}.log'
-			log = logger.initLogger(logfile)
-			print(color('blue2', f'\N{MEMO} Log: '), f'{logfile}')
-		else:
-			print(color('blue2', f'\N{HEAVY MINUS SIGN} Output:'), 'stdout')
-			print(color('blue2', f'\N{HEAVY MINUS SIGN} Log:'), color('red', 'none'))
-			logfile = None
-			log = None
-		
-		
-		
-		
-		resultsDictionary = {}
-		maxrss_start = platform_info.getMaxRSS()
-		##=====================  FRESH INPUT FOR SOLVER  ===========================
-		while 1:
-			ARGSLIST = []
-#			print(f'\n{SEPARATOR_DOTS}')
-			
-#			print(f'{SEPARATOR_EQ}')
-#			print('\n')
-			
-			solverEmojiSet = [ '\N{ROBOT FACE}', '\N{BRAIN}',  '\N{RAT}',  '\N{ABACUS}',  
-				u"\U0001F50D", u"\U0001F50E" ,'\N{DIRECT HIT}', '\N{JIGSAW PUZZLE PIECE}']
-#			for emoji in solverEmojiSet:
-#				print(color('yellow2', centerOnLine(f'{emoji} ENTER ARGUMENTS FOR SOLVER {emoji} \n', MAX_LINE_LENGTH)))
-			
-#			solverEmoji = u"\U0001F50D"
-#			print(color('yellow2', centerOnLine(f'{solverEmoji} N-PUZZLE SOLVER {solverEmoji} \n', MAX_LINE_LENGTH)))
-			
-			
-#			if wrapperArgs.pdb:
-#				print (color('cyan2', 'SOLVER USING PDB: '), color('green', wrapperArgs.pdb))
-#			else:
-#				print (color('cyan2', 'SOLVER USING PDB: '), color('red2', 'None'))
-#			print(SEPARATOR_DASH)
-			print(color('white', f'\nBuild argument list:'))
+        args_deco = '\N{SHOPPING TROLLEY}'
+        print(
+            color('blue2',
+                  f'\n {args_deco} ARGS:'), 
+            color('green',
+                  f'{[a for a in listofargs if not isinstance(a, sqlite3.Connection)]}'))
+    
+    def exit_if_exit(user_input_string):
+#        print(color('yellow', 'DEBUG: hello from exit_if_exit'))
+        
+        inpt = user_input_string.strip()
+        exit_substrings = ['exit', 'q', 'exi', 'wxi', 'xit', 'eit',
+                  'ecit', 'xig', 'evit', 'eci', 'xif', 'xot', 'ex']
+        if any(s in inpt for s in exit_substrings):
+            clean_up_and_exit(1)
+    
+    def clean_up_and_exit(exitcode=0):
+        if PDB_CONNECTION:
+            PDB_CONNECTION.close()
+            deco = '\N{Link Symbol}\u200d\N{Cross mark}'
+            print(f'{deco} SQLite connection closed. Bye!')
+        sys.exit(exitcode)
+    
+    #---------------------------------------------#
+    ##### THIS TRY BLOCK ENCASES WHOLE PROGRAM ####
+    # TODO: I wonder if I need the blocks within it then? :/
+    
+    try:
+            
+        wrapperParser = argparse.ArgumentParser()
+        wrapperParser.add_argument(
+            '-pdb', 
+            help='pattern database as heuristic function', 
+            choices=list(pdb.PDBINFO.keys()))
+        wrapperParser.add_argument(
+            '-b',
+            '-batch',
+            dest='batch', 
+            help='batch input from file', 
+            type=argparse.FileType('r'))
+        wrapperParser.add_argument(
+            '-o',
+            help='specify output filename')
+        wrapperArgs = wrapperParser.parse_args()
+        PDB_CONNECTION = None
+        
 
-	
-			if wrapperArgs.pdb:
-				ARGSLIST.append(PDB_CONNECTION)
-				ARGSLIST.extend(['-f', ''.join(['pdb_', wrapperArgs.pdb])])
-			
-			
-			wroteLogHeaderInfo = False
-			
-			while 1:
-				printArgs(ARGSLIST)
-				nextArg = input()
-				exitIfExit(nextArg)
-				
-				if not nextArg:
-					print(SEPARATOR_DASH)
-					print(' - RUN: press SPACE, double-tap Enter, or type run or ok')
-					print(' - DELETE: type del x to remove the last x arguments entered (default 1)')
-					print(SEPARATOR_DASH)
-					nextArg = input()
-					if not nextArg:
-						break # stop taking input
-					
-				nextArg = nextArg.strip()
-					
-				if 'del' in nextArg:
-					res = re.search(r'\d+', nextArg)
-					if res is None:
-						n = 1
-					else:
-						n = int(res.group())
-					if wrapperArgs.pdb:
-						for i in range(n):
-							if len(ARGSLIST) > 3:
-								ARGSLIST.pop()
-							else: 
-								print(color('magenta', 'To change PDB choice, exit program.'))
-								break
-					else:
-						for i in range(n):
-							if ARGSLIST:
-								ARGSLIST.pop()
-					continue
-				
-				if nextArg in ['', 'run', 'ok']:
-					break # stop taking input 
-				
-				if nextArg in ['help', 'h']:	# concise help
-					try:
-						solver(' ')
-						continue
-					except:
-						continue
-				if nextArg in ['--help', '-h']:  # verbose help
-					solver([nextArg])
-					continue
-				
-				if len(nextArg.split(' ')) > 1:
-					listofnextArgs = nextArg.split(' ')
-					listofnextArgs.reverse()
-					print(color('white2', '\nadding...'))
-					while listofnextArgs:
-						a = listofnextArgs.pop()
-						if a in ['-t', 't']:
-							nextArg = '-t'
-							break
-						if a in ['--str', '-str']:
-							nextArg = '--str'
-							print(f' {a}')
-							break
-						else:
-							print(f' {a}')
-							ARGSLIST.append(a)
-					if not listofnextArgs:
-						continue
-				
-				if nextArg in ['-t', 't']:
-					print(color('red','Err:'), f'{nextArg} not accepted.')
-					print(color('white', 'Specify seconds (-ts, -tsec) or minutes (-tm, -tmin)'))
-					continue
-				
-				elif nextArg in ['--str', '-str']:
-					ARGSLIST.append(nextArg)
-					print(color('yellow', f'Enter the string for arg {nextArg} on its own line:'))
-					stringAccepted = False
-					while not stringAccepted:
-						nextArg = input()
-						
-						exitIfExit(nextArg)
-						nextArg = nextArg.strip()
-						if not nextArg:
-							break
-						if ',' not in nextArg:
-							print(color('red','Err:'), 'numbers must be separated by commas')
-						if any(ch in ['\\', '\'', '\"'] for ch in nextArg):
-							print(color('red','Err:'), 'unlike cli, do NOT contain string in quotes or escape any chars')
-						else:
-							stringAccepted = True
-							ARGSLIST.append(nextArg)
-					
-				elif nextArg in ['--ints', '-ints']:
-					ARGSLIST.append(nextArg)
-					print(color('yellow', 'Enter numbers separated by spaces (no other characters)'))
-					nextArg = input()
-					if 'exi' in nextArg:
-						sys.exit(0)
-					nextArg_list = nextArg.split()
-					ARGSLIST.extend(nextArg_list)
-				
-				else:
-					ARGSLIST.append(nextArg)
-			
-			
-			if (wrapperArgs.pdb and len(ARGSLIST) > 3) or (not wrapperArgs.pdb and len(ARGSLIST) > 0) or (wrapperArgs.batch):
-				if wrapperArgs.batch:
-					def printRunHeader():
-						print(color('magenta', f'{SEPARATOR_DOTS}'))
-						print()
-						txt = [''.join((' '*2, "\N{RUNNER} \N{RUNNER} \N{RUNNER}  RUNNING SOLVER:     ")), f' {n_processed+1} / {num_lines} ', f'\u23f3 {secondsToWhatever(perf_counter()-t_start)} ']
-						label = ''.join((color('magenta2', txt[0]), color('cyan2', txt[1])))
-						blankspace = ' ' * (len(SEPARATOR_DOTS)-5-len(''.join(txt)))
-						timeElapsed = color('blue', txt[2])
-						
-						print(''.join((label, blankspace, timeElapsed)))
-						print(color('magenta', f'\n{SEPARATOR_DOTS}'))
+        #~~~~~~~~~~~~~~~~ Program Header & Instructions ~~~~~~~~~~~~~~~~
+        print('\n\n')
+        print(f'{SEPARATOR_EQ}\n')
+        print(
+            color('red2',     ' \N{WRAPPED PRESENT} wrapper:'), 
+            color('yellow',   ' call n-puzzle'), 
+            color('yellow2',  'solver'), 
+            color('yellow',   'on batches of inputs'))
+        print(f'\n{SEPARATOR_EQ}')
+        
+        
+        
+        print(color('white',   '- to exit, type'), 
+              color('white2',  'exit'), 
+              color('white',   'or'), 
+              color('white2',  'q'))
+            
+        print(color('white',   '- help with'), 
+              color('white2',  'wrapper'), 
+              color('white',   'args:\n  (command line)'),
+              color('white',  f'{INDENT}wrapper.py -h  [or --help]'))
+        
+        print(color('white',  '- help with'), 
+              color('white2', 'solver'),
+              color('white',  'args:\n  (inside wrapper)'),
+              color('white', f'{INDENT}concise:  type h  [or help]'),
+              color('white',  '{INDENT}verbose:  type -h  [or --help]'))
+        
+        print(f'{SEPARATOR_DASH}\n\n')
+        
+        
+        ##~~~~~~ Display & Initialize Wrapper Choices from CLI ~~~~~~~~
+        redNone = color('red', 'none')
+        if wrapperArgs.o:
+            RUN_ID = ''.join([wrapperArgs.o, '___', RUN_ID])
+        print(
+            color(
+                'white', 
+                f'Wrapper instance \N{SQUARED ID}: {RUN_ID}'
+            ))
 
-						
-						
-						print(color('blue2', f'\n\N{INBOX TRAY} INPUT:'), f'{input_filename}')
-						print(color('blue2', f'\n\N{OUTBOX TRAY} OUTPUT:'), f'{output_filename}')
-						print(color('blue2', f'\n\N{MEMO} LOG: '), f'{logfile}')	# or \N{SPIRAL NOTE PAD}
-						
-#						print(f'\n{SEPARATOR_DASH}')
-						printArgs(argsThisRun)
-						print(f'\n{SEPARATOR_DOTS}\n')
-						
-					
-					def printFooter(log):
-						def printAndOrLog(line, log=log, doNotPrint=False):
-							if log:
-								log.info(line)
-							if not doNotPrint:
-								print(line)
-						
-						t_elaps = secondsToWhatever(perf_counter()-t_start)
-						printAndOrLog(f'\n\n\N{CHEQUERED FLAG} processed {n_processed} inputs in  {t_elaps}')
-						printAndOrLog(f'{SEPARATOR_DOTS}\n')
-						
-						if n_fail:
-							print(" \u274C", color('red2', f'{n_fail}'), color('white', 'of'), color('red2', f'{num_lines}'), color('white', 'inputs'), color('red2','failed'), color('white', '(had errors)'))
-							printAndOrLog(f'  {n_fail} or {num_lines} inputs failed (had errors)', doNotPrint=True)
-							if n_success:
-								print("  \u2714", color('green2', f'{n_success}'), color('white', 'of'), color('green2', f'{num_lines}'), color('white','inputs processed successfully'))
-								printAndOrLog(f'  {n_success} of {num_lines} inputs processed successfully', doNotPrint=True)
-							
-						else: # success only
-							print(" \u2705", color('green2', f'{n_success}'), color('white', 'of'), color('green2', f'{num_lines}'), color('white','inputs processed successfully'))
-							printAndOrLog(f'  {n_success} of {num_lines} inputs processed successfully', doNotPrint=True)
-											
-	#					print(f'\n time elapsed: {secondsToWhatever(perf_counter()-t_start)}')
-						print(color('blue2', "\n\n   OUTPUT FILE: "), color('white2', f'{output_filename} '))
-						print(color('blue2', f'\N{MEMO} LOGFILE: '), f'{logfile}')	# or \N{SPIRAL NOTE PAD}
-						
-						printAndOrLog(f'{SEPARATOR_DOTS}')
-						
-						printAndOrLog(f'Max RSS (of wrapper and all runs): {platform_info.prettyMemory(platform_info.getMaxRSS()-maxrss_start)}')
-						printAndOrLog(f'Keep in mind all results are held in memory and are dumped to json at the end.  ')
-					
-					def writeOutput():
-						if outputToFile:
-							json.dump(resultsDictionary, fo, allow_nan=True, indent=4, sort_keys=True)
-							print(color('blue2', "... successfully wrote results to Json file \u270D\uFE0F"))
-						printFooter(log)
-						
-					
-					try:
-						num_lines = len(batchlines)
-						n_processed = 0
-						n_success = 0
-						n_fail = 0
-						t_start = perf_counter()
-						for line in batchlines:
-							argsThisRun = ARGSLIST.copy()
-							argsThisRun.append('-ints')
-							puzzle = line.split()
-							argsThisRun.extend(puzzle)
-							printRunHeader()
-							print(f'DEBUG: calling solver from {lineno()}')
-							success, logheader, resultSet = callSolver(argsThisRun, silent=True)
-							if log and resultSet and not wroteLogHeaderInfo:
-								logger.printLogHeader(log, RUN_ID, input_filename, output_filename, logheader['psize'], logheader['algo'], logheader['heur'], logheader['timeout_s'], logheader['goal'])
-								wroteLogHeaderInfo = True
-								
-							n_processed += 1
-							if success is not None:
-								n_success += 1
-							else:
-								n_fail += 1
-							
-							if resultSet:
-								resultsDictionary[n_processed] = resultSet.copy()
-								# NOTE:  FAILED RUNS ARE NOT RECORDED TO LOG OR REUSLTS RN!
-							print('\n')
-						
-						writeOutput()
-						break
-					except Exception as exc:
-						printException(exc, lineno())
-						continue
-					except SystemExit as sysex:
-						printException(sysex, lineno())
-					
-				else:
-					try:
-						print(f'DEBUG: calling solver from {lineno()}')
-						success, logheader, resultSet = callSolver(ARGSLIST)
-						if log and not wroteLogHeaderInfo:
-							log.printLogHeader(log, RUN_ID, input_filename, output_filename, logheader['psize'], logheader['algo'], logheader['heur'], logheader['timeout_s'], logheader['goal'])
-							wroteLogHeaderInfo = True
-						continue
-					except Exception as exc:
-						printException(exc, lineno())
-						continue
-					except SystemExit as sysex:
-						printException(sysex, lineno())
-					
-			else:
-				print(f'DEBUG: breaking from line {lineno()}')
-				break
-			
-		
-		if wrapperArgs.pdb:
-			PDB_CONNECTION.close()
-	#		print(color('white', 'SQLite connection closed. Bye!'))
-		else:
-			print()
+        
+        ##~~~~~~~ Initialize & Print PDB if Chosen from CLI  ~~~~~~~~~~~
 
-		
-		if outputToFile:
-			fo.close()
-	
-	##### THIS TRY BLOCK ENCASES WHOLE PROGRAM #####
-	except Exception as exc:
-		printException(exc, lineno())
-		if outputToFile:
-			fo.close()
+        if wrapperArgs.pdb:
+            # Connect to Database!
+            PDB_CONNECTION = pdb.initDB(wrapperArgs.pdb)
+            displaypdb = color('green2', wrapperArgs.pdb)
+            
+            
+        else:
+            wrapperArgs.pdb = None
+            displaypdb = redNone
+    
+        #~~~~~~~~~~~~~~~~~ Print DB Connection Obj ~~~~~~~~~~~~~~~~~~~~~
+        
+        if PDB_CONNECTION:
+            decoL = '\N{HANDSHAKE}'
+            decoR = '' # \N{LINK SYMBOL} 
+            print(f"{decoL} initialized,"\
+                f"{color('white', str(PDB_CONNECTION))} {decoR}")
+        
+        if wrapperArgs.pdb:
+            print(
+                color('blue2', f'\n\N{WRAPPED PRESENT} PDB: \t'), 
+                displaypdb)
+        else:
+            print(
+                color('blue2', f'\n\N{HEAVY MINUS SIGN} PDB: \t'), 
+                displaypdb)
+            
+        
+        
+        ##~~~~~~~~ Initialize INput File & Display Choice ~~~~~~~~~~~~~~
+        if wrapperArgs.batch:
+            # input tile is already opened for you by argparser!
+            fi = wrapperArgs.batch
+            input_filename = fi.name
+            batchlines = [line.strip() for line in fi]
+            fi.close()
+            
+            print(
+                color('blue2', f'\N{WRAPPED PRESENT} Input: \t'), 
+                color('green2', f'{input_filename} '), 
+                color('white2', f'({len(batchlines)} lines)'))
+            
+            outputToFile = True
+            
+        else:
+            print(
+                color('blue2', f'\N{HEAVY MINUS SIGN} Input: \t'),
+                color('white', 'manual'))
+            
+            outputToFile = False  # TODO: for now!
+
+
+
+        ##~~~~~~~~~ Initialize OUTPUT File & Display Choice ~~~~~~~~~~~#
+        if outputToFile:
+            initDirectory(OUTPUT_DIRECTORY)
+            
+            if wrapperArgs.o:
+                output_filename = ''\
+                f'{OUTPUT_DIRECTORY}{RUN_ID}.json'
+            else:
+                output_filename = ''\
+                f'{OUTPUT_DIRECTORY}'\
+                f'{st.get_base_file_name(input_filename)}__{RUN_ID}.json'
+            
+            fo = open(output_filename, 'w')
+            print(
+                color('blue2', 
+                     f'\N{WRAPPED PRESENT} Output: \t'), 
+                f'{output_filename}')
+            
+            if wrapperArgs.o:
+                logfile = f'{OUTPUT_DIRECTORY}{RUN_ID}.log'
+            else:
+                logfile = ''\
+                f'{OUTPUT_DIRECTORY}'\
+                f'{st.get_base_file_name(input_filename)}__{RUN_ID}.log'
+                
+            log = logger.initLogger(logfile)
+            
+            print(color('blue2', f'\N{MEMO} Log: \t'), f'{logfile}')
+            
+        else:
+            print(
+                color('blue2', f'\N{HEAVY MINUS SIGN} Output:\t'),
+                'stdout'
+            )
+            print(
+                color('blue2', f'\N{HEAVY MINUS SIGN} Log:\t'), 
+                color('red', 'none')
+            )
+            
+            logfile = None
+            log = None
+            
+            if wrapperArgs.o:
+                print(
+                    color("yellow",
+                          "\n\nI didn't actually implement writing results"\
+                           '/logging to file with one-by-one inputs'\
+                           "because it's a hell of a fringe case... "\
+                           "Sorry! ¯\/_(ツ)_//¯.\n ")
+                )
+        
+    
+        
+        resultsDictionary = {}
+        maxrss_start = platform_info.getMaxRSS()
+        
+        # =====++======  GET FRESH ARGS FOR SOLVER  ==========+=========
+        # This loop repeats until/unless:
+        # - you are doing batch input from file
+        # - 
+        while 1:
+            
+            ARGSLIST = []
+            print(color('white', f'\nAdd args to list:'))
+            
+            if wrapperArgs.pdb:
+                ARGSLIST.append(PDB_CONNECTION)
+                ARGSLIST.extend(
+                    ['-f', ''.join(['pdb_', wrapperArgs.pdb])]
+                )
+            
+            wroteLogHeaderInfo = False
+            # Log Header info for an input batch is collected
+            # when the first input is run, and is written once.
+            # (Since the contents of the header are the same for all
+            # runs in he batch)
+            
+            while 1:
+                printArgs(ARGSLIST)
+                nextArg = input()
+                exit_if_exit(nextArg)
+                
+                if not nextArg:
+                    print(SEPARATOR_DASH)
+                    print(' - RUN: press SPACE, '\
+                          'double-tap Enter, or type run or ok')
+                    
+                    print(' - DELETE: type del x to remove'\
+                         'the last x arguments entered (default 1)')
+                    print(SEPARATOR_DASH)
+                    
+                    
+                    nextArg = input()
+                    exit_if_exit(nextArg)
+                    if not nextArg:
+                        break # stop taking input
+                    
+#                nextArg = nextArg.strip()
+#                exit_if_exit(nextArg)
+                
+                if 'del' in nextArg:
+                    res = re.search(r'\d+', nextArg)
+                    if res is None:
+                        n = 1
+                    else:
+                        n = int(res.group())
+                    if wrapperArgs.pdb:
+                        for i in range(n):
+                            if len(ARGSLIST) > 3:
+                                ARGSLIST.pop()
+                            else: 
+                                print(
+                                    color('magenta', 'To change '\
+                                    'PDB choice, exit program.'))
+                                break
+                    else:
+                        for i in range(n):
+                            if ARGSLIST:
+                                ARGSLIST.pop()
+                    continue
+                
+                
+                if nextArg in ['', 'run', 'ok']:
+                    break # stop taking input 
+                
+                
+                if nextArg in ['help', 'h']:    # concise help
+                    try:
+                        solver(' ')
+                        continue
+                    except:
+                        continue
+                
+                if nextArg in ['--help', '-h']:  # verbose help
+                    solver([nextArg])
+                    continue
+                
+                
+                if len(nextArg.split(' ')) > 1:
+                    listofnextArgs = nextArg.split(' ')
+                    listofnextArgs.reverse()
+                    print(color('white2', '\nadding...'))
+                    while listofnextArgs:
+                        a = listofnextArgs.pop()
+                        if a in ['-t', 't']:
+                            nextArg = '-t'
+                            break
+                        if a in ['--str', '-str']:
+                            nextArg = '--str'
+                            print(f' {a}')
+                            break
+                        else:
+                            print(f' {a}')
+                            ARGSLIST.append(a)
+                    if not listofnextArgs:
+                        continue
+                
+                
+                if nextArg in ['-t', 't']:
+                    print(
+                         color('red','Err:'), 
+                         f'{nextArg} not accepted.'
+                    )
+                    print(
+                        color('white', 
+                        'Specify seconds (-ts, -tsec) '\
+                        'or minutes (-tm, -tmin)')
+                    )
+                    continue
+                
+                
+                elif nextArg in ['--str', '-str']:
+                    ARGSLIST.append(nextArg)
+                    print(
+                        color('yellow', 
+                            f'Enter the string for arg '\
+                            f'{nextArg} on its own line:')
+                    )
+                    stringAccepted = False
+                    while not stringAccepted:
+                        nextArg = input()
+                        
+                        exit_if_exit(nextArg)
+                        nextArg = nextArg.strip()
+                        if not nextArg:
+                            break
+                        if ',' not in nextArg:
+                            print(
+                                color('red','Err:'), 
+                                'numbers must be separated by commas'
+                            )
+                            
+                        if any(ch in ['\\','\'','\"'] for ch in nextArg):
+                            print(
+                                color('red','Err:'),
+                                'unlike cli, do NOT contain '\
+                                'string in quotes or escape any chars'
+                            )
+                        else:
+                            stringAccepted = True
+                            ARGSLIST.append(nextArg)
+                    
+                elif nextArg in ['--ints', '-ints']:
+                    ARGSLIST.append(nextArg)
+                    print(
+                        color('yellow', 
+                             'Enter numbers separated by spaces '\
+                             '(no other characters)'))
+                    nextArg = input()
+                    
+                    exit_if_exit(nextArg)
+                    nextArg_list = nextArg.split()
+                    ARGSLIST.extend(nextArg_list)
+                
+                else:
+                    ARGSLIST.append(nextArg)
+            
+            
+            if (wrapperArgs.pdb and len(ARGSLIST) > 3) or \
+            (not wrapperArgs.pdb and len(ARGSLIST) > 0) or \
+            (wrapperArgs.batch):
+                if wrapperArgs.batch:
+                    
+                    # It's lowkey so ghetto do define decent sized funcs
+                    # like this nested within several loops... 
+                    # TODO: please fix! <3
+                    def printRunHeader():
+                        print(color('magenta', f'{SEPARATOR_DOT}'))
+                        print()
+                        txt = [
+                            ''.join((
+                                ' '*2, 
+                                "\N{RUNNER} \N{RUNNER} \N{RUNNER}  "\
+                                "RUNNING SOLVER:     ")
+                            ),
+                            f' {n_processed+1} / {num_lines} ', 
+                             '\u23f3 '\
+                            f'{secondsToWhatever(perf_counter()-t_start)}'
+                        ]
+                        
+                        label = ''.join(
+                            (color
+                                ('magenta2', txt[0]), 
+                                color('cyan2', txt[1])
+                            ))
+                        blankspace = ' '*(len(SEPARATOR_DOT)-5-len(''.join(txt)))
+                        timeElapsed = color('blue', txt[2])
+                        
+                        print(''.join((label, blankspace, timeElapsed)))
+                        print(color('magenta', f'\n{SEPARATOR_DOT}'))
+
+                        
+                        print(
+                            color('blue2', f'\n\N{INBOX TRAY} INPUT:'), 
+                            f'{input_filename}')
+                        print(color('blue2', f'\n\N{OUTBOX TRAY} OUTPUT:'),
+                            f'{output_filename}')
+                        print(color('blue2', f'\n\N{MEMO} LOG: '),
+                            f'{logfile}') 
+                        
+                        print(f'\n{SEPARATOR_DASH}')
+                        printArgs(argsThisRun)
+                        print(f'\n{SEPARATOR_DOT}\n')
+                        
+                    
+                    def printFooter(log):
+                        def printAndOrLog(
+                            line, log=log, doNotPrint=False
+                        ):
+                            if log:
+                                log.info(line)
+                            if not doNotPrint:
+                                print(line)
+                        
+                        t_elaps = secondsToWhatever(perf_counter()-t_start)
+                        printAndOrLog(f'\n\n\N{CHEQUERED FLAG} processed {n_processed} inputs in  {t_elaps}')
+                        printAndOrLog(f'{SEPARATOR_DOT}\n')
+                        
+                        if n_fail:
+                            print(" \u274C", color('red2', f'{n_fail}'), color('white', 'of'), color('red2', f'{num_lines}'), color('white', 'inputs'), color('red2','failed'), color('white', '(had errors)'))
+                            printAndOrLog(f'  {n_fail} or {num_lines} inputs failed (had errors)', doNotPrint=True)
+                            if n_success:
+                                print("  \u2714", color('green2', f'{n_success}'), color('white', 'of'), color('green2', f'{num_lines}'), color('white','inputs processed successfully'))
+                                printAndOrLog(f'  {n_success} of {num_lines} inputs processed successfully', doNotPrint=True)
+                            
+                        else: # success only
+                            print(" \u2705", color('green2', f'{n_success}'), color('white', 'of'), color('green2', f'{num_lines}'), color('white','inputs processed successfully'))
+                            printAndOrLog(f'  {n_success} of {num_lines} inputs processed successfully', doNotPrint=True)
+                            
+                            
+    #                    print(f'\n time elapsed: {secondsToWhatever(perf_counter()-t_start)}')
+                        print(color('blue2', "\n\n   OUTPUT FILE: "), color('white2', f'{output_filename} '))
+                        print(color('blue2', f'\N{MEMO} LOGFILE: '), f'{logfile}')    # or \N{SPIRAL NOTE PAD}
+                        
+                        printAndOrLog(f'{SEPARATOR_DOT}')
+                        
+                        printAndOrLog(f'Max RSS (of wrapper and all runs): {platform_info.prettyMemory(platform_info.getMaxRSS()-maxrss_start)}')
+                        printAndOrLog(f'Keep in mind all results are held in memory and are dumped to json at the end.  ')
+                    
+                    def writeOutput():
+                        if outputToFile:
+                            json.dump(resultsDictionary, fo, allow_nan=True, indent=4, sort_keys=True)
+                            print(color('blue2', "... successfully wrote results to Json file \u270D\uFE0F"))
+                        printFooter(log)
+                        
+                    
+                    try:
+                        num_lines = len(batchlines)
+                        n_processed = 0
+                        n_success = 0
+                        n_fail = 0
+                        t_start = perf_counter()
+                        
+                        for line in batchlines:
+                            
+                            argsThisRun = ARGSLIST.copy()
+                            argsThisRun.append('-ints')
+                            puzzle = line.split()
+                            argsThisRun.extend(puzzle)
+                            
+                            printRunHeader()
+                            
+                            print(color('yellow',
+                                        f'DEBUG: wrapper | wrapper|'\
+                                        f'line {lineno()} |'\
+                                        'calling callSolver,'\
+                                        'expecting 3 return vals')
+                            )
+                            outcome = callSolver(argsThisRun, silent=True)
+                            
+                            if outcome: 
+                                success, logheader, resultSet = outcome
+                            
+                                if log and \
+                                resultSet and \
+                                not wroteLogHeaderInfo:
+                                    logger.printLogHeader(log, RUN_ID, input_filename, output_filename, logheader['psize'], logheader['algo'], logheader['heur'], logheader['timeout_s'], logheader['goal'])
+                                    print(color('yellow',
+                                                f'DEBUG: wrapper | wrapper| line {lineno()} |'\
+                                                'Wrote logheader to log file')
+                                    )
+                                    wroteLogHeaderInfo = True
+                            else:
+                                success = None
+                                logheader = None
+                                resultSet = None
+                                
+                            n_processed += 1
+                            if success is not None:
+                                n_success += 1
+                            else:
+                                n_fail += 1
+                            
+                            if resultSet:
+                                resultsDictionary[n_processed] = resultSet.copy()
+                                # NOTE:  FAILED RUNS ARE NOT RECORDED TO LOG OR REUSLTS RN!
+                            print('\n')
+                        
+                        writeOutput()
+                        break
+                    except Exception as exc:
+                        printException(exc, lineno())
+                        continue
+                    except SystemExit as sysex:
+                        printException(sysex, lineno())
+                        print(f'^^ That was printException called from wrapper line {lineno()}. \n'\
+                                 ' now calling clean-up-and-exit ')  
+                        clean_up_and_exit()
+                    
+                else:
+                    try:
+                        print(f'DEBUG: calling callSolver from {lineno()}')
+                        
+                        success, logheader, resultSet = callSolver(ARGSLIST)
+                        
+                        if log and not wroteLogHeaderInfo:
+                            log.printLogHeader(log, RUN_ID, input_filename, output_filename, logheader['psize'], logheader['algo'], logheader['heur'], logheader['timeout_s'], logheader['goal'])
+                            wroteLogHeaderInfo = True
+                            
+                            print(color('yellow',
+                                        f'DEBUG: wrapper | wrapper| line {lineno()} |'\
+                                        'Wrote logheader to log file')
+                            )
+                            
+                        continue
+                    except Exception as exc:
+                        printException(exc, lineno())
+                        continue
+#                    except SystemExit as sysex:
+#                        printException(sysex, lineno())
+                        
+                    
+            else:
+                print(color('yellow',
+                            f'DEBUG: wrapper | wrapper | '\
+                            'line {lineno()} |'\
+                            '"break"ing out of outer loop')
+                )
+                break
+            
+        
+        if wrapperArgs.pdb:
+            PDB_CONNECTION.close()
+            print(color('white', 'SQLite connection closed. Bye!'))
+            
+#        if fo:
+#            fo.close()
+    
+    
+    ##### THIS TRY BLOCK ENCASES WHOLE PROGRAM #####
+    except Exception as exc:
+        print('I wonder if this block ever catches anything? lol')
+        print(color('yellow',
+                    f'DEBUG: wrapper | wrapper| line {lineno()} |'\
+                    'calling printException...')
+        )
+        printException(exc, lineno())
+        clean_up_and_exit()
+#        if fo:
+#            fo.close()
+            
