@@ -24,3 +24,9 @@ that's 35 more!
 
 But I will split set 3 into halves so I can run inputs faster in parallel
 or even quarters hmmm....
+
+
+[SET 4]
+is the remaining 67 that haven't shown up in the other sets
+(so s1^se2^set3). i'm gonna let some searches run unbounded on it
+in the background just for fun... shrug
