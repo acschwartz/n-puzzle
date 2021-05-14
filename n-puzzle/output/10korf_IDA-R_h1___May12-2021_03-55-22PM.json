@@ -1,0 +1,112 @@
+{
+    "1": {
+        "algo": "IDA*",
+        "foundSol": false,
+        "goal": "zero_first",
+        "init": "(11, 4, 0, 8, 6, 10, 5, 13, 12, 7, 14, 3, 1, 2, 9, 15)",
+        "max_path_len": 31,
+        "nodes_gen": 140347922,
+        "runtime_sec": 540.0000859929714,
+        "sol_len": 0,
+        "timedOut": true
+    },
+    "2": {
+        "algo": "IDA*",
+        "foundSol": false,
+        "goal": "zero_first",
+        "init": "(5, 4, 7, 1, 11, 12, 14, 15, 10, 13, 8, 6, 2, 0, 9, 3)",
+        "max_path_len": 32,
+        "nodes_gen": 138954919,
+        "runtime_sec": 540.0000788590405,
+        "sol_len": 0,
+        "timedOut": true
+    },
+    "3": {
+        "algo": "IDA*",
+        "foundSol": false,
+        "goal": "zero_first",
+        "init": "(11, 0, 15, 8, 13, 12, 3, 5, 10, 1, 4, 6, 14, 9, 7, 2)",
+        "max_path_len": 31,
+        "nodes_gen": 139325687,
+        "runtime_sec": 540.0000708340667,
+        "sol_len": 0,
+        "timedOut": true
+    },
+    "4": {
+        "algo": "IDA*",
+        "foundSol": false,
+        "goal": "zero_first",
+        "init": "(15, 1, 3, 12, 4, 0, 6, 5, 2, 8, 14, 9, 13, 10, 7, 11)",
+        "max_path_len": 32,
+        "nodes_gen": 139762829,
+        "runtime_sec": 540.0000783058349,
+        "sol_len": 0,
+        "timedOut": true
+    },
+    "5": {
+        "algo": "IDA*",
+        "foundSol": false,
+        "goal": "zero_first",
+        "init": "(11, 14, 13, 1, 2, 3, 12, 4, 15, 7, 9, 5, 10, 6, 8, 0)",
+        "max_path_len": 30,
+        "nodes_gen": 139433177,
+        "runtime_sec": 540.0000790518243,
+        "sol_len": 0,
+        "timedOut": true
+    },
+    "6": {
+        "algo": "IDA*",
+        "foundSol": false,
+        "goal": "zero_first",
+        "init": "(12, 5, 13, 11, 2, 10, 0, 9, 7, 8, 4, 3, 14, 6, 15, 1)",
+        "max_path_len": 31,
+        "nodes_gen": 137957371,
+        "runtime_sec": 540.0000675499905,
+        "sol_len": 0,
+        "timedOut": true
+    },
+    "7": {
+        "algo": "IDA*",
+        "foundSol": false,
+        "goal": "zero_first",
+        "init": "(11, 5, 1, 14, 4, 12, 10, 0, 2, 7, 13, 3, 9, 15, 6, 8)",
+        "max_path_len": 32,
+        "nodes_gen": 139103602,
+        "runtime_sec": 540.0000646500848,
+        "sol_len": 0,
+        "timedOut": true
+    },
+    "8": {
+        "algo": "IDA*",
+        "foundSol": false,
+        "goal": "zero_first",
+        "init": "(12, 15, 2, 6, 1, 14, 4, 8, 5, 3, 7, 0, 10, 13, 9, 11)",
+        "max_path_len": 32,
+        "nodes_gen": 139694594,
+        "runtime_sec": 540.000079362886,
+        "sol_len": 0,
+        "timedOut": true
+    },
+    "9": {
+        "algo": "IDA*",
+        "foundSol": false,
+        "goal": "zero_first",
+        "init": "(6, 12, 11, 3, 13, 7, 9, 15, 2, 14, 8, 10, 4, 1, 5, 0)",
+        "max_path_len": 31,
+        "nodes_gen": 139760457,
+        "runtime_sec": 540.0000623259693,
+        "sol_len": 0,
+        "timedOut": true
+    },
+    "10": {
+        "algo": "IDA*",
+        "foundSol": false,
+        "goal": "zero_first",
+        "init": "(13, 11, 8, 9, 0, 15, 7, 10, 4, 3, 6, 14, 5, 12, 2, 1)",
+        "max_path_len": 30,
+        "nodes_gen": 139166960,
+        "runtime_sec": 540.0001091319136,
+        "sol_len": 0,
+        "timedOut": true
+    }
+}
