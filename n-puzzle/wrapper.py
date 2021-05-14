@@ -218,14 +218,23 @@ if __name__ == '__main__':
             
     
             #~~~~~~~~~~~~~~~~ Program Header & Instructions ~~~~~~~~~~~~~~~~
-            print('\n\n')
-            print(f'{SEPARATOR_EQ}\n')
+#            print('\n\n')
+#            print(f'{SEPARATOR_EQ}\n')
+#            print(
+#                color('red2',     ' \N{WRAPPED PRESENT}  wrapper:'), 
+#                color('yellow',   ' call n-puzzle'), 
+#                color('yellow2',  'solver'), 
+#                color('yellow',   'on batches of inputs'))
+#            print(f'\n{SEPARATOR_EQ}')
+            
+            #~~~~~~~~~~~~~~~~ Program Header & Instructions ~~~~~~~~~~~~~~~~
+            print('\n')
+            print(f'{SEPARATOR_EQ}')
             print(
-                color('red2',     ' \N{WRAPPED PRESENT}  wrapper:'), 
-                color('yellow',   ' call n-puzzle'), 
-                color('yellow2',  'solver'), 
-                color('yellow',   'on batches of inputs'))
-            print(f'\n{SEPARATOR_EQ}')
+                color('white2',     ' wrapper.py:'), 
+                'batch-calling for the n-puzzle solver',
+            )
+            print(f'{SEPARATOR_EQ}\n')
             
             
 #            TODO: fix (muuuuuch) later
@@ -246,7 +255,7 @@ if __name__ == '__main__':
 #                    color('white',  '{INDENT}verbose:  type -h  [or --help]'))
 #            
 #            print(f'{SEPARATOR_DASH}\n\n')
-            print('\n')
+            
             
             ##~~~~~~ Display & Initialize Wrapper Choices from CLI ~~~~~~~~
             redNone = color('red', 'none')
@@ -465,7 +474,10 @@ if __name__ == '__main__':
                     if len(nextArg.split(' ')) > 1:
                         listofnextArgs = nextArg.split(' ')
                         listofnextArgs.reverse()
-                        print(color('white2', '\nadding...'))
+                        print(
+                            color('white1', '\n \N{BUILDING CONSTRUCTION}  '),
+                            color('white2', 'adding...')
+                        )
                         while listofnextArgs:
                             a = listofnextArgs.pop()
                             if a in ['-t', 't']:
