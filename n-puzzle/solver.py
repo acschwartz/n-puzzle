@@ -111,7 +111,7 @@ def verbose_info(args, puzzle, goal_state, size, PDB_CONNECTION):
     
     emoji_randomness = ['\N{SLOT MACHINE}', '\N{GAME DIE}']
     shuffle(emoji_randomness)
-    print(color('red2', 'search algorithm:'), ('{emoji_randomness[0]} IDA* random node ordering (IDA*-R)' if args.r else 'IDA*') if args.ida else 'A*')
+    print(color('red2', 'search algorithm:'), (f'{emoji_randomness[0]} IDA* random node ordering (IDA*-R)' if args.r else 'IDA*') if args.ida else 'A*')
 
 
 #########################################################################################
