@@ -35,7 +35,7 @@ def is_valid_input(data):
 #    return True
 
 def setup_parser():
-    parser = argparse.ArgumentParser(description='n-puzzle solver ')
+    parser = argparse.ArgumentParser(description=' \N{INPUT SYMBOL FOR NUMBERS} n-puzzle solver ')
 #    parser.add_argument('-c', action='store_false', help='no colors', default=True)
     parser.add_argument('-f', help='heuristic function', choices=list(heuristics.KV.keys()), default="manhattan")
     parser.add_argument('-ida', action='store_true', help='ida* search (default is A*)')

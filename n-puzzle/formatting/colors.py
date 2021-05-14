@@ -12,4 +12,3 @@ def color(c, msg):
         return color_codes[ci] + msg + color_codes[eoci]
     else:
         return msg
-

@@ -1,23 +1,33 @@
 #!/usr/bin/env python3
 
+
+
+#import argparse
 import sys
+import sqlite3
 import resource
 import tracemalloc
 from time import perf_counter
+from random import shuffle
+
+
 #from npuzzle.visualizer import visualizer
 from npuzzle.search import a_star_search, ida_star_search
 from npuzzle.is_solvable import is_solvable
-from npuzzle import colors
-from npuzzle.colors import color
+from formatting import colors
+from formatting.colors import color
 from npuzzle import parser
 from npuzzle import heuristics
 from npuzzle import goal_states
 from npuzzle.pdb import pdb
 from npuzzle.pdb.eightpuzzle.subprof15 import subprof15
 from npuzzle import timeout
+from npuzzle.timeout import prettyTime
+
+# TODO: these submodules need to be organized better with the project
 from npuzzle.platform_info import prettyMemory
-import sqlite3
-import argparse
+from formatting.exceptions import *
+
 
 colors.enabled = True
 
@@ -98,13 +108,15 @@ def verbose_info(args, puzzle, goal_state, size, PDB_CONNECTION):
                 print(color('blue', '  - ' + k + '\t:'), v(puzzle, goal_state, size, PDB_CONNECTION))
             except:
                 continue
-
-    print(color('red2', 'search algorithm:'), ('IDA* w/ random node ordering (IDA*-R)' if args.r else 'IDA*') if args.ida else 'A*')
+    
+    emoji_randomness = ['\N{SLOT MACHINE}', '\N{GAME DIE}']
+    shuffle(emoji_randomness)
+    print(color('red2', 'search algorithm:'), ('{emoji_randomness[0]} IDA* random node ordering (IDA*-R)' if args.r else 'IDA*') if args.ida else 'A*')
 
 
 #########################################################################################
 
-def main(arglist=None):
+def solver(arglist=None):
     global PDB_CONNECTION
 
     # if None passed, uses sys.argv[1:], else use custom args
@@ -124,15 +136,22 @@ def main(arglist=None):
             data = parser.get_input()
             print(f'\n{__name__}: args received from command line: {data}\n')
             PDB_CONNECTION = None
+    
+        
+
+        if not data:
+            print('solver.py return')
+            return (None, None, 0) 
+        # (None, None, None) throws an exception when you try to unpack it
+
     except Exception as exc:
-        raise RuntimeError
-
-
-    if not data:
-        return (None, None, None)
-    puzzle, size, args = data
-
-    #------------------------- SET UP LOG INFO ---------#
+        printException(exc, lineno())
+#        sys.exit(exc)
+    
+    
+    puzzle, size, args = data    
+    
+    #------------- SET UP LOG HEADER SCHEMA -----------#
     logheader = {
         'psize': size,
         'algo': ('IDA*-R' if args.r else 'IDA*') if args.ida else 'A*',
@@ -143,7 +162,7 @@ def main(arglist=None):
     }
     #---------------------------------------------------#
     
-    #----------------------- INIT RESULTSET ---------#
+    #----------------- INIT RESULTSET ------------------#
     
     resultSet = {}
     
@@ -207,13 +226,18 @@ def main(arglist=None):
         logheader['timeout_s'] = TIMEOUT_SEC
     res = None
     searchTimedOut = False
+    
+    
     if args.ida:
         try:
             res = ida_star_search(puzzle, goal_state, size, HEURISTIC, TRANSITION_COST, RANDOM_NODE_ORDER, PDB_CONNECTION)
             timeout.turnOffAlarm()
         except timeout.TimeOutException:
             searchTimedOut = True
-            print(color('red2', f' \N{NO ENTRY SIGN}\N{STOPWATCH} Search timed out after {TIMEOUT_SEC} seconds ({secToMin(TIMEOUT_SEC)} mins !)'))
+#            emoji = ( '\N{NO ENTRY SIGN} \N{STOPWATCH} ')
+#            print('t\o at ')
+#            timeOutMessage = color('red2', f' \N{ALARM CLOCK} Search timed out after {TIMEOUT_SEC} seconds ({secToMin(TIMEOUT_SEC)} mins !)')
+#            print(timeOutMessage)
             from npuzzle.search import ida_star_nodes_generated, ida_star_max_path_length
             print(f'Nodes generated: {ida_star_nodes_generated}')
             res = (False, None, {'space':ida_star_max_path_length, 'time':ida_star_nodes_generated})
@@ -224,7 +248,7 @@ def main(arglist=None):
             timeout.turnOffAlarm()
         except timeout.TimeOutException:
             searchTimedOut = True
-            print(color('red2', f' \N{NO ENTRY SIGN}\N{STOPWATCH} Search timed out after {TIMEOUT_SEC} seconds ({secToMin(TIMEOUT_SEC)} mins !)'))
+#            print(color('red2', f' \N{NO ENTRY SIGN}\N{STOPWATCH} Search timed out after {TIMEOUT_SEC} seconds ({secToMin(TIMEOUT_SEC)} mins !)'))
             from npuzzle.search import a_star_nodes_generated
             print(f'Nodes generated: {a_star_nodes_generated}')
             res = (False, None, {'space':a_star_nodes_generated, 'time':a_star_nodes_generated})
@@ -269,16 +293,21 @@ def main(arglist=None):
 #            # should prob throw exception but this is thrown together ¯\_(ツ)_/¯
 #        peak *= nodesize
 #        print(color('red', 'peak memory use (calculated): '), bytes_to_human_readable_string(peak))
+    print(color('yellow2', f' \u231B search duration: {prettyTime(t_search)}'))
     print(color('magenta2','space complexity:'), f"{complexity['space']:,}", 'nodes in memory')
     print(color('green2','time complexity:'), f"{complexity['time']:,}", 'nodes generated')
-    print(color('green2','search duration:') + ' %.4f second(s)' % (t_search))
-    fmt = '%d' + color('green2',' nodes generated, ') + '%.8f' + color('green',' second(s) per node')
-    print(fmt % (complexity['time'], t_search / max(complexity['time'],1) ))
+    print(f" {(t_search / max(complexity['time'],1)):.5f}")
+#    fmt = '%d' + color('green2',' nodes generated, ') + '%.8f' + color('green',' second(s) per node')
+#    print(fmt % (complexity['time'], t_search / max(complexity['time'],1) ))
+    
+    print('\n')
+    if searchTimedOut:
+        print(color('red2', f' \N{ALARM CLOCK} Search timed out after'),(color('white2', f'{prettyTime(TIMEOUT_SEC)} ')))
     if success:
         print(color('yellow', '\N{GLOWING STAR} solution found '))
         print(color('yellow2','length of solution:'), max(len(steps) - 1, 0))
         if args.showsteps or args.p:
-            print(color('green', '\N{FOOTPRINTS} initial state and solution steps:'))
+            print(color('green', '\N{WORLD MAP} initial state and solution steps:'))  # or \N{FOOTPRINTS}
             if args.p:
                 pretty_print_steps(steps, size)
             else:
@@ -319,25 +348,30 @@ def main(arglist=None):
     }
     # -------- POPULATE RESULTSET --------#
     
-    print(color('white2', '\n\nReturning (success, logheader, resultSet)'))
-    print(color('white2', '\nsuccess:'), f'{success}')
-    print(color('white2', '\nlogheader:'), f'\n{logheader}')
-    print(color('white2', '\nresultSet:'), f'\n{resultSet}')
+#    print(color('white2', '\n\nReturning (success, logheader, resultSet)'))
+#    print(color('white2', '\nsuccess:'), f'{success}')
+#    print(color('white2', '\nlogheader:'), f'\n{logheader}')
+#    print(color('white2', '\nresultSet:'), f'\n{resultSet}')
+    print('\n\n')
     
     return (success, logheader, resultSet)
 
     
-if __name__ == '__main__':  
-    # find '-f' in argsv without doing parseargs - just 'peeking' to pre-set up the DB
-    args = sys.argv[1:]
-    print(args)
-    heuristic = args[(args.index('-f')+1)]
-    if heuristic.startswith('pdb_'):
-        pdbname = heuristic[4:]
-        # actually I don't know if I need the above... lol
-        
-    global PDB_CONNECTION
-    PDB_CONNECTION = None
     
-    main(sys.argv[1:])
+#--- TAKING AWAY ABILITY TO CALL IT AS A SCRIPT FOR NOW....
+# --- I LKE MY WRAPPER BETTER FOR ME
+    
+#if __name__ == '__main__':  
+#    # find '-f' in argsv without doing parseargs - just 'peeking' to pre-set up the DB
+##    args = sys.argv[1:]
+##    print(args)
+##    heuristic = args[(args.index('-f')+1)]
+##    if heuristic.startswith('pdb_'):
+##        pdbname = heuristic[4:]
+##        # actually I don't know if I need the above... lol
+#        
+#    global PDB_CONNECTION
+#    PDB_CONNECTION = None
+#    
+#    main(sys.argv[1:])
     

@@ -36,3 +36,13 @@ def turnOffAlarm():
 #signal.alarm(0)
 #
 #loop(6)
+	
+	
+def prettyTime(seconds, shorter=True):
+	h=seconds//3600
+	m=(seconds%3600)//60
+	s=(seconds%3600)%60
+	if shorter:
+		return f'{h} h {m} m {s:.2f} s'
+	else:
+		return f'{h} hours {m} mins {s:.2f} sec'
