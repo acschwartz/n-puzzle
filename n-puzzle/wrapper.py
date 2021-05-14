@@ -232,7 +232,7 @@ if __name__ == '__main__':
             print(f'{SEPARATOR_EQ}')
             print(
                 color('white2',     ' wrapper.py:'), 
-                'batch-calling for the n-puzzle solver',
+                'batch-processing for the n-puzzle solver',
             )
             print(f'{SEPARATOR_EQ}\n')
             
@@ -602,7 +602,8 @@ if __name__ == '__main__':
 #                            for t in text:
 #                                print(t)
                         
-                            print(color('white', f'{SEPARATOR_DOT}\n'))
+#                            print(color('white', f'{SEPARATOR_DOT}\n'))
+                            print(f'{SEPARATOR_DOT}\n')
                             
                             txt = [
                                 ['white', '   > > > > >    '],
@@ -621,7 +622,8 @@ if __name__ == '__main__':
                             line_ = ''.join(colorized[:-1]+[blankspace]+colorized[-1:])
                             print(line_)
                             
-                            print(color('white', f'\n{SEPARATOR_DOT}'))
+#                            print(color('white', f'\n{SEPARATOR_DOT}'))
+                            print(f'\n{SEPARATOR_DOT}')
                             
 #                            print(
 #                                color('blue2', f'\n \N{INPUT SYMBOL FOR NUMBERS}  INPUT:\t'),
@@ -652,11 +654,13 @@ if __name__ == '__main__':
                             )
                             
                             
-                            print(color('white', f'\n{SEPARATOR_DOT}'))
+#                            print(color('white', f'\n{SEPARATOR_DOT}'))
+                            print(f'\n{SEPARATOR_DOT}')
                             
                             print(color('white', '\n Calling solver with '))
                             printArgs(argsThisRun, areWrapped=True)
-                            print(color('white2', f'\n{SEPARATOR_DOT}\n'))
+#                            print(color('white2', f'\n{SEPARATOR_DOT}\n'))
+                            print(f'\n{SEPARATOR_DOT}\n')
                             
                             
                         
