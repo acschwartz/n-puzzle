@@ -603,27 +603,48 @@ if __name__ == '__main__':
 #                                print(t)
                         
 #                            print(color('white', f'{SEPARATOR_DOT}\n'))
-                            print(f'{SEPARATOR_DOT}\n')
                             
+                            #TODO: this should be a function but I'm too tired
+                            print(f'{SEPARATOR_DOT}\n')
                             txt = [
                                 ['white', '   > > > > >    '],
                                 ['white2', 'SEARCHING   '],
                                 ['magenta2', f'{n_processed+1} / {num_lines}'],
-                                ['blue2', f'\u23f3  {secondsToWhatever(perf_counter()-t_start)}']
+                                ['white', f"{strftime(f'%I:%M:%S %p  %m/%d/%y')} "]
                             ]
                             
-                            placeholder = ''.join([ele[1] for ele in txt][:-1])
+                            leftside_textonly_nocolor = ''.join([ele[1] for ele in txt][:-1])
+                            rightside_textonly_nocolor = txt[3][1]
                             
                             blankspace = ' ' * ( len(SEPARATOR_DOT) 
-                                                - len(placeholder) 
-                                                - len(txt[3][1]) -6 )
+                                                - len(leftside_textonly_nocolor) 
+                                                - len(rightside_textonly_nocolor))
+                            
+                            colorized = [color(ele[0], ele[1]) for ele in txt]
+                            line_ = ''.join(colorized[:-1]+[blankspace]+colorized[-1:])
+                            print(line_)
+                            #----
+                            txt = [
+                                ['white', ' '],
+                                ['white', '  '],
+                                ['white', f' '],
+                                ['blue', f'\u23f3  {secondsToWhatever(perf_counter()-t_start)} ']
+                            ]
+                            
+                            leftside_textonly_nocolor = ''.join([ele[1] for ele in txt][:-1])
+                            rightside_textonly_nocolor = txt[3][1]
+                            
+                            blankspace = ' ' * ( len(SEPARATOR_DOT) 
+                                                - len(leftside_textonly_nocolor) 
+                                                - len(rightside_textonly_nocolor))
                             
                             colorized = [color(ele[0], ele[1]) for ele in txt]
                             line_ = ''.join(colorized[:-1]+[blankspace]+colorized[-1:])
                             print(line_)
                             
+                            
 #                            print(color('white', f'\n{SEPARATOR_DOT}'))
-                            print(f'\n{SEPARATOR_DOT}')
+                            print(f'{SEPARATOR_DOT}')
                             
 #                            print(
 #                                color('blue2', f'\n \N{INPUT SYMBOL FOR NUMBERS}  INPUT:\t'),
@@ -661,7 +682,7 @@ if __name__ == '__main__':
                             printArgs(argsThisRun, areWrapped=True)
 #                            print(color('white2', f'\n{SEPARATOR_DOT}\n'))
                             print(f'\n{SEPARATOR_DOT}\n')
-                            
+
                             
                         
                         def printFooter(log):
