@@ -38,7 +38,7 @@ def printException(exc, lineNo, verbose=True):
 	exc_name = type(exc).__name__
 	remark = f'\nexception caught by {os.path.basename(__file__)} '\
 			f'line {lineNo}'
-	print(color( 'blue', remark ))
+	print(color( 'black', remark ))
 	
 	separator = color('red2', 
 					  center_by_padding('X', MAX_LINE_LENGTH, 'X'))
@@ -58,7 +58,7 @@ def printException(exc, lineNo, verbose=True):
 				else random_emoji()
 	deco_right = ''   # nothing right now
 	
-	print(color('red2', f' \n  {deco_left}  {exc_name} : '), 
+	print(color('red2', f' \n  {deco_left}   {exc_name} : '), 
 		  color('yellow2', f'{str(exc)} {deco_right}'))
 	
 	if verbose:

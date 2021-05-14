@@ -1,0 +1,3 @@
+I split up the Korf 100 set for parallel processing
+
+Original 100 = korf100_15puzzles

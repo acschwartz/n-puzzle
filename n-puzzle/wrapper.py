@@ -158,18 +158,24 @@ SET UP EACH EXPERIMENT:
 
 if __name__ == '__main__':
     try:    
-        def printArgs(listofargs, prefix=''):
+        def printArgs(listofargs, prefix='', areWrapped=False):
             def hideDB(lst):
                 return [a for a in listofargs 
                         if not isinstance(a, sqlite3.Connection)]
     
-    
-            args_deco = '\N{SHOPPING TROLLEY}'
-            print(
-                color('blue2',
-                        f'\n {args_deco} ARGS:'), 
-                color('green',
-                        f'{[a for a in listofargs if not isinstance(a, sqlite3.Connection)]}'))
+            args_deco = '\N{WRAPPED PRESENT}' if areWrapped else '\N{PACKAGE}'
+            args_filtered = [a for a in listofargs if not isinstance(a, sqlite3.Connection)]
+            
+            if not areWrapped:
+                print( #color('blue2', f'\n {args_deco} ARGS:'), 
+                        f' {args_deco} ',
+                        color('green2', f'{args_filtered}'))
+            else:
+                print(
+                    color('yellow2', f'\n  {args_deco}   args:\t'),
+                    color('red2', ' '.join(args_filtered))
+                )
+                
         
         def exit_if_exit(user_input_string):
     #        print(color('yellow', 'DEBUG: hello from exit_if_exit'))
@@ -215,42 +221,44 @@ if __name__ == '__main__':
             print('\n\n')
             print(f'{SEPARATOR_EQ}\n')
             print(
-                color('red2',     ' \N{WRAPPED PRESENT} wrapper:'), 
+                color('red2',     ' \N{WRAPPED PRESENT}  wrapper:'), 
                 color('yellow',   ' call n-puzzle'), 
                 color('yellow2',  'solver'), 
                 color('yellow',   'on batches of inputs'))
             print(f'\n{SEPARATOR_EQ}')
             
             
-            
-            print(color('white',   '- to exit, type'), 
-                    color('white2',  'exit'), 
-                    color('white',   'or'), 
-                    color('white2',  'q'))
-                
-            print(color('white',   '- help with'), 
-                    color('white2',  'wrapper'), 
-                    color('white',   'args:\n  (command line)'),
-                    color('white',  f'{INDENT}wrapper.py -h  [or --help]'))
-            
-            print(color('white',  '- help with'), 
-                    color('white2', 'solver'),
-                    color('white',  'args:\n  (inside wrapper)'),
-                    color('white', f'{INDENT}concise:  type h  [or help]'),
-                    color('white',  '{INDENT}verbose:  type -h  [or --help]'))
-            
-            print(f'{SEPARATOR_DASH}\n\n')
-            
+#            TODO: fix (muuuuuch) later
+#            print(color('white',   '- to exit, type'), 
+#                    color('white2',  'exit'), 
+#                    color('white',   'or'), 
+#                    color('white2',  'q'))
+#                
+#            print(color('white',   '- help with'), 
+#                    color('white2',  'wrapper'), 
+#                    color('white',   'args:\n  (command line)'),
+#                    color('white',  f'{INDENT}wrapper.py -h  [or --help]'))
+#            
+#            print(color('white',  '- help with'), 
+#                    color('white2', 'solver'),
+#                    color('white',  'args:\n  (inside wrapper)'),
+#                    color('white', f'{INDENT}concise:  type h  [or help]'),
+#                    color('white',  '{INDENT}verbose:  type -h  [or --help]'))
+#            
+#            print(f'{SEPARATOR_DASH}\n\n')
+            print('\n')
             
             ##~~~~~~ Display & Initialize Wrapper Choices from CLI ~~~~~~~~
             redNone = color('red', 'none')
             if wrapperArgs.o:
                 RUN_ID = ''.join([wrapperArgs.o, '___', RUN_ID])
             print(
-                color(
-                    'white', 
-                    f'Wrapper instance \N{SQUARED ID}: {RUN_ID}'
-                ))
+                    color( 'red2', 
+                            f' \N{LABEL}:  {RUN_ID}\n'),
+                    color('white',
+                            f'\N{RIBBON}  wrapping:  ')
+#                    f'\N{SQUARED ID} wrapper instance: {RUN_ID}'
+                ) # alt deco: \N{SQUARED ID} \N{LABEL}
     
             
             ##~~~~~~~ Initialize & Print PDB if Chosen from CLI  ~~~~~~~~~~~
@@ -267,19 +275,23 @@ if __name__ == '__main__':
         
             #~~~~~~~~~~~~~~~~~ Print DB Connection Obj ~~~~~~~~~~~~~~~~~~~~~
             
-            if PDB_CONNECTION:
-                decoL = '\N{HANDSHAKE}'
-                decoR = '' # \N{LINK SYMBOL} 
-                print(f"{decoL} initialized,"\
-                    f"{color('white', str(PDB_CONNECTION))} {decoR}")
+            # CUTE BUT DISTRACTING.... fix up UI later
+#            if PDB_CONNECTION:
+#                decoL = '\N{HANDSHAKE}'
+#                decoR = '' # \N{LINK SYMBOL} 
+#                print(
+#                    f"{decoL} "\
+#                    f"{color('black', 'initialized')},"\
+#                    f"{color('black', str(PDB_CONNECTION))}"\
+#                    f" {decoR}")
             
             if wrapperArgs.pdb:
                 print(
-                    color('blue2', f'\n\N{WRAPPED PRESENT} PDB: \t'), 
+                    color('blue2', f'\n \N{HEAVY MINUS SIGN} PDB: \t'), 
                     displaypdb)
             else:
                 print(
-                    color('blue2', f'\n\N{HEAVY MINUS SIGN} PDB: \t'), 
+                    color('blue2', f'\n \N{HEAVY MINUS SIGN} PDB: \t'), 
                     displaypdb)
                 
             
@@ -293,15 +305,15 @@ if __name__ == '__main__':
                 fi.close()
                 
                 print(
-                    color('blue2', f'\N{WRAPPED PRESENT} Input: \t'), 
+                    color('blue2', f' \N{HEAVY MINUS SIGN} Input: \t'), 
                     color('green2', f'{input_filename} '), 
-                    color('white2', f'({len(batchlines)} lines)'))
+                    color('cyan2', f'({len(batchlines)} lines)'))
                 
                 outputToFile = True
                 
             else:
                 print(
-                    color('blue2', f'\N{HEAVY MINUS SIGN} Input: \t'),
+                    color('blue2', f' \N{HEAVY MINUS SIGN} Input: \t'),
                     color('white', 'manual'))
                 
                 outputToFile = False  # TODO: for now!
@@ -322,9 +334,9 @@ if __name__ == '__main__':
                 
                 fo = open(output_filename, 'w')
                 print(
-                    color('blue2', 
-                        f'\N{WRAPPED PRESENT} Output: \t'), 
-                    f'{output_filename}')
+                    color('blue2', f' \N{HEAVY MINUS SIGN} Output: \t'), 
+                    color('blue', f'{output_filename}')
+                )
                 
                 if wrapperArgs.o:
                     logfile = f'{OUTPUT_DIRECTORY}{RUN_ID}.log'
@@ -335,15 +347,16 @@ if __name__ == '__main__':
                     
                 log = logger.initLogger(logfile)
                 
-                print(color('blue2', f'\N{MEMO} Log: \t'), f'{logfile}')
+                print(color('blue2', f' \N{HEAVY MINUS SIGN} Log: \t'),
+                      color('blue', f'{logfile}')) # \N{MEMO} 
                 
             else:
                 print(
-                    color('blue2', f'\N{HEAVY MINUS SIGN} Output:\t'),
+                    color('blue2', f' \N{HEAVY MINUS SIGN} Output:\t'),
                     'stdout'
                 )
                 print(
-                    color('blue2', f'\N{HEAVY MINUS SIGN} Log:\t'), 
+                    color('blue2', f' \N{HEAVY MINUS SIGN} Log:\t'), 
                     color('red', 'none')
                 )
                 
@@ -368,10 +381,11 @@ if __name__ == '__main__':
             # This loop repeats until/unless:
             # - you are doing batch input from file
             # - 
+            
             while 1:
                 
                 ARGSLIST = []
-                print(color('white', f'\nAdd args to list:'))
+                print(color('white', f'\n \N{BUILDING CONSTRUCTION}   with args: '))
                 
                 if wrapperArgs.pdb:
                     ARGSLIST.append(PDB_CONNECTION)
@@ -559,17 +573,25 @@ if __name__ == '__main__':
                             print(''.join((label, blankspace, timeElapsed)))
                             print(color('magenta', f'\n{SEPARATOR_DOT}'))
     
+                        
+#                            print(
+#                                color('blue2', f'\n \N{INPUT SYMBOL FOR NUMBERS}  INPUT:\t'),
+#                                color('green2', f'{input_filename}'))
+#                            print(color('blue2', f'\n \N{bar chart}  OUTPUT:\t'),
+#                                f'{output_filename}')
+#                            print(color('blue2', f'\n \N{MEMO}  LOG:\t'),
+#                                f'{logfile}') 
+#                            print(f'{SEPARATOR_DASH}\n')
                             
                             print(
-                                color('blue2', f'\n\N{INBOX TRAY} INPUT:'), 
-                                f'{input_filename}')
-                            print(color('blue2', f'\n\N{OUTBOX TRAY} OUTPUT:'),
-                                f'{output_filename}')
-                            print(color('blue2', f'\n\N{MEMO} LOG: '),
-                                f'{logfile}') 
+                                color('blue', f'\n  \N{LABEL}   label:\t'),
+                                color('white2', (f'{RUN_ID}')))
+                            print(
+                                color('blue', f'\n  \N{INPUT SYMBOL FOR NUMBERS}  inputs:\t'),
+                                color('green2', f'{input_filename}'))
                             
-                            print(f'\n{SEPARATOR_DASH}')
-                            printArgs(argsThisRun)
+                            
+                            printArgs(argsThisRun, areWrapped=True)
                             print(f'\n{SEPARATOR_DOT}\n')
                             
                         
@@ -590,9 +612,10 @@ if __name__ == '__main__':
                                 printAndOrLog(f'  {n_success} of {num_lines} inputs processed successfully', log, doNotPrint=True)
                                 
                                 
-        #                    print(f'\n time elapsed: {secondsToWhatever(perf_counter()-t_start)}')
-                            print(color('blue2', "\n\n   OUTPUT FILE: "), color('white2', f'{output_filename} '))
-                            print(color('blue2', f'\N{MEMO} LOGFILE: '), f'{logfile}')    # or \N{SPIRAL NOTE PAD}
+                            print(f'\n \u231B time elapsed: {secondsToWhatever(perf_counter()-t_start)}')
+                            print(color('blue2', "\n \N{HEAVY MINUS SIGN} results: \t"), color('green2', f'{output_filename} '))
+                            print(color('blue2', f'\n \N{HEAVY MINUS SIGN} log: \t'), f'{logfile}') 
+                            # alt \N{MEMO} or \N{SPIRAL NOTE PAD}
                             
                             printAndOrLog(f'{SEPARATOR_DOT}', log)
                             
@@ -603,9 +626,9 @@ if __name__ == '__main__':
                             if outputToFile:
                                 try:
                                     json.dump(resultsDictionary, fo, allow_nan=True, indent=4, sort_keys=True)
-                                    print('Successfully wrote results to json file.')
+                                    print(' Successfully wrote results to json file.')
                                 except:
-                                    print('Writing results failed.')
+                                    print(' Writing results failed.')
                             if do_call_printFooter:
                                 printFooter(log)
                             
@@ -729,8 +752,8 @@ if __name__ == '__main__':
         broom = '\N{BROOM}'
         checkmark= '\u2705'
         print_task = lambda task: print(color('white2', f'\n{task} ... {broom}'))
-        print_done = lambda: print(color('white', f'{HALF_INDENT}Done'))
-        print_failed = lambda errormsg: print(color('white', f'{checkmark} Done'))
+        print_done = lambda: print(color('white', f'{HALF_INDENT}{checkmark} Done'))
+        print_failed = lambda errormsg: print(color('white', f'{HALF_INDENT}\N{CROSS MARK} Failed\n{errormsg}'))
         
         printException(k, lineno(), verbose=False)
         
@@ -777,5 +800,6 @@ if __name__ == '__main__':
                         'them or they will be lost.')
                 print('\nSEPARATOR_EQ')
             
-        print('Cleanup tasks finished. Bye!')
+        print(color('white2', '\nCleanup tasks finished.'))
+        print(color('white', 'Exiting.\n'))
         exit()
