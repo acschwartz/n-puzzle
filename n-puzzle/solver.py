@@ -319,7 +319,7 @@ def solver(arglist=None):
                             print(s)
     
         else:
-            print(color('red','\N{THUMBS DOWN SIGN} solution not found'))
+            print(color('red',' \N{THUMBS DOWN SIGN} solution not found'))
     #    if success and args.v:
     #        visualizer(steps, size)
         
@@ -353,7 +353,7 @@ def solver(arglist=None):
     #    print(color('white2', '\nsuccess:'), f'{success}')
     #    print(color('white2', '\nlogheader:'), f'\n{logheader}')
     #    print(color('white2', '\nresultSet:'), f'\n{resultSet}')
-        print('\n\n')
+        print('\n')
         
         return (success, logheader, resultSet)
     
