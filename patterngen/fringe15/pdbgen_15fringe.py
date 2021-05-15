@@ -21,7 +21,7 @@ from patterngen.pdbgen import patterns
 import fringe15generator
 
 
-RUN_ID = strftime(f'%y%m%d-%H%M%S')
+RUN_ID = strftime(f'%m-%d-%Y_%I-%M-%S%p')
 OUTPUT_DIRECTORY = 'output/'
 
 ##==============================================================================================##

@@ -28,7 +28,7 @@ from solver import solver
 
 colors.enabled = True
 global RUN_ID
-RUN_ID = strftime(f'%b%d-%Y_%I-%M-%S%p')
+RUN_ID = strftime(f'%m-%d-%Y_%I-%M-%S%p')
 OUTPUT_DIRECTORY = 'output/'
 
 
