@@ -1,4 +1,7 @@
-# n-puzzle @ 42 fremont
+# n-puzzle solver
+
+## this is not up to date with new functionality; update when finished
+
 
 ```
 usage: solver.py [-h] [-c] [-ida] [-r] [-g] [-u]
