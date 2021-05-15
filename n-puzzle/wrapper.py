@@ -610,7 +610,7 @@ if __name__ == '__main__':
                                 ['white', '   > > > > >    '],
                                 ['white2', 'SEARCHING   '],
                                 ['magenta2', f'{n_processed+1} / {num_lines}'],
-                                ['white', f"{strftime(f'%I:%M:%S %p  %m/%d/%y')} "]
+                                ['white', f"{strftime(f'%I:%M:%S %p  %m/%d/%y')}"]
                             ]
                             
                             leftside_textonly_nocolor = ''.join([ele[1] for ele in txt][:-1])
