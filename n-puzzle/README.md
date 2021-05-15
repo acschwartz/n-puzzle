@@ -98,4 +98,4 @@ use `-ida -r` for **IDA\* with randomized node ordering**
 
 
 
-[![resources/screenshot.png](resources/screenshot.png "resources/screenshot.png")](resources/screenshot.png "resources/screenshot.png")
+# [![resources/screenshot.png](resources/screenshot.png "resources/screenshot.png")](resources/screenshot.png "resources/screenshot.png")
