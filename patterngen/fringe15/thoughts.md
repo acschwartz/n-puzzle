@@ -164,7 +164,7 @@ and they use much fewer resources than other options, predictably.
 
 
 Each byte in python is treated as a "unit", so:
-b =  b'x\73x\6f\xc9\xde' is made up of 4 subunits 
+b =  b'x\73x\6fx\c9x\de' is made up of 4 subunits 
 b[0] = '\x73' etc ..
 As one "unit" it cannot really be split or indexed further unless you convert it to another type like string or int
 		-which is relatively expensive when it comes to generating >500mil nodes
@@ -177,3 +177,12 @@ As one "unit" it cannot really be split or indexed further unless you convert it
 In the byte '\x73' (\x is just the escape char in the output), the "left digit" 
 73 in hex == 115 so we will need to extract each digit separately - which is just math
 and I already have the formulas for. So... let's get to this
+
+
+------------------------------------------------------------------------ 
+## What else do I need to represent?
+
+Fringe/Frontier: queue of nodes - (pattern repr (with 0 position), cost)
+* cost: can it be bundled in with the state repr?
+* undo-move / mmove that takes you to parent
+------------------------------------------------------------------------
