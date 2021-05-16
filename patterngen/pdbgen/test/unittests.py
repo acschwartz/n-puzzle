@@ -387,7 +387,6 @@ class TestEncoding(unittest.TestCase):
 		emptytile = patterns.PATTERN_INFO['full8puzzle']['empty tile']
 		encode = patterns.PATTERN_INFO['full8puzzle']['encode']
 		decode = patterns.PATTERN_INFO['full8puzzle']['decode']
-		generator.makeInitialNode(ptiles, emptytile, <#goalstate#>, <#encode#>)
 		
 		
 		
