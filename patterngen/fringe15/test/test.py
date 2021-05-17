@@ -8,12 +8,10 @@ import inspect
 myself = lambda: inspect.stack()[1][3]
 
 from dbtools import db
-#from pdbgen import generator
-#from pdbgen import logger
-#from pdbgen import encoding
-#from pdbgen import patterns
+from fringe15.fringe15encoding import *
+from fringe15.fringe15pattern import *
 
-DEBUG = False
+DEBUG = True
 TIMEIT = False
 
 
@@ -27,11 +25,46 @@ TIMEIT = False
 class TestEncoding(unittest.TestCase):
 	def __init__(self, *args, **kwargs):
 		super(TestEncoding, self).__init__(*args, **kwargs)
-		self.fifteenpuzzles_fringe = (
-			{ 'pattern': (3,7,11,12,13,14,15), 'encoding': b'\x13\x7b\xcd\xef' },
-			{ 'pattern': (3,7,0,12,13,14,15), 'encoding': b'\x13\x70\xcd\xef' },
+		self.puzzles = (
+			{ 	# 0  -  -  3
+				# -  -  -  7
+				# -  -  -  11
+				# 12 13 14 15
+				'pattern': (0,3,7,11,12,13,14,15), 
+				'encoding': b'\x03\x7b\xcd\xef' 
+			},
+			{ 	# -  0  -  3
+				# -  7  -  -
+				# -  13 11 15
+				# 12 -  -  14
+				'pattern': (1,3,5,10,12,9,15,11), 
+				'encoding': b'\x13\x5a\xc9\xfb' 
+			},
+			{ 	# 15  -  - 14
+				#  -  -  - 13
+				#  -  -  - 12
+				# 11  7  3  0
+				'pattern': (15,14,13,12,11,7,3,0), 
+				'encoding': b'\xfe\xdc\xb7\x30' 
+			},
 		)
 	
+	def test_encode_pattern(self):
+		for puzzle in self.puzzles:
+			self.assertEqual(encode_pattern(puzzle['pattern'], DEBUG), puzzle['encoding'])
+	
+	def test_decode_pattern(self):
+		for puzzle in self.puzzles:
+			self.assertEqual(decode_pattern(puzzle['encoding']), puzzle['pattern'])
+		
+	def test_encode_decode(self):
+		for puzzle in self.puzzles:
+			pattern = puzzle['pattern']
+			encoded = encode_pattern(puzzle['pattern'], DEBUG)
+			self.assertEqual(decode_pattern(encoded), pattern)
+		for puzzle in self.puzzles:
+			self.assertEqual(decode_pattern(encode_pattern(puzzle['pattern'])), puzzle['pattern'])
+			self.assertEqual(encode_pattern(decode_pattern(puzzle['encoding'])), puzzle['encoding'])
 	
 #	def test_encode15puzzle_fringe_DummyTile(self):
 #		pname = '15puzzle_fringe'
