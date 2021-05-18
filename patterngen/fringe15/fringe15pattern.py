@@ -15,7 +15,7 @@ PATTERN_INFO = {
 				'goal state': (0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15),
 				'empty tile': 0,
 				'encode': encode_pattern,
-#				'decode': decode15puzzle_fringe_DummyTile,
+				'decode': decode_pattern,
 				},
 }
 ##==============================================================================================##

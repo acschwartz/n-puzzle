@@ -9,23 +9,18 @@ myself = lambda: inspect.stack()[1][3]
 
 from dbtools import db
 from fringe15.fringe15encoding import *
+from fringe15.fringe15generator import *
 from fringe15.fringe15pattern import *
+
+from pdbgen.moves import MOVE_FUNCTIONS as moves
+from pdbgen.moves import OPP_MOVE_IDs as opp_moves
+from pdbgen.moves import DIRECTIONS as dir
 
 DEBUG = True
 TIMEIT = False
 
-
-
-##====================================================================##
-
-#  U N I T   T E S T S
-
-##====================================================================##
-
-class TestEncoding(unittest.TestCase):
-	def __init__(self, *args, **kwargs):
-		super(TestEncoding, self).__init__(*args, **kwargs)
-		self.puzzles = (
+dim = 4
+puzzles = (
 			{ 	# 0  -  -  3
 				# -  -  -  7
 				# -  -  -  11
@@ -47,56 +42,85 @@ class TestEncoding(unittest.TestCase):
 				'pattern': (15,14,13,12,11,7,3,0), 
 				'encoding': b'\xfe\xdc\xb7\x30' 
 			},
+			{ 	# -  -  -  3
+				# -  -  -  7
+				# -  -  0  11
+				# 12 13 14 15
+				'pattern': (10,3,7,11,12,13,14,15), 
+				'encoding': b'\xa3\x7b\xcd\xef' 
+			},
 		)
+
+
+##====================================================================##
+
+#  U N I T   T E S T S
+
+##====================================================================##
+
+class TestEncoding(unittest.TestCase):
 	
 	def test_encode_pattern(self):
-		for puzzle in self.puzzles:
+		for puzzle in puzzles:
 			self.assertEqual(encode_pattern(puzzle['pattern'], DEBUG), puzzle['encoding'])
 	
 	def test_decode_pattern(self):
-		for puzzle in self.puzzles:
+		for puzzle in puzzles:
 			self.assertEqual(decode_pattern(puzzle['encoding']), puzzle['pattern'])
 		
 	def test_encode_decode(self):
-		for puzzle in self.puzzles:
+		for puzzle in puzzles:
 			pattern = puzzle['pattern']
 			encoded = encode_pattern(puzzle['pattern'], DEBUG)
 			self.assertEqual(decode_pattern(encoded), pattern)
-		for puzzle in self.puzzles:
+		for puzzle in puzzles:
 			self.assertEqual(decode_pattern(encode_pattern(puzzle['pattern'])), puzzle['pattern'])
 			self.assertEqual(encode_pattern(decode_pattern(puzzle['encoding'])), puzzle['encoding'])
 	
-#	def test_encode15puzzle_fringe_DummyTile(self):
-#		pname = '15puzzle_fringe'
-#		ptiles = patterns.PATTERN_INFO[pname]['pattern tiles']
-#		goalstate = patterns.PATTERN_INFO[pname]['goal state']
-#		emptytile = patterns.PATTERN_INFO[pname]['empty tile']
-#		encode = patterns.PATTERN_INFO[pname]['encode']
-#		decode = patterns.PATTERN_INFO[pname]['decode']
 	
-#	def test_encode15puzzle_fringe_DummyTile(self):
-#		puzzles = self.fifteenpuzzles_fringe
-#		res = []
-#		for p in puzzles:
-#			res.append(encoding.encode15puzzle_fringe_DummyTile(p['pattern']))
-#			
-#		for i, e in enumerate(res):
-#			self.assertEqual(e, puzzles[i]['encoding'])
-			
-			
-#	def test_decode15puzzle_fringe_DummyTile(self):
-#		puzzles = self.fifteenpuzzles_fringe
-#		res = []
-#		for p in puzzles:
-#			res.append(encoding.decode15puzzle_fringe_DummyTile(p['encoding']))
-#			
-#		for i, e in enumerate(res):
-#			self.assertEqual(e, puzzles[i]['pattern'])
+	 
+class TestGenerateChildren(unittest.TestCase):
 	
-
+	def test_puzzle0(self):
+		puzzle = puzzles[0]
+		# 0  -  -  3
+		# -  -  -  7
+		# -  -  -  11
+		# 12 13 14 15
+		
+		node = Node(encode_pattern(puzzle['pattern']))
+		children = generate_children(node, dim, moves, opp_moves, encode_pattern, decode_pattern)
+		expected_children = [
+			Node(encode_pattern((1,3,7,11,12,13,14,15)), cost=0, undo=dir.index('left')),
+			Node(encode_pattern((4,3,7,11,12,13,14,15)), cost=0, undo=dir.index('up')),
+		]
+		for i, child in enumerate(children):
+			self.assertEqual(decode_pattern(child.pattern), decode_pattern(expected_children[i].pattern))
 		
 		
+	def test_puzzle3(self):
+		puzzle = puzzles[3]
+		# -  -  -  3
+		# -  -  -  7
+		# -  -  0  11
+		# 12 13 14 15
+		
+		node = Node(encode_pattern(puzzle['pattern']))
+		children = generate_children(node, dim, moves, opp_moves, encode_pattern, decode_pattern)
+		expected_children = [
+			Node(encode_pattern((9,3,7,11,12,13,14,15)), cost=0, undo=dir.index('right')),
+			Node(encode_pattern((11,3,7,10,12,13,14,15)), cost=1, undo=dir.index('left')),
+			Node(encode_pattern((6,3,7,11,12,13,14,15)), cost=0, undo=dir.index('down')),
+			Node(encode_pattern((14,3,7,11,12,13,10,15)), cost=1, undo=dir.index('up')),
+		]
+		for i, child in enumerate(children):
+			self.assertEqual(decode_pattern(child.pattern), decode_pattern(expected_children[i].pattern))
+		
+		
+		
+		
+		
 
-##==============================================================================================##
+##====================================================================##
 if __name__ == '__main__':
 	unittest.main()
