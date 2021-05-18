@@ -77,6 +77,26 @@ class TestEncoding(unittest.TestCase):
 			self.assertEqual(decode_pattern(encode_pattern(puzzle['pattern'])), puzzle['pattern'])
 			self.assertEqual(encode_pattern(decode_pattern(puzzle['encoding'])), puzzle['encoding'])
 	
+	def test_decode_singlebyte(self):
+		test_inputs = [
+			{'e': bytes([10]),
+			 'd': (0, 10) }, 
+			{'e': bytes([254]),
+			 'd': (15, 14) },
+		]
+		for i in test_inputs:
+			self.assertEqual(decode_pattern(i['e']), i['d'])
+	
+	def test_decode_stub_get_0th_element(self):
+		test_inputs = [
+			{'e': bytes([10]),
+			 'd': (0, 10) }, 
+			{'e': bytes([254]),
+			 'd': (15, 14) },
+		]
+		for i in test_inputs:
+			self.assertEqual(decode_pattern(i['e'])[0], i['d'][0])
+	
 	
 	 
 class TestGenerateChildren(unittest.TestCase):
@@ -95,7 +115,7 @@ class TestGenerateChildren(unittest.TestCase):
 			Node(encode_pattern((4,3,7,11,12,13,14,15)), cost=0, undo=dir.index('up')),
 		]
 		for i, child in enumerate(children):
-			self.assertEqual(decode_pattern(child.pattern), decode_pattern(expected_children[i].pattern))
+			self.assertEqual(child.get_decoded_pattern(), expected_children[i].get_decoded_pattern())
 		
 		
 	def test_puzzle3(self):
@@ -114,8 +134,7 @@ class TestGenerateChildren(unittest.TestCase):
 			Node(encode_pattern((14,3,7,11,12,13,10,15)), cost=1, undo=dir.index('up')),
 		]
 		for i, child in enumerate(children):
-			self.assertEqual(decode_pattern(child.pattern), decode_pattern(expected_children[i].pattern))
-		
+			self.assertEqual(child.get_decoded_pattern(), expected_children[i].get_decoded_pattern())
 		
 		
 		
