@@ -116,6 +116,12 @@ class TestGenerateChildren(unittest.TestCase):
 		]
 		for i, child in enumerate(children):
 			self.assertEqual(child.get_decoded_pattern(), expected_children[i].get_decoded_pattern())
+		expected_children = [
+			Node((1,3,7,11,12,13,14,15), cost=0, undo=dir.index('left')),
+			Node([4,3,7,11,12,13,14,15], cost=0, undo=dir.index('up')),
+		]
+		for i, child in enumerate(children):
+			self.assertEqual(child.get_decoded_pattern(), expected_children[i].get_decoded_pattern())
 		
 		
 	def test_puzzle3(self):
@@ -128,9 +134,9 @@ class TestGenerateChildren(unittest.TestCase):
 		node = Node(encode_pattern(puzzle['pattern']))
 		children = generate_children(node, dim, moves, opp_moves, encode_pattern, decode_pattern)
 		expected_children = [
-			Node(encode_pattern((9,3,7,11,12,13,14,15)), cost=0, undo=dir.index('right')),
-			Node(encode_pattern((11,3,7,10,12,13,14,15)), cost=1, undo=dir.index('left')),
-			Node(encode_pattern((6,3,7,11,12,13,14,15)), cost=0, undo=dir.index('down')),
+			Node((9,3,7,11,12,13,14,15), cost=0, undo=dir.index('right')),
+			Node(encode_pattern([11,3,7,10,12,13,14,15]), cost=1, undo=dir.index('left')),
+			Node([6,3,7,11,12,13,14,15], cost=0, undo=dir.index('down')),
 			Node(encode_pattern((14,3,7,11,12,13,10,15)), cost=1, undo=dir.index('up')),
 		]
 		for i, child in enumerate(children):

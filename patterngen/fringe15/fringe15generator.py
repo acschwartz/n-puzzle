@@ -9,7 +9,9 @@ from sqlite3 import IntegrityError
 from fringe15.fringe15pattern import PATTERN_INFO
 
 class Node:
-	"""Search node for BFS in generate_pattern_database"""
+	"""Search node for BFS in generate_pattern_database
+	For 15-puzzle fringe pattern only (currently) """
+	
 	__slots__: ('pattern_encoding', 'cost', 'undo')
 	def __init__(self, pattern, cost=0, undo=-1):
 		if isinstance(pattern, bytes):
