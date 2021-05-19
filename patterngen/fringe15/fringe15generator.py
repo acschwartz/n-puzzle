@@ -175,7 +175,9 @@ def generate_pattern_database(pattern_info=PATTERN_INFO, log=None, dbfile=None, 
 			
 			if exploredCount % 10000 == 0:
 				log.debug(f"Entries collected: {exploredCount}")
-				connection.commit()
+				if exploredCount % 1000000 == 0:
+					connection.commit()
+					log.debug(f"Database commit")
 		
 	
 	# Tie up loose ends
