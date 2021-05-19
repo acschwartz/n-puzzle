@@ -12,13 +12,13 @@
 import sys
 from time import strftime
 
-from patterngen.helpers.memorytools import *
-from patterngen.helpers.timetools import *
+from helpers.memorytools import *
+from helpers.timetools import *
 
-from patterngen.pdbgen import logger
-from patterngen.pdbgen import moves
-import fringe15pattern
-from fringe15generator import generate_pattern_database
+from pdbgen import logger
+from pdbgen import moves
+import fringe15.fringe15pattern
+from fringe15.fringe15generator import generate_pattern_database
 
 
 RUN_ID = strftime(f'%y%m%d-%H%M%S')
@@ -44,7 +44,7 @@ sys.excepthook = handle_exception
 ##====================================================================##
 if __name__ == '__main__':
 	pname = '15puzzle_fringe'
-	info = fringe15pattern.PATTERN_INFO[pname]
+	info = fringe15.fringe15pattern.PATTERN_INFO[pname]
 	base_filename = f'{pname}_pdb_{RUN_ID}'
 	base_filename_with_path = f'{OUTPUT_DIRECTORY}{base_filename}'
 	

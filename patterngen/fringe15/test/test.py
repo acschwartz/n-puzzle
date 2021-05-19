@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import unittest
-#from math import floor, ceil
+# from math import floor, ceil
 #from timeit import timeit
 
 import inspect
@@ -109,7 +109,7 @@ class TestGenerateChildren(unittest.TestCase):
 		# 12 13 14 15
 		
 		node = Node(encode_pattern(puzzle['pattern']))
-		children = generate_children(node, dim, moves, opp_moves, encode_pattern, decode_pattern)
+		children = generate_children(node, dim, moves, opp_moves)
 		expected_children = [
 			Node(encode_pattern((1,3,7,11,12,13,14,15)), cost=0, undo=dir.index('left')),
 			Node(encode_pattern((4,3,7,11,12,13,14,15)), cost=0, undo=dir.index('up')),
@@ -132,7 +132,7 @@ class TestGenerateChildren(unittest.TestCase):
 		# 12 13 14 15
 		
 		node = Node(encode_pattern(puzzle['pattern']))
-		children = generate_children(node, dim, moves, opp_moves, encode_pattern, decode_pattern)
+		children = generate_children(node, dim, moves, opp_moves)
 		expected_children = [
 			Node((9,3,7,11,12,13,14,15), cost=0, undo=dir.index('right')),
 			Node(encode_pattern([11,3,7,10,12,13,14,15]), cost=1, undo=dir.index('left')),
