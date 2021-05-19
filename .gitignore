@@ -128,8 +128,11 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# MacOS stuff
+# MacOS
 .DS_Store
+
+# Visual Studio Code
+.vscode
 
 # files
 how-to-activate-venv.txt
