@@ -125,67 +125,68 @@ def generate_children(node, dim, moves, opp_moves):
 
 
 def generate_pattern_database(pattern_info=PATTERN_INFO, log=None, dbfile=None, moves=MOVE_FUNCTIONS, opp_moves=OPP_MOVE_IDs):
-	"""Generates the pattern database"""
-	dim = pattern_info['dim']
-	# ptiles = pattern_info['pattern tiles']		# DO I NEED THIS?
-	# goal_state = pattern_info['goal state']
+    """Generates the pattern database"""
+    dim = pattern_info['dim']
+    # ptiles = pattern_info['pattern tiles']		# DO I NEED THIS?
+    # goal_state = pattern_info['goal state']
 #	encode = info['encode']		# No longer need bc of change to Node class
 #	decode = info['decode']
-	target_pattern = (0,3,7,11,12,13,14,15) 	# TODO: should prob not hardcode this in if poss
-	
-	# Initialize search queue w/ initial node
+    target_pattern = (0,3,7,11,12,13,14,15) 	# TODO: should prob not hardcode this in if poss
+    
+    # Initialize search queue w/ initial node
 
-	queue = deque([Node(target_pattern)])
-	
-	# Initialize database
-	# Stores (Pattern, Cost) of explored nodes
-	connection, dbfile = db.initDB(log, dbfile)
-	cursor = connection.cursor()
-	tables = db.createTables(connection, dim*dim, log)
-	exploredCount = 0
-	
-	# Initialilze explored set
-	# For checking membership w/o querying DB
-	explored = set()
-	
-	
-	# Breadth first search finds (Pattern, Cost) values for PDB
-	while queue:
-		node = queue.popleft()
-		
-		if node.get_pattern_encoding() not in explored:
-			# Generate node's children
-			children = generate_children(node, dim, moves, opp_moves)
-			for child in children:
-				if child.get_pattern_encoding() not in explored:
-					queue.append(child)
-			
-			# Add node info to PDB and explored set
-			try:
-				insert_into_table = tables[node.get_pip_emptytile()]
-				db.insert(connection, insert_into_table, node.get_pattern_encoding(), node.cost)
-				
-				explored.add(node.get_pattern_encoding())
-				exploredCount += 1
-			except IntegrityError as exc:
-				# Pattern already in DB for some reason ...
-				# TODO: does this need more investigating?
-				pass
-			
-			
-			if exploredCount % 10000 == 0:
-				print(f"Entries collected: {exploredCount:,}")
-				if exploredCount % 10000000 == 0:
-					connection.commit()
-					print(f"Database commit")
-		
-	
-	# Tie up loose ends
-	log.debug(f'\n\nFINISHED GENERATING PATTERN DATABASE')
-	log.debug(f'{exploredCount} entries collected')
-	log.debug(f'Committing entries ...')
-	connection.commit()
-	connection.close()
-	log.debug(f'Done.')
-	
-	return dbfile, tables, exploredCount
+    queue = deque([Node(target_pattern)])
+    
+    # Initialize database
+    # Stores (Pattern, Cost) of explored nodes
+    connection, dbfile = db.initDB(log, dbfile)
+    cursor = connection.cursor()
+    cursor.execute("PRAGMA journal_mode = OFF")
+    tables = db.createTables(connection, dim*dim, log)
+    exploredCount = 0
+    
+    # Initialilze explored set
+    # For checking membership w/o querying DB
+    explored = set()
+    
+    
+    # Breadth first search finds (Pattern, Cost) values for PDB
+    while queue:
+        node = queue.popleft()
+        
+        if node.get_pattern_encoding() not in explored:
+            # Generate node's children
+            children = generate_children(node, dim, moves, opp_moves)
+            for child in children:
+                if child.get_pattern_encoding() not in explored:
+                    queue.append(child)
+            
+            # Add node info to PDB and explored set
+            try:
+                insert_into_table = tables[node.get_pip_emptytile()]
+                db.insert(connection, insert_into_table, node.get_pattern_encoding(), node.cost)
+                
+                explored.add(node.get_pattern_encoding())
+                exploredCount += 1
+            except IntegrityError as exc:
+                # Pattern already in DB for some reason ...
+                # TODO: does this need more investigating?
+                pass
+            
+            
+            if exploredCount % 10000 == 0:
+                print(f"Entries collected: {exploredCount:,}")
+                if exploredCount % 10000000 == 0:
+                    connection.commit()
+                    print(f"Database commit")
+        
+    
+    # Tie up loose ends
+    log.debug(f'\n\nFINISHED GENERATING PATTERN DATABASE')
+    log.debug(f'{exploredCount} entries collected')
+    log.debug(f'Committing entries ...')
+    connection.commit()
+    connection.close()
+    log.debug(f'Done.')
+    
+    return dbfile, tables, exploredCount
