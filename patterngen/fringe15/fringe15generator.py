@@ -142,6 +142,12 @@ def generate_pattern_database(pattern_info=PATTERN_INFO, log=None, dbfile=None, 
     connection, dbfile = db.initDB(log, dbfile)
     cursor = connection.cursor()
     cursor.execute("PRAGMA journal_mode = OFF")
+    cursor.execute("PRAGMA synchronous = OFF")
+    # The above pragma settings are a little "dangerous" in that the db can get corrupted on
+    # power interrupt because there is no rollback journal. However, I am trying to optimize
+    # performance (both runtime and memory) at any cost to make this generator work.
+    cursor.execute("PRAGMA locking_mode = EXCLUSIVE")
+
     tables = db.createTables(connection, dim*dim, log)
     exploredCount = 0
     
@@ -171,14 +177,18 @@ def generate_pattern_database(pattern_info=PATTERN_INFO, log=None, dbfile=None, 
             except IntegrityError as exc:
                 # Pattern already in DB for some reason ...
                 # TODO: does this need more investigating?
+                print(exc)
                 pass
             
             
             if exploredCount % 10000 == 0:
                 print(f"Entries collected: {exploredCount:,}")
-                if exploredCount % 10000000 == 0:
-                    connection.commit()
-                    print(f"Database commit")
+                # if exploredCount % 10000000 == 0:
+                    # connection.commit()
+                    # print(f"Database commit")
+            
+            if exploredCount == 2000000:
+                exit()
         
     
     # Tie up loose ends
