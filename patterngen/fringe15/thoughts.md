@@ -13,20 +13,20 @@ but here in PDB land we only care about the PATTERN
 (state representation) ---CONVERT----> (pattern representation) ----ENCODE----> (encoded DB key)
 
 our pattern info:
-	PATTERN_INFO = {
-		'15puzzle_fringe': {
-			# 0  -  -  3
-			# -  -  -  7
-			# -  -  -  11
-			# 12 13 14 15
-			
-					'dim': 4,	# 15-puzzle is 4x4
-					'pattern tiles': (3, 7, 11, 12, 13, 14, 15),
-					'goal state': (0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15),
-					'empty tile': 0,
-	#				'encode': encode15puzzle_fringe_DummyTile,
-	#				'decode': decode15puzzle_fringe_DummyTile,
-					},
+    PATTERN_INFO = {
+        '15puzzle_fringe': {
+            # 0  -  -  3
+            # -  -  -  7
+            # -  -  -  11
+            # 12 13 14 15
+            
+                    'dim': 4,    # 15-puzzle is 4x4
+                    'pattern tiles': (3, 7, 11, 12, 13, 14, 15),
+                    'goal state': (0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15),
+                    'empty tile': 0,
+    #                'encode': encode15puzzle_fringe_DummyTile,
+    #                'decode': decode15puzzle_fringe_DummyTile,
+                    },
 
 we only care about the locations of 8 tiles  (technically just 7 but we also need to store the 0/empty tile somehow)
 since bytes hold an even number of hex digits, we will store the position of the empty tile within the pattern, 
@@ -77,27 +77,27 @@ but here in PDB land we only care about the PATTERN
 
 
 
-puzzle state:						  state representation:
+puzzle state:                          state representation:
    4   1   2   3       ------->     ( 4, 1, 2, 3, 5, 9, 7, 0, 8, 13, 6, 10, 12, 14, 15, 11)
-   5   9   7   0				     in state representation,
-   8   13  6   10					  index/'key' = location of tile in puzzle board        = k?, L for loc?, p for place? pip = place in puzle?
-   12  14  15  11					        value = the numbered tile					    = n (for its number tile?)  
+   5   9   7   0                     in state representation,
+   8   13  6   10                      index/'key' = location of tile in puzzle board        = k?, L for loc?, p for place? pip = place in puzle?
+   12  14  15  11                            value = the numbered tile                        = n (for its number tile?)  
 
 
 Let's define some nomenclature..    
-			values are (n)umbered tiles:    n: ( 4, 1, 2, 3, 5, 9, 7, 0, 8, 13, 6, 10, 12, 14, 15, 11 )
-			indices are place in puzzle:   pip:  0  1  2  3  4  5  6  7  8  9  10  11  12  13  14  15
+            values are (n)umbered tiles:    n: ( 4, 1, 2, 3, 5, 9, 7, 0, 8, 13, 6, 10, 12, 14, 15, 11 )
+            indices are place in puzzle:   pip:  0  1  2  3  4  5  6  7  8  9  10  11  12  13  14  15
 
 
 
- pattern:						 pattern tiles:  (3, 7, 11, 12, 13, 14, 15) + "0"
+ pattern:                         pattern tiles:  (3, 7, 11, 12, 13, 14, 15) + "0"
 .   .   .   3       ------->     we ONLY care about the locations of these tiles.
-.   .   7   0				     using the whole 16-length array to represent the board now doesn't make sense
-.   13  .   .					 since our pattern tiles are "set in stone" (as far as what, not where, they are)
-.   14  15  11					 we can save room....
+.   .   7   0                     using the whole 16-length array to represent the board now doesn't make sense
+.   13  .   .                     since our pattern tiles are "set in stone" (as far as what, not where, they are)
+.   14  15  11                     we can save room....
 
 the unchanging "reference list" of pattern tiles (pTiles):
-							     values are    n:   (0, 3, 7, 11, 12, 13, 14, 15) 
+                                 values are    n:   (0, 3, 7, 11, 12, 13, 14, 15) 
 list indices are "id" of n in reference list:  ref:  0  1  2   3   4   5   6   7
  
 If we map  n to ref  (e.g. most obviously in sorted order), we don't even need to store  n  in a pattern representation
@@ -114,9 +114,9 @@ So we have:
   pip:   .   .   .   3   .   .   6   7   .   9    .    .   12   13   14   15
 
 
-pattern:						  pattern representation:
+pattern:                          pattern representation:
 .   .   .   3       ------->      pip: ( 7  3  6  15  12  9  13  14 )
-.   .   7   0				      ref:   0  1  2  3   4   5   6   7
+.   .   7   0                      ref:   0  1  2  3   4   5   6   7
 .   13  .   .
 .   14  15  11
 
@@ -124,9 +124,9 @@ pattern:						  pattern representation:
 
 Just to break it down as if you don't get this already
         state[pip]  ==   n
-	state.index(n)  ==  pip
+    state.index(n)  ==  pip
    pTiles.index(n)  ==  ref
-	   pTiles[ref]  ==   n
+       pTiles[ref]  ==   n
       pattern[ref]  ==  pip
 pattern.index(pip)  ==  ref
 
@@ -145,8 +145,8 @@ Since this is a 15-puzzle,  both pip and n are bounded by (0, 15]
 
 
 Ss  pattern:  "7 , 3 , 6 , 15 , 12 , 9 , 13 , 14"
-	becomes:   736fc9de
-	
+    becomes:   736fc9de
+    
 I can't think of a more efficient way to represent this information off the top of my head,
 while still being able to work with it reasonably, although I'm sure one exists.
 I recall in the paper that introduced the Fringe PDB, each of their database entries was only one byte? how??
@@ -167,12 +167,12 @@ Each byte in python is treated as a "unit", so:
 b =  b'x\73x\6fx\c9x\de' is made up of 4 subunits 
 b[0] = '\x73' etc ..
 As one "unit" it cannot really be split or indexed further unless you convert it to another type like string or int
-		-which is relatively expensive when it comes to generating >500mil nodes
-				(Edit: omg I just double-checked and the default # of timeit() iterations is 1,000,000 ..... I thought it was 10,000. FML.
-				I double checked because the math of saving a second of execution over 10,000 ops didn't didn't seem right)
-				Anyway apparently the timing isn't as big a deal as I thought (I think it was my higher-level programming that was bag- like completely
-				misunderstanding the actions the search should be taking on the game board... man I am not having a good track record with this project
-				but at least I'm learning a lot...)
+        -which is relatively expensive when it comes to generating >500mil nodes
+                (Edit: omg I just double-checked and the default # of timeit() iterations is 1,000,000 ..... I thought it was 10,000. FML.
+                I double checked because the math of saving a second of execution over 10,000 ops didn't didn't seem right)
+                Anyway apparently the timing isn't as big a deal as I thought (I think it was my higher-level programming that was bag- like completely
+                misunderstanding the actions the search should be taking on the game board... man I am not having a good track record with this project
+                but at least I'm learning a lot...)
 
 In the byte '\x73' (\x is just the escape char in the output), the "left digit" 
 73 in hex == 115 so we will need to extract each digit separately - which is just math

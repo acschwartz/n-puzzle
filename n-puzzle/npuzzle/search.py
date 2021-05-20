@@ -129,7 +129,7 @@ def ida_star_search(init_state, goal_state, size, HEURISTIC, TRANSITION_COST, RA
                 path.appendleft(child)   # add child to LIFO queue "try it on" in the path, so to speak
                 result = {}
                 result['goal_found'], result['fcost_over_limit'] = DFS(path, g + TRANSITION_COST, f_limit)  # and then "try on" its children
-                if result['goal_found'] is True:			# different than " == True" btw
+                if result['goal_found'] is True:            # different than " == True" btw
                     return True, g + TRANSITION_COST
                 if result['fcost_over_limit'] < min_fcost_exceeding_limit:
                     min_fcost_exceeding_limit = result['fcost_over_limit']

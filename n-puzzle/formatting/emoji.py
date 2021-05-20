@@ -95,60 +95,60 @@ emoji = [
     '\N{Link Symbol}\u200d\N{Cross mark}',
     '\N{PILE OF POO}\u2668\uFE0F', 
     '\N{Derelict House Building}\N{FIRE}',
-	'\N{Personal Computer}',
-	'\N{Fire}\N{Personal Computer}',
-	'\N{Personal Computer}\N{Fire}',
-	'\N{Personal Computer}\N{SPAGHETTI}',
-	'\N{Personal Computer}\N{STEAMING BOWL}',
-	'\N{Personal Computer}\N{Pile of Poo}',
-	'\u2328\uFE0F\N{Pile of Poo}',
-	'\u2328\uFE0F\N{Fire}',
-	'\N{Reversed Hand with Middle Finger Extended}', # MIDDLE FINGER lol
-	'\N{Personal Computer}\N{Reversed Hand with Middle Finger Extended}',
+    '\N{Personal Computer}',
+    '\N{Fire}\N{Personal Computer}',
+    '\N{Personal Computer}\N{Fire}',
+    '\N{Personal Computer}\N{SPAGHETTI}',
+    '\N{Personal Computer}\N{STEAMING BOWL}',
+    '\N{Personal Computer}\N{Pile of Poo}',
+    '\u2328\uFE0F\N{Pile of Poo}',
+    '\u2328\uFE0F\N{Fire}',
+    '\N{Reversed Hand with Middle Finger Extended}', # MIDDLE FINGER lol
+    '\N{Personal Computer}\N{Reversed Hand with Middle Finger Extended}',
     '\u2328\uFE0F\u26A0\uFE0F', #keyboard + warning
     '\u2328\uFE0F\U0001F447', # keyboard + finger press
     '\u2328\uFE0F\u203C\uFE0F', # keyboard + !!
     '\u2328\uFE0F\u2757\uFE0F', # keyboard + !
     '\u2328\uFE0F\U0001F6D1', # keyboard + stop sign
-#	'\N{}',
-#	'\N{}',
-#	'\N{}',
-#	'\N{}',
-#	'\N{}',
-#	'\N{}',
+#    '\N{}',
+#    '\N{}',
+#    '\N{}',
+#    '\N{}',
+#    '\N{}',
+#    '\N{}',
 ]
 
 
 
 ExceptionEmojis = [ 
-	'\N{NO ENTRY SIGN}',
-	'\u26A0\uFE0F',  # {WARNING}/caution (which prints as dingbat)
-#	'\U0001f92c',  # CUSSIN' MAD FACE
-#	'\u2049\uFE0F', #'u\N{EXCLAMATION QUESTION MARK}', (o/w dingbat)
-	'\N{SOS}',  
-	'\N{Fire}' ,  
-	'\N{Fire Extinguisher}' , 
-	'\N{COLLISION SYMBOL}',  # Bang!
-	'\N{CROSS MARK}', # BIG RED X
-	'\U0001F921',  #  CLOWN FACE LOL
-	'\U0001f974',  # 'WOOZY' / SCRUNCHED UP FACE
-	'\U0001f644',  #  EYE ROLLING FACE
-	'\N{PILE OF POO}',
-	'\N{THUMBS DOWN SIGN}',
-	'\N{Derelict House Building}',	# lol
-	'\U0001F9D0',  # FACE W/ MONOCLE
-	'\U0001F928',  # FACE W/ RAISED EYEBROW
-	'\N{Grimacing Face}',  # CRINGE
-	'\N{Popcorn}', #lol
-	'\N{POUTING CAT FACE}',
-	'\N{SKULL}',
+    '\N{NO ENTRY SIGN}',
+    '\u26A0\uFE0F',  # {WARNING}/caution (which prints as dingbat)
+#    '\U0001f92c',  # CUSSIN' MAD FACE
+#    '\u2049\uFE0F', #'u\N{EXCLAMATION QUESTION MARK}', (o/w dingbat)
+    '\N{SOS}',  
+    '\N{Fire}' ,  
+    '\N{Fire Extinguisher}' , 
+    '\N{COLLISION SYMBOL}',  # Bang!
+    '\N{CROSS MARK}', # BIG RED X
+    '\U0001F921',  #  CLOWN FACE LOL
+    '\U0001f974',  # 'WOOZY' / SCRUNCHED UP FACE
+    '\U0001f644',  #  EYE ROLLING FACE
+    '\N{PILE OF POO}',
+    '\N{THUMBS DOWN SIGN}',
+    '\N{Derelict House Building}',    # lol
+    '\U0001F9D0',  # FACE W/ MONOCLE
+    '\U0001F928',  # FACE W/ RAISED EYEBROW
+    '\N{Grimacing Face}',  # CRINGE
+    '\N{Popcorn}', #lol
+    '\N{POUTING CAT FACE}',
+    '\N{SKULL}',
     '\N{oil drum}\N{fire}',
     '\N{Spaghetti}',  # (tracebak?? lol?)
     '\N{Steaming bowl}',  # RAMEN
     '\N{Pretzel}',    # same tho
     '\N{Derelict House Building}\N{FIRE}',
-	'\N{Personal Computer}\N{STEAMING BOWL}',
-	'\N{Personal Computer}\N{Pile of Poo}',
+    '\N{Personal Computer}\N{STEAMING BOWL}',
+    '\N{Personal Computer}\N{Pile of Poo}',
     f'{minimemoji}\N{Fire}',
 ]
 

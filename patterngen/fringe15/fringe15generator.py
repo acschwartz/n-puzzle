@@ -13,21 +13,21 @@ from fringe15.fringe15pattern import pretty_pattern
 
 
 class Node:
-	"""Search node for BFS in generate_pattern_database
-	For 15-puzzle fringe pattern only (currently) """
-	__slots__: ('pattern_encoding', 'cost', 'undo')
-	def __init__(self, pattern, cost=0, undo=255):
-		if isinstance(pattern, bytes):
-			self.pattern_encoding = pattern
-		elif isinstance(pattern, (list, tuple)):
-			self.pattern_encoding = self.encode(pattern)
-		else:
-			raise TypeError('Node.pattern must be bytes, list, or tuple')
-		self.cost = cost
-		self.undo = undo
-	
-	def __repr__(self):
-		info = f"""
+    """Search node for BFS in generate_pattern_database
+    For 15-puzzle fringe pattern only (currently) """
+    __slots__: ('pattern_encoding', 'cost', 'undo')
+    def __init__(self, pattern, cost=0, undo=255):
+        if isinstance(pattern, bytes):
+            self.pattern_encoding = pattern
+        elif isinstance(pattern, (list, tuple)):
+            self.pattern_encoding = self.encode(pattern)
+        else:
+            raise TypeError('Node.pattern must be bytes, list, or tuple')
+        self.cost = cost
+        self.undo = undo
+    
+    def __repr__(self):
+        info = f"""
 pattern: {self.get_decoded_pattern()}
 pretty:
 {pretty_pattern(self.get_decoded_pattern())}
@@ -35,92 +35,92 @@ encoding: {self.get_pattern_encoding()}
 pip emptytile: {self.get_pip_emptytile()}
 undo move: {self.undo_move_repr()}
 cost: {self.cost}
-		"""
-		return info
+        """
+        return info
 
-	def __str__(self):
-		return f"pattern{self.get_decoded_pattern()}; cost: {self.cost}"
+    def __str__(self):
+        return f"pattern{self.get_decoded_pattern()}; cost: {self.cost}"
 
-	def encode(self, pattern):
-		"""copied from fringe15encoding.py
-		Input: pattern repr. WITH empty tile | Return: bytes encoding
-		e.g. in: (0,3,7,11,12,13,14,15) | out: b'x\03x\7bx\cdx\ef'
-		"""
-		encoding = [0, 0, 0, 0]
-		i=0
-		for n in pattern:
-			encoding[floor(i/2)] += n*(1<<(4*(~i&1)))
-			i+=1
-		return bytes(encoding)
-	
-	def decode(self, bytestr):
-		"""copied from fringe15pattern.py
-		Input: byte encoding | Return: pattern repr. WITH empty tile
-		e.g. out: b'x\03x\7bx\cdx\ef' | out: (0,3,7,11,12,13,14,15)
-		"""
-		decoded = []
-		for n in bytestr:
-			decoded.append((n//16) % 16)
-			decoded.append(n%16)
-		return tuple(decoded)
-	
-	def get_pip_emptytile(self):
-		# assuming emptytile is at index (ref) 0 in pattern
-		return self.decode(self.pattern_encoding)[0]
-	
-	def get_pattern_encoding(self):
-		return self.pattern_encoding
-	
-	def get_decoded_pattern(self):
-		return self.decode(self.pattern_encoding)
-	
-	def undo_move_repr(self):
-		try:
-			return dir[self.undo]
-		except:
-			return None
+    def encode(self, pattern):
+        """copied from fringe15encoding.py
+        Input: pattern repr. WITH empty tile | Return: bytes encoding
+        e.g. in: (0,3,7,11,12,13,14,15) | out: b'x\03x\7bx\cdx\ef'
+        """
+        encoding = [0, 0, 0, 0]
+        i=0
+        for n in pattern:
+            encoding[floor(i/2)] += n*(1<<(4*(~i&1)))
+            i+=1
+        return bytes(encoding)
+    
+    def decode(self, bytestr):
+        """copied from fringe15pattern.py
+        Input: byte encoding | Return: pattern repr. WITH empty tile
+        e.g. out: b'x\03x\7bx\cdx\ef' | out: (0,3,7,11,12,13,14,15)
+        """
+        decoded = []
+        for n in bytestr:
+            decoded.append((n//16) % 16)
+            decoded.append(n%16)
+        return tuple(decoded)
+    
+    def get_pip_emptytile(self):
+        # assuming emptytile is at index (ref) 0 in pattern
+        return self.decode(self.pattern_encoding)[0]
+    
+    def get_pattern_encoding(self):
+        return self.pattern_encoding
+    
+    def get_decoded_pattern(self):
+        return self.decode(self.pattern_encoding)
+    
+    def undo_move_repr(self):
+        try:
+            return dir[self.undo]
+        except:
+            return None
 
 
 
 
 
 def generate_children(node, dim, moves, opp_moves):
-	"""Generate children of a search Node. Returns children as Nodes"""
-	
-	node_pattern = node.get_decoded_pattern()
-	node_pip_emptytile = node.get_pip_emptytile()
-	
-	children = []
-	moveID = 0		# not using enumerate(moves) because this is faster
-	for m in moves:
-		if moveID == node.undo:
-			# This move generates node's parent - skip 
-			moveID += 1
-			continue
-		child_pip_emptytile = m(node_pip_emptytile, dim)
-		if child_pip_emptytile is not None:
-			child_pattern = list(node_pattern)
-			child_cost = node.cost
-			child_undo = opp_moves[moveID]
-			
-			# update pip emptytile in child pattern
-			child_pattern[0] = child_pip_emptytile
-			
-			try:
-				# swapping with another pattern tile 
-				# this means we also update cost
-				ref_ptile_to_swap = node_pattern.index(child_pip_emptytile)
-				child_pattern[ref_ptile_to_swap] = node_pip_emptytile
-				child_cost += 1
-			except ValueError:
-				# else, swapping with a non-pattern tile
-				# nothing else to update, and cost stays the same
-				pass
-				
-			children.append(Node(child_pattern, child_cost, child_undo))
-		moveID += 1
-	return tuple(children)
-	
+    """Generate children of a search Node. Returns children as Nodes"""
+    
+    node_pattern = node.get_decoded_pattern()
+    node_pip_emptytile = node.get_pip_emptytile()
+    
+    children = []
+    moveID = 0        # not using enumerate(moves) because this is faster
+    for m in moves:
+        if moveID == node.undo:
+            # This move generates node's parent - skip 
+            moveID += 1
+            continue
+        child_pip_emptytile = m(node_pip_emptytile, dim)
+        if child_pip_emptytile is not None:
+            child_pattern = list(node_pattern)
+            child_cost = node.cost
+            child_undo = opp_moves[moveID]
+            
+            # update pip emptytile in child pattern
+            child_pattern[0] = child_pip_emptytile
+            
+            try:
+                # swapping with another pattern tile 
+                # this means we also update cost
+                ref_ptile_to_swap = node_pattern.index(child_pip_emptytile)
+                child_pattern[ref_ptile_to_swap] = node_pip_emptytile
+                child_cost += 1
+            except ValueError:
+                # else, swapping with a non-pattern tile
+                # nothing else to update, and cost stays the same
+                pass
+                
+            children.append(Node(child_pattern, child_cost, child_undo))
+        moveID += 1
+    return tuple(children)
+    
 
 
 
