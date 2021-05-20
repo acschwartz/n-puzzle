@@ -1,48 +1,48 @@
 #!/usr/bin/env python3
 
 def move_index_left(i, dim):
-	if i % dim > 0:
-		return i-1
-	else:
-		return None
-	
+    if i % dim > 0:
+        return i-1
+    else:
+        return None
+    
 def move_index_right(i, dim):
-	if i % dim + 1 < dim:
-		return i+1
-	else:
-		return None
-	
+    if i % dim + 1 < dim:
+        return i+1
+    else:
+        return None
+    
 def move_index_up(i, dim):
-	x = i-dim
-	if x >= 0:
-		return x
-	else:
-		return None
-	
+    x = i-dim
+    if x >= 0:
+        return x
+    else:
+        return None
+    
 def move_index_down(i, dim):
-	x = i+dim
-	if x < dim*dim:	# assumes square puzzle
-		return x
-	else:
-		return None
+    x = i+dim
+    if x < dim*dim:    # assumes square puzzle
+        return x
+    else:
+        return None
 
 MOVES_INFO = {
-	'left': {
-		'func': move_index_left,
-		'opp': 'right'
-	},
-	'right': {
-		'func': move_index_right,
-		'opp': 'left'
-	},
-	'up': {
-		'func': move_index_up,
-		'opp': 'down'
-	},
-	'down': {
-		'func': move_index_down,
-		'opp': 'up'
-	}
+    'left': {
+        'func': move_index_left,
+        'opp': 'right'
+    },
+    'right': {
+        'func': move_index_right,
+        'opp': 'left'
+    },
+    'up': {
+        'func': move_index_up,
+        'opp': 'down'
+    },
+    'down': {
+        'func': move_index_down,
+        'opp': 'up'
+    }
 }
 
 

@@ -11,9 +11,9 @@ requirements = []  # This could be retrieved from requirements.txt
 
 # Package (minimal) configuration
 setup(
-	name="npuzzle",	#pnuzzle lol
-	version="1.0.0",
-	description="n-puzzle solver",
-	packages=find_packages(),  # __init__.py folders search
-	install_requires=requirements
+    name="npuzzle",    #pnuzzle lol
+    version="1.0.0",
+    description="n-puzzle solver",
+    packages=find_packages(),  # __init__.py folders search
+    install_requires=requirements
 )

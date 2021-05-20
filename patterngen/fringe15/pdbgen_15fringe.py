@@ -27,36 +27,36 @@ OUTPUT_DIRECTORY = 'output/'
 ##====================================================================##
 def handle_exception(exc_type, exc_value, exc_traceback):
 # Source: https://stackoverflow.com/questions/6234405/logging-uncaught-exceptions-in-python
-	if issubclass(exc_type, KeyboardInterrupt):
-		sys.__excepthook__(exc_type, exc_value, exc_traceback)
-		return
-	
-	log.critical("\nUncaught exception", 
-				 exc_info=(exc_type, exc_value, exc_traceback))
-	log.info('\n')
-	
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    
+    log.critical("\nUncaught exception", 
+                 exc_info=(exc_type, exc_value, exc_traceback))
+    log.info('\n')
+    
 sys.excepthook = handle_exception
 ##====================================================================##
 
 
 ##====================================================================##
-#		M A I N
+#        M A I N
 ##====================================================================##
 if __name__ == '__main__':
-	pname = '15puzzle_fringe'
-	info = fringe15.fringe15pattern.PATTERN_INFO[pname]
-	base_filename = f'{pname}_pdb_{RUN_ID}'
-	base_filename_with_path = f'{OUTPUT_DIRECTORY}{base_filename}'
-	
-	log, logfile = logger.initLogger(base_filename_with_path)
-	logger.printHeader(log, pname, RUN_ID, base_filename)
-	
-	t_start = pCounter()
-	m_start = getMaxRSS()
-	
-	dbfile, tables, n_entries = generate_pattern_database(
-									info, log, base_filename_with_path)
-	
-	logger.printStats(log, t_start, m_start, 
-					  dbfile, tables, n_entries, title='Stats')
-	log.debug(f'logfile: {logfile}')
+    pname = '15puzzle_fringe'
+    info = fringe15.fringe15pattern.PATTERN_INFO[pname]
+    base_filename = f'{pname}_pdb_{RUN_ID}'
+    base_filename_with_path = f'{OUTPUT_DIRECTORY}{base_filename}'
+    
+    log, logfile = logger.initLogger(base_filename_with_path)
+    logger.printHeader(log, pname, RUN_ID, base_filename)
+    
+    t_start = pCounter()
+    m_start = getMaxRSS()
+    
+    dbfile, tables, n_entries = generate_pattern_database(
+                                    info, log, base_filename_with_path)
+    
+    logger.printStats(log, t_start, m_start, 
+                      dbfile, tables, n_entries, title='Stats')
+    log.debug(f'logfile: {logfile}')
