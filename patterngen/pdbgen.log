@@ -1,0 +1,168 @@
+
+Uncaught exception
+Traceback (most recent call last):
+  File "./pdbgen.py", line 45, in <module>
+    raise RuntimeError
+RuntimeError
+
+
+
+Uncaught exception
+Traceback (most recent call last):
+  File "./pdbgen.py", line 49, in <module>
+    print(encode(goalstate))
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/encoding.py", line 8, in encode8puzzle
+    encoding[floor(i/2)] += n*(1<<(4*(~i&1)))
+IndexError: list index out of range
+
+
+
+Uncaught exception
+Traceback (most recent call last):
+  File "./pdbgen.py", line 51, in <module>
+    generator.generatePatternDatabase(info, log, RUN_ID)
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/generator.py", line 45, in generatePatternDatabase
+    pattern, nodeinfo = splitNode(node, len_pattern_encoding)
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/generator.py", line 19, in splitNode
+    return node[:len_encoded_pattern], {'cost': node[len_encoded_pattern], 'emptyTileLocation': node[len_encoded_pattern+1], 'undoMove': node[len_encoded_pattern+2]}
+TypeError: 'int' object is not subscriptable
+
+
+
+Uncaught exception
+Traceback (most recent call last):
+  File "./pdbgen.py", line 51, in <module>
+    generator.generatePatternDatabase(info, log, RUN_ID)
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/generator.py", line 45, in generatePatternDatabase
+    pattern, nodeinfo = splitNode(node, len_pattern_encoding)
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/generator.py", line 19, in splitNode
+    return node[:len_encoded_pattern], {'cost': node[len_encoded_pattern], 'emptyTileLocation': node[len_encoded_pattern+1], 'undoMove': node[len_encoded_pattern+2]}
+TypeError: 'int' object is not subscriptable
+
+
+
+Uncaught exception
+Traceback (most recent call last):
+  File "./pdbgen.py", line 51, in <module>
+    generator.generatePatternDatabase(info, log, RUN_ID)
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/generator.py", line 45, in generatePatternDatabase
+    pattern, nodeinfo = splitNode(node, len_pattern_encoding)
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/generator.py", line 19, in splitNode
+    return node[:len_encoded_pattern], {'cost': node[len_encoded_pattern], 'emptyTileLocation': node[len_encoded_pattern+1], 'undoMove': node[len_encoded_pattern+2]}
+TypeError: 'int' object is not subscriptable
+
+
+
+Uncaught exception
+Traceback (most recent call last):
+  File "./pdbgen.py", line 51, in <module>
+    generator.generatePatternDatabase(info, log, RUN_ID)
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/generator.py", line 36, in generatePatternDatabase
+    con, cur = db.initDB(log)
+  File "/Users/annie/Documents/n-puzzle/patterngen/dbtools/db.py", line 11, in initDB
+    cur = con.cursor()
+UnboundLocalError: local variable 'con' referenced before assignment
+
+
+
+Uncaught exception
+Traceback (most recent call last):
+  File "./pdbgen.py", line 51, in <module>
+    generator.generatePatternDatabase(info, log, RUN_ID)
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/generator.py", line 53, in generatePatternDatabase
+    generateChildren(pattern, nodeinfo, dim, ptiles, moves, opp_moves, log)
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/generator.py", line 73, in generateChildren
+    print(decode(pattern))
+NameError: name 'decode' is not defined
+
+
+
+Uncaught exception
+Traceback (most recent call last):
+  File "./pdbgen.py", line 51, in <module>
+    generator.generatePatternDatabase(info, log, RUN_ID)
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/generator.py", line 53, in generatePatternDatabase
+    children = generateChildren(pattern, nodeinfo, dim, ptiles, moves, opp_moves, encode, decode, log)
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/generator.py", line 77, in generateChildren
+    childinfo['undo'] = opp_moves(moveID)
+TypeError: 'tuple' object is not callable
+
+
+
+Uncaught exception
+Traceback (most recent call last):
+  File "./pdbgen.py", line 51, in <module>
+    generator.generatePatternDatabase(info, log, RUN_ID)
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/generator.py", line 53, in generatePatternDatabase
+    children = generateChildren(pattern, nodeinfo, dim, ptiles, moves, opp_moves, encode, decode, log)
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/generator.py", line 67, in generateChildren
+    log.debug(f'\tundo move: {DIRS(undo)}')
+TypeError: 'tuple' object is not callable
+
+
+
+Uncaught exception
+Traceback (most recent call last):
+  File "./pdbgen.py", line 51, in <module>
+    generator.generatePatternDatabase(info, log, RUN_ID)
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/generator.py", line 53, in generatePatternDatabase
+    children = generateChildren(pattern, nodeinfo, dim, ptiles, moves, opp_moves, encode, decode, log)
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/generator.py", line 67, in generateChildren
+    log.debug(f'\tundo move: {DIRS[undo]}')
+IndexError: tuple index out of range
+
+
+
+Uncaught exception
+Traceback (most recent call last):
+  File "./pdbgen.py", line 51, in <module>
+    generator.generatePatternDatabase(info, log, RUN_ID)
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/generator.py", line 62, in generatePatternDatabase
+    if not db.checkRowExists(cur, tables, child_pattern):
+  File "/Users/annie/Documents/n-puzzle/patterngen/dbtools/db.py", line 38, in checkRowExists
+    cur.execute("SELECT EXISTS ( SELECT * from %s where %s = ?)"%(tablename, attribute), (value,))
+sqlite3.OperationalError: no such table: 'PatternCosts_EmptyTileLocation_0', 'PatternCosts_EmptyTileLocation_1', 'PatternCosts_EmptyTileLocation_2', 'PatternCosts_EmptyTileLocation_3', 'PatternCosts_EmptyTileLocation_4', 'PatternCosts_EmptyTileLocation_5', 'PatternCosts_EmptyTileLocation_6', 'PatternCosts_EmptyTileLocation_7', 'PatternCosts_EmptyTileLocation_8'
+
+
+
+Uncaught exception
+Traceback (most recent call last):
+  File "./pdbgen.py", line 51, in <module>
+    generator.generatePatternDatabase(info, log, RUN_ID)
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/generator.py", line 63, in generatePatternDatabase
+    queue.append(makeNode(child_pattern, childinfo))
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/generator.py", line 17, in makeNode
+    return encodedPattern+bytes(stateinfo) # TODO: maybe could optimize
+TypeError: 'str' object cannot be interpreted as an integer
+
+
+
+Uncaught exception
+Traceback (most recent call last):
+  File "./pdbgen.py", line 51, in <module>
+    generator.generatePatternDatabase(info, log, RUN_ID)
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/generator.py", line 59, in generatePatternDatabase
+    children = generateChildren(pattern, nodeinfo, dim, ptiles, moves, opp_moves, encode, decode, log)
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/generator.py", line 138, in generateChildren
+    pprint.pp(queue, 2)
+NameError: name 'queue' is not defined
+
+
+
+Uncaught exception
+Traceback (most recent call last):
+  File "./pdbgen.py", line 51, in <module>
+    generator.generatePatternDatabase(info, log, RUN_ID)
+  File "/Users/annie/Documents/n-puzzle/patterngen/pdbgen/generator.py", line 76, in generatePatternDatabase
+    pprint.pp(queue, 2)
+  File "/Users/annie/.pyenv/versions/3.8.7/lib/python3.8/pprint.py", line 63, in pp
+    pprint(object, *args, sort_dicts=sort_dicts, **kwargs)
+  File "/Users/annie/.pyenv/versions/3.8.7/lib/python3.8/pprint.py", line 53, in pprint
+    printer.pprint(object)
+  File "/Users/annie/.pyenv/versions/3.8.7/lib/python3.8/pprint.py", line 148, in pprint
+    self._format(object, self._stream, 0, 0, {}, 0)
+  File "/Users/annie/.pyenv/versions/3.8.7/lib/python3.8/pprint.py", line 185, in _format
+    stream.write(rep)
+AttributeError: 'int' object has no attribute 'write'
+
+
