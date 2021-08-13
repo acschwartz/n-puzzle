@@ -1,4 +1,5 @@
 from collections import namedtuple
+import numpy as np
 import pandas as pd
 
 import os
@@ -9,6 +10,32 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir) 
 from get_heuristic_value import get_h_value
+
+
+def calcEffectiveBranchingFactor(df, row_index):
+        # calculating effective branching factor (b*)
+        # formula:  N = (b*)^1 + (b*)^2 + ... + (b*)^d
+        # solve for b*
+        # values needed: N = nodes generated, d = max depth
+
+        # 1. get N and d  (for entry i)
+        d = df['search depth'][row_index]
+        N = df['nodes gen'][row_index]
+
+        # 2. construct numpy coefficient array
+        # docs: https://numpy.org/doc/stable/reference/generated/numpy.roots.html#numpy.roots
+        coeff = [1] * d
+        coeff.append(-1 * N)
+
+        # 3. get roots
+        
+        roots = np.roots(coeff)
+
+        # 4. extract real, positive root
+        mask = np.logical_and(np.isreal(roots), roots > 1)
+        bstar = float(roots[mask][0])   # hopefully there is only one!
+
+        return bstar
 
 
 to_process = [
@@ -57,6 +84,19 @@ for metadata in to_process:
     df['space (nodes)'] = df['nodes gen'].where(df['algo'] == 'A*', df['search depth'])
     df['h val'] = list(map(lambda puz: get_h_value(heuristics[metadata['h']].solverpy, puz), df['puzzle'].to_list() ))
 
+    
+    # calculate effective branching factor
+    list_nodesgen = df['nodes gen'].to_list()
+    list_depth = df['search depth'].to_list()
+
+    list_bstar = [] # effective branching factor
+    for i in range(1, len(df)+1):
+        list_bstar.append(calcEffectiveBranchingFactor(df, i))
+    
+    df['b*'] = list_bstar
+
+
+    # re-order cols
     column_order = [
         'exp',
         'N',
@@ -68,10 +108,19 @@ for metadata in to_process:
         'runtime (sec)',
         'time (nodes)',
         'space (nodes)',
-        'puzzle',
-        'goal',             # TODO: not sure where this goes
+        'b*',
         'nodes gen', 
         'search depth',
+        'puzzle',
+        'goal',             # TODO: not sure where this goes
     ]
-
     df = df[column_order]
+
+    # display max columns 
+    pd.set_option('display.max_columns', None)
+    print(df)
+    
+    
+
+
+    
