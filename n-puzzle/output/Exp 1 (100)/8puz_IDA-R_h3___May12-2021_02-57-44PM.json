@@ -1,6 +1,6 @@
 {
     "1": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(1, 8, 7, 3, 2, 5, 0, 6, 4)",
@@ -11,7 +11,7 @@
         "timedOut": false
     },
     "2": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(0, 8, 4, 6, 1, 3, 5, 2, 7)",
@@ -22,7 +22,7 @@
         "timedOut": false
     },
     "3": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(3, 7, 5, 0, 1, 4, 6, 2, 8)",
@@ -33,7 +33,7 @@
         "timedOut": false
     },
     "4": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(0, 7, 4, 1, 3, 8, 6, 5, 2)",
@@ -44,7 +44,7 @@
         "timedOut": false
     },
     "5": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(6, 5, 7, 3, 2, 8, 0, 1, 4)",
@@ -55,7 +55,7 @@
         "timedOut": false
     },
     "6": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(8, 7, 3, 0, 4, 6, 1, 2, 5)",
@@ -66,7 +66,7 @@
         "timedOut": false
     },
     "7": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(5, 0, 8, 4, 2, 6, 7, 1, 3)",
@@ -77,7 +77,7 @@
         "timedOut": false
     },
     "8": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(8, 3, 4, 1, 2, 7, 0, 6, 5)",
@@ -88,7 +88,7 @@
         "timedOut": false
     },
     "9": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(8, 1, 2, 0, 4, 7, 6, 5, 3)",
@@ -99,7 +99,7 @@
         "timedOut": false
     },
     "10": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(6, 4, 1, 3, 7, 5, 2, 8, 0)",
@@ -110,7 +110,7 @@
         "timedOut": false
     },
     "11": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(8, 0, 7, 3, 4, 6, 5, 1, 2)",
@@ -121,7 +121,7 @@
         "timedOut": false
     },
     "12": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(5, 8, 0, 2, 7, 1, 6, 4, 3)",
@@ -132,7 +132,7 @@
         "timedOut": false
     },
     "13": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(8, 5, 4, 0, 7, 1, 6, 2, 3)",
@@ -143,7 +143,7 @@
         "timedOut": false
     },
     "14": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(2, 1, 8, 7, 3, 4, 5, 0, 6)",
@@ -154,7 +154,7 @@
         "timedOut": false
     },
     "15": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(5, 8, 3, 1, 7, 6, 4, 0, 2)",
@@ -165,7 +165,7 @@
         "timedOut": false
     },
     "16": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(1, 7, 5, 2, 0, 3, 4, 6, 8)",
@@ -176,7 +176,7 @@
         "timedOut": false
     },
     "17": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(1, 5, 6, 4, 7, 2, 0, 3, 8)",
@@ -187,7 +187,7 @@
         "timedOut": false
     },
     "18": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(6, 0, 2, 3, 1, 7, 4, 8, 5)",
@@ -198,7 +198,7 @@
         "timedOut": false
     },
     "19": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(7, 1, 0, 5, 8, 6, 4, 2, 3)",
@@ -209,7 +209,7 @@
         "timedOut": false
     },
     "20": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(7, 8, 0, 4, 6, 5, 2, 3, 1)",
@@ -220,7 +220,7 @@
         "timedOut": false
     },
     "21": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(3, 1, 0, 7, 4, 2, 8, 6, 5)",
@@ -231,7 +231,7 @@
         "timedOut": false
     },
     "22": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(0, 4, 7, 6, 2, 8, 1, 3, 5)",
@@ -242,7 +242,7 @@
         "timedOut": false
     },
     "23": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(1, 6, 7, 0, 3, 2, 5, 4, 8)",
@@ -253,7 +253,7 @@
         "timedOut": false
     },
     "24": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(6, 4, 5, 3, 2, 1, 7, 8, 0)",
@@ -264,7 +264,7 @@
         "timedOut": false
     },
     "25": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(1, 0, 6, 2, 7, 4, 5, 8, 3)",
@@ -275,7 +275,7 @@
         "timedOut": false
     },
     "26": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(4, 0, 5, 2, 8, 3, 7, 1, 6)",
@@ -286,7 +286,7 @@
         "timedOut": false
     },
     "27": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(3, 8, 0, 2, 1, 7, 4, 5, 6)",
@@ -297,7 +297,7 @@
         "timedOut": false
     },
     "28": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(4, 3, 7, 0, 1, 6, 2, 8, 5)",
@@ -308,7 +308,7 @@
         "timedOut": false
     },
     "29": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(0, 2, 6, 4, 1, 8, 5, 7, 3)",
@@ -319,7 +319,7 @@
         "timedOut": false
     },
     "30": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(8, 6, 1, 3, 2, 4, 7, 0, 5)",
@@ -330,7 +330,7 @@
         "timedOut": false
     },
     "31": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(5, 1, 4, 3, 7, 6, 0, 2, 8)",
@@ -341,7 +341,7 @@
         "timedOut": false
     },
     "32": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(5, 0, 8, 4, 1, 3, 7, 2, 6)",
@@ -352,7 +352,7 @@
         "timedOut": false
     },
     "33": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(0, 6, 5, 3, 4, 8, 2, 7, 1)",
@@ -363,7 +363,7 @@
         "timedOut": false
     },
     "34": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(0, 2, 6, 5, 4, 7, 3, 8, 1)",
@@ -374,7 +374,7 @@
         "timedOut": false
     },
     "35": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(5, 2, 1, 8, 0, 6, 4, 3, 7)",
@@ -385,7 +385,7 @@
         "timedOut": false
     },
     "36": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(0, 8, 3, 7, 6, 1, 5, 2, 4)",
@@ -396,7 +396,7 @@
         "timedOut": false
     },
     "37": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(8, 6, 4, 2, 0, 1, 7, 3, 5)",
@@ -407,7 +407,7 @@
         "timedOut": false
     },
     "38": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(6, 8, 0, 2, 4, 1, 3, 5, 7)",
@@ -418,7 +418,7 @@
         "timedOut": false
     },
     "39": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(0, 8, 2, 5, 7, 6, 1, 3, 4)",
@@ -429,7 +429,7 @@
         "timedOut": false
     },
     "40": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(0, 2, 8, 7, 1, 6, 4, 3, 5)",
@@ -440,7 +440,7 @@
         "timedOut": false
     },
     "41": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(8, 2, 7, 3, 6, 4, 1, 5, 0)",
@@ -451,7 +451,7 @@
         "timedOut": false
     },
     "42": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(3, 6, 2, 7, 0, 4, 8, 5, 1)",
@@ -462,7 +462,7 @@
         "timedOut": false
     },
     "43": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(0, 4, 5, 8, 6, 1, 3, 7, 2)",
@@ -473,7 +473,7 @@
         "timedOut": false
     },
     "44": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(3, 7, 6, 8, 2, 1, 0, 4, 5)",
@@ -484,7 +484,7 @@
         "timedOut": false
     },
     "45": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(3, 1, 5, 2, 6, 0, 4, 8, 7)",
@@ -495,7 +495,7 @@
         "timedOut": false
     },
     "46": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(5, 8, 4, 1, 2, 3, 7, 6, 0)",
@@ -506,7 +506,7 @@
         "timedOut": false
     },
     "47": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(5, 7, 0, 8, 6, 4, 3, 2, 1)",
@@ -517,7 +517,7 @@
         "timedOut": false
     },
     "48": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(8, 3, 4, 6, 1, 7, 0, 2, 5)",
@@ -528,7 +528,7 @@
         "timedOut": false
     },
     "49": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(2, 6, 4, 7, 3, 5, 0, 1, 8)",
@@ -539,7 +539,7 @@
         "timedOut": false
     },
     "50": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(4, 8, 3, 1, 5, 2, 0, 6, 7)",
@@ -550,7 +550,7 @@
         "timedOut": false
     },
     "51": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(3, 7, 0, 6, 8, 5, 4, 1, 2)",
@@ -561,7 +561,7 @@
         "timedOut": false
     },
     "52": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(0, 8, 2, 4, 3, 1, 5, 7, 6)",
@@ -572,7 +572,7 @@
         "timedOut": false
     },
     "53": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(5, 3, 2, 1, 4, 8, 7, 6, 0)",
@@ -583,7 +583,7 @@
         "timedOut": false
     },
     "54": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(4, 2, 6, 5, 3, 1, 0, 7, 8)",
@@ -594,7 +594,7 @@
         "timedOut": false
     },
     "55": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(3, 2, 6, 1, 4, 0, 7, 8, 5)",
@@ -605,7 +605,7 @@
         "timedOut": false
     },
     "56": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(5, 6, 8, 1, 3, 0, 7, 2, 4)",
@@ -616,7 +616,7 @@
         "timedOut": false
     },
     "57": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(3, 4, 2, 0, 5, 1, 7, 8, 6)",
@@ -627,7 +627,7 @@
         "timedOut": false
     },
     "58": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(1, 6, 2, 8, 5, 4, 7, 3, 0)",
@@ -638,7 +638,7 @@
         "timedOut": false
     },
     "59": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(8, 0, 7, 2, 6, 3, 4, 1, 5)",
@@ -649,7 +649,7 @@
         "timedOut": false
     },
     "60": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(4, 7, 5, 0, 2, 8, 3, 1, 6)",
@@ -660,7 +660,7 @@
         "timedOut": false
     },
     "61": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(5, 2, 0, 1, 6, 4, 8, 3, 7)",
@@ -671,7 +671,7 @@
         "timedOut": false
     },
     "62": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(1, 4, 6, 5, 7, 3, 2, 8, 0)",
@@ -682,7 +682,7 @@
         "timedOut": false
     },
     "63": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(4, 5, 7, 2, 1, 8, 6, 0, 3)",
@@ -693,7 +693,7 @@
         "timedOut": false
     },
     "64": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(8, 7, 5, 4, 1, 2, 3, 6, 0)",
@@ -704,7 +704,7 @@
         "timedOut": false
     },
     "65": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(1, 7, 8, 4, 2, 6, 3, 5, 0)",
@@ -715,7 +715,7 @@
         "timedOut": false
     },
     "66": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(6, 8, 7, 3, 4, 1, 2, 0, 5)",
@@ -726,7 +726,7 @@
         "timedOut": false
     },
     "67": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(5, 1, 3, 0, 6, 4, 2, 7, 8)",
@@ -737,7 +737,7 @@
         "timedOut": false
     },
     "68": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(0, 4, 6, 2, 1, 5, 7, 3, 8)",
@@ -748,7 +748,7 @@
         "timedOut": false
     },
     "69": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(3, 4, 0, 2, 7, 8, 5, 1, 6)",
@@ -759,7 +759,7 @@
         "timedOut": false
     },
     "70": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(6, 2, 7, 5, 1, 0, 8, 4, 3)",
@@ -770,7 +770,7 @@
         "timedOut": false
     },
     "71": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(8, 0, 2, 5, 7, 1, 6, 4, 3)",
@@ -781,7 +781,7 @@
         "timedOut": false
     },
     "72": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(4, 8, 6, 0, 1, 2, 5, 3, 7)",
@@ -792,7 +792,7 @@
         "timedOut": false
     },
     "73": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(6, 1, 3, 5, 4, 2, 8, 7, 0)",
@@ -803,7 +803,7 @@
         "timedOut": false
     },
     "74": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(4, 8, 6, 5, 0, 2, 1, 7, 3)",
@@ -814,7 +814,7 @@
         "timedOut": false
     },
     "75": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(5, 7, 1, 3, 4, 8, 6, 2, 0)",
@@ -825,7 +825,7 @@
         "timedOut": false
     },
     "76": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(6, 8, 4, 3, 2, 0, 1, 7, 5)",
@@ -836,7 +836,7 @@
         "timedOut": false
     },
     "77": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(8, 7, 6, 1, 5, 3, 2, 0, 4)",
@@ -847,7 +847,7 @@
         "timedOut": false
     },
     "78": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(4, 5, 1, 6, 3, 7, 2, 0, 8)",
@@ -858,7 +858,7 @@
         "timedOut": false
     },
     "79": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(5, 0, 1, 7, 6, 4, 3, 2, 8)",
@@ -869,7 +869,7 @@
         "timedOut": false
     },
     "80": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(0, 2, 4, 6, 8, 3, 7, 5, 1)",
@@ -880,7 +880,7 @@
         "timedOut": false
     },
     "81": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(7, 5, 1, 6, 8, 0, 2, 3, 4)",
@@ -891,7 +891,7 @@
         "timedOut": false
     },
     "82": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(7, 3, 1, 2, 0, 6, 4, 5, 8)",
@@ -902,7 +902,7 @@
         "timedOut": false
     },
     "83": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(0, 3, 4, 2, 1, 5, 8, 7, 6)",
@@ -913,7 +913,7 @@
         "timedOut": false
     },
     "84": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(0, 8, 6, 7, 3, 5, 1, 2, 4)",
@@ -924,7 +924,7 @@
         "timedOut": false
     },
     "85": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(0, 4, 2, 3, 1, 6, 8, 5, 7)",
@@ -935,7 +935,7 @@
         "timedOut": false
     },
     "86": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(8, 3, 0, 6, 7, 2, 5, 1, 4)",
@@ -946,7 +946,7 @@
         "timedOut": false
     },
     "87": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(3, 2, 8, 1, 5, 6, 4, 0, 7)",
@@ -957,7 +957,7 @@
         "timedOut": false
     },
     "88": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(7, 4, 6, 3, 1, 5, 2, 0, 8)",
@@ -968,7 +968,7 @@
         "timedOut": false
     },
     "89": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(2, 7, 0, 4, 1, 5, 8, 6, 3)",
@@ -979,7 +979,7 @@
         "timedOut": false
     },
     "90": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(8, 2, 1, 3, 7, 5, 4, 0, 6)",
@@ -990,7 +990,7 @@
         "timedOut": false
     },
     "91": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(1, 7, 5, 0, 6, 3, 2, 4, 8)",
@@ -1001,7 +1001,7 @@
         "timedOut": false
     },
     "92": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(4, 1, 5, 2, 3, 0, 6, 8, 7)",
@@ -1012,7 +1012,7 @@
         "timedOut": false
     },
     "93": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(1, 4, 0, 2, 8, 7, 5, 3, 6)",
@@ -1023,7 +1023,7 @@
         "timedOut": false
     },
     "94": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(4, 0, 2, 5, 7, 6, 3, 1, 8)",
@@ -1034,7 +1034,7 @@
         "timedOut": false
     },
     "95": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(6, 3, 1, 8, 4, 0, 5, 7, 2)",
@@ -1045,7 +1045,7 @@
         "timedOut": false
     },
     "96": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(5, 7, 4, 1, 8, 2, 6, 3, 0)",
@@ -1056,7 +1056,7 @@
         "timedOut": false
     },
     "97": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(7, 5, 2, 4, 1, 3, 8, 6, 0)",
@@ -1067,7 +1067,7 @@
         "timedOut": false
     },
     "98": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(5, 1, 8, 6, 0, 7, 4, 3, 2)",
@@ -1078,7 +1078,7 @@
         "timedOut": false
     },
     "99": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(1, 5, 4, 2, 0, 7, 3, 8, 6)",
@@ -1089,7 +1089,7 @@
         "timedOut": false
     },
     "100": {
-        "algo": "IDA*",
+        "algo": "IDA*-R",
         "foundSol": true,
         "goal": "zero_first",
         "init": "(4, 6, 5, 8, 3, 1, 2, 0, 7)",
