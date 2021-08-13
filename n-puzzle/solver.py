@@ -340,7 +340,7 @@ def solver(arglist=None, returnHValueOnly=False):
             sol_len= max(len(steps) - 1, 0)
         else:
             steps = 0
-            sol_len = 0
+            sol_len = -1
         # -------- POPULATE RESULTSET --------#
         resultSet = {
             'init': str(puzzle),
