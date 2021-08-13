@@ -117,7 +117,7 @@ def verbose_info(args, puzzle, goal_state, size, PDB_CONNECTION):
 
 #########################################################################################
 
-def solver(arglist=None):
+def solver(arglist=None, returnHValueOnly=False):
     try:
         global PDB_CONNECTION
     
@@ -197,7 +197,13 @@ def solver(arglist=None):
             
             
         goal_state = goal_states.KV[args.s](size)
+
+        # -------- RETURN H VALUE ONLY OPTION (NO SEARH) --------- #
+        if returnHValueOnly:
+            return HEURISTIC(puzzle, goal_state, size, PDB_CONNECTION)
+
         verbose_info(args, puzzle, goal_state, size, PDB_CONNECTION)
+
         if not is_solvable(puzzle, goal_state, size):
             print(color('red','this puzzle is not solvable'))
             return (None, logheader, resultSet)
@@ -215,7 +221,7 @@ def solver(arglist=None):
                 maxrss_before_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
                 print(color('white', 'max rss before search:'), maxrss_before_search)
     
-    
+
         # -------- SEARCH --------- #
         t_before_search = perf_counter()
         if args.tmin:
