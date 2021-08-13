@@ -40,7 +40,7 @@
         "max_path_len": 58,
         "nodes_gen": 72741677,
         "runtime_sec": 540.0001887649996,
-        "sol_len": 0,
+        "sol_len": -1,
         "timedOut": true
     },
     "5": {
@@ -62,7 +62,7 @@
         "max_path_len": 48,
         "nodes_gen": 73417466,
         "runtime_sec": 540.0001268979977,
-        "sol_len": 0,
+        "sol_len": -1,
         "timedOut": true
     },
     "7": {

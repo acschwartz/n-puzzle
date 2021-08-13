@@ -7,7 +7,7 @@
         "max_path_len": 32,
         "nodes_gen": 163041589,
         "runtime_sec": 540.0000946186483,
-        "sol_len": 0,
+        "sol_len": -1,
         "timedOut": true
     },
     "2": {
@@ -18,7 +18,7 @@
         "max_path_len": 33,
         "nodes_gen": 163314110,
         "runtime_sec": 540.0000881329179,
-        "sol_len": 0,
+        "sol_len": -1,
         "timedOut": true
     },
     "3": {
@@ -29,7 +29,7 @@
         "max_path_len": 34,
         "nodes_gen": 159628911,
         "runtime_sec": 540.0000825040042,
-        "sol_len": 0,
+        "sol_len": -1,
         "timedOut": true
     },
     "4": {
@@ -40,7 +40,7 @@
         "max_path_len": 30,
         "nodes_gen": 161628255,
         "runtime_sec": 540.0000954456627,
-        "sol_len": 0,
+        "sol_len": -1,
         "timedOut": true
     },
     "5": {
@@ -51,7 +51,7 @@
         "max_path_len": 32,
         "nodes_gen": 162480996,
         "runtime_sec": 540.0000720657408,
-        "sol_len": 0,
+        "sol_len": -1,
         "timedOut": true
     },
     "6": {
@@ -62,7 +62,7 @@
         "max_path_len": 31,
         "nodes_gen": 161218418,
         "runtime_sec": 540.0000877976418,
-        "sol_len": 0,
+        "sol_len": -1,
         "timedOut": true
     },
     "7": {
@@ -73,7 +73,7 @@
         "max_path_len": 34,
         "nodes_gen": 161902034,
         "runtime_sec": 540.0000726357102,
-        "sol_len": 0,
+        "sol_len": -1,
         "timedOut": true
     },
     "8": {
@@ -84,7 +84,7 @@
         "max_path_len": 34,
         "nodes_gen": 162034106,
         "runtime_sec": 540.0000820346177,
-        "sol_len": 0,
+        "sol_len": -1,
         "timedOut": true
     },
     "9": {
@@ -95,7 +95,7 @@
         "max_path_len": 32,
         "nodes_gen": 162193257,
         "runtime_sec": 540.0000731907785,
-        "sol_len": 0,
+        "sol_len": -1,
         "timedOut": true
     },
     "10": {
@@ -106,7 +106,7 @@
         "max_path_len": 30,
         "nodes_gen": 161998346,
         "runtime_sec": 540.0000877976418,
-        "sol_len": 0,
+        "sol_len": -1,
         "timedOut": true
     }
 }
