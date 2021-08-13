@@ -99,8 +99,6 @@ def verbose_info(args, puzzle, goal_state, size, PDB_CONNECTION):
     for k,v in opts2.items():
             print(color(opt_color, k), v)
 
-   
-    # NOTE: removed because it wasn't vibing with my handling of the pdb's.. worry bout it later (TODO)
     if is_solvable(puzzle, goal_state, size):
         print(color('blue', 'heuristic scores for initial state'))
         for k,v in heuristics.KV.items():
@@ -342,12 +340,15 @@ def solver(arglist=None):
             'init': str(puzzle),
             'foundSol': success,  # none if failed, False if not found, True if found
             'timedOut': searchTimedOut,
-            'goal': args.s,
             'runtime_sec': t_search,
             'nodes_gen': res[2]['time'],
-            'algo': 'IDA*' if args.ida else 'A*', # for knowing which is time and space complexity
+            'algo': logheader['algo'], # for knowing which is time and space complexity
+            'heuristic': logheader['heur'],
+            'h_val': HEURISTIC(puzzle, goal_state, size, PDB_CONNECTION),
             'sol_len': sol_len,
             'max_path_len': (ida_star_max_path_length if args.ida else sol_len),
+            'n_puzzle': size**2-1,
+            'goal': args.s,
             # don't include memory measurement probbaly
         }
         # -------- POPULATE RESULTSET --------#
