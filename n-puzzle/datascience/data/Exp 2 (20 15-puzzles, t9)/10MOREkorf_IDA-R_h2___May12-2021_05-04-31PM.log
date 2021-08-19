@@ -1,0 +1,50 @@
+==========================================================================
+Run ID: 10MOREkorf_IDA-R_h2___May12-2021_05-04-31PM
+Input file: input/10more_korf100_10xor20.txt
+Result file: output/10MOREkorf_IDA-R_h2___May12-2021_05-04-31PM.json
+==========================================================================
+
+Puzzle: 15-puzzle
+
+SEARCH ALGORITHM: 	IDA*-R
+HEURISTIC: 		manhattan
+Timeout: 		9 m
+
+Goal state: zero_first
+==========================================================================
+
+ 
+SYSTEM:
+{
+  "platform": "Linux",
+  "platform-release": "5.4.0-72-generic",
+  "platform-version": "#80-Ubuntu SMP Mon Apr 12 17:35:00 UTC 2021",
+  "architecture": "x86_64",
+  "hostname": "csel-kh4250-12",
+  "ip-address": "127.0.0.1",
+  "mac-address": "9b:39:f1:e2:a1:d7",
+  "processor": "x86_64",
+  "ram": "31 GB"
+}
+==========================================================================
+
+note:
+	for A*:
+	  - space complexity = nodes generated
+	  - time complexity = nodes generated
+		
+	for IDA*:
+	  - space complexity = max path length
+	  - time complexity: nodes generated
+
+==========================================================================
+
+
+
+ 🏁 processed 10 inputs in  38.0 m 24.61 s
+........................................................................
+
+  10 of 10 inputs processed successfully
+........................................................................
+Max RSS (of wrapper and all runs): 672.00KB
+Keep in mind all results are held in memory and are dumped to json at the end.  

@@ -1,0 +1,50 @@
+==========================================================================
+Run ID: 10korf_IDA-R_h1___May12-2021_03-55-22PM
+Input file: input/10_of_korf100_every10th.txt
+Result file: output/10korf_IDA-R_h1___May12-2021_03-55-22PM.json
+==========================================================================
+
+Puzzle: 15-puzzle
+
+SEARCH ALGORITHM: 	IDA*-R
+HEURISTIC: 		hamming
+Timeout: 		9 m
+
+Goal state: zero_first
+==========================================================================
+
+ 
+SYSTEM:
+{
+  "platform": "Linux",
+  "platform-release": "5.4.0-70-generic",
+  "platform-version": "#78-Ubuntu SMP Fri Mar 19 13:29:52 UTC 2021",
+  "architecture": "x86_64",
+  "hostname": "csel-kh4250-11",
+  "ip-address": "127.0.0.1",
+  "mac-address": "73:3f:d2:37:3e:b0",
+  "processor": "x86_64",
+  "ram": "31 GB"
+}
+==========================================================================
+
+note:
+	for A*:
+	  - space complexity = nodes generated
+	  - time complexity = nodes generated
+		
+	for IDA*:
+	  - space complexity = max path length
+	  - time complexity: nodes generated
+
+==========================================================================
+
+
+
+ 🏁 processed 10 inputs in  1.0 h 30.0 m 0.13 s
+........................................................................
+
+  10 of 10 inputs processed successfully
+........................................................................
+Max RSS (of wrapper and all runs): 472.00KB
+Keep in mind all results are held in memory and are dumped to json at the end.  
