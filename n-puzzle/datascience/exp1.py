@@ -1,18 +1,4 @@
-from collections import namedtuple
-import numpy as np
-import pandas as pd
 import pickle as pkl
-import re
-
-# to be able to import from get_heuristic_value
-import os
-import sys
-import inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir) 
-from get_heuristic_value import get_h_value
-
 from data_processing import *
 
 
@@ -33,16 +19,24 @@ input_filenames = [
     '8puz_IDA_h3___May12-2021_02-50-13PM.json'
 ]
 
-exp1_data = {}
+exp1 = {}
 
 for filename in input_filenames:
     df = processJsonToDataframe(experiment_no, timeout_min, input_filename_prefix, filename)
 
     df_nickname = df['algo'][1].replace('*', '') + '_' + df['heuristic'][1]  # e.g. 'A_h1'
-    exp1_data[df_nickname] = df.copy()
+    exp1[df_nickname] = df.copy()
   
 with open(f'exp{experiment_no}.pkl', 'wb') as f:
-    pkl.dump(exp1_data, f, protocol=0)
+    pkl.dump(exp1, f, protocol=0)
 
-print('dict name: exp1_data')
-print(exp1_data.keys())
+print('\ndict name:\texp1')
+print(exp1.keys())
+
+# to "flatten" dict into single df:for k in data.keys():
+# exp1_all = pd.DataFrame()
+# for k in exp1.keys():
+#     exp1_all = exp1_all.append(exp1[k])
+
+# from pandasgui import show
+# show(exp1_all)
