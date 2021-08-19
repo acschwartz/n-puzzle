@@ -1,11 +1,12 @@
 from collections import namedtuple
 import numpy as np
 import pandas as pd
+import re
 
+# to be able to import from get_heuristic_value
 import os
 import sys
 import inspect
-
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir) 
@@ -43,26 +44,35 @@ def calcHeuristicPercentError(df, row_index):
     return np.around(percent_error, 1)
 
 
-to_process = [
-    {
-        'experiment': 1,
-        'timeout (min)': pd.NA,
-        'file': 'data/Experiment 1 (100 8-puzzles)/8puz_AStar_h1___May12-2021_02-37-50PM.json',
-        'h': 'h1',
-    },
-]
 
 
 HeuristicInfo = namedtuple('HeuristicNames', ['solverpy', 'fordataframe', 'desc'])
 heuristics = {
     'h1': HeuristicInfo(solverpy='hamming', fordataframe='hamming', desc='misplaced tiles'),
     'h2': HeuristicInfo('manhattan', 'manhattan', desc=None),
-    'h3': HeuristicInfo('linearconflicts', 'MHD + linear conflicts', desc='MHD + linear conflicts')
+    'h3': HeuristicInfo('linearconflicts', 'mhd+linear conflicts', desc='MHD + linear conflicts')
 }
 
+# INPUTS
+experiment_no = 1
+timeout_min = pd.NA
+input_filename_prefix = 'data/Experiment 1 (100 8-puzzles)/'
+input_filenames = [
+    '8puz_AStar_h1___May12-2021_02-37-50PM.json',
+    '8puz_AStar_h2___May12-2021_02-38-57PM.json',
+    '8puz_AStar_h3___May12-2021_02-39-18PM.json',
+    '8puz_IDA-R_h1___May12-2021_02-54-58PM.json',
+    '8puz_IDA-R_h2___May12-2021_02-57-21PM.json',
+    '8puz_IDA-R_h3___May12-2021_02-57-44PM.json',
+    '8puz_IDA_h1___May12-2021_02-46-49PM.json',
+    '8puz_IDA_h2___May12-2021_02-49-36PM.json',
+    '8puz_IDA_h3___May12-2021_02-50-13PM.json'
+]
 
-for metadata in to_process:
-    df = pd.read_json(metadata['file'])
+data = {}
+
+for filename in input_filenames:
+    df = pd.read_json(input_filename_prefix+filename)
     df = df.transpose()
 
     del df['foundSol']
@@ -79,13 +89,14 @@ for metadata in to_process:
         })
 
     # populate new fields
-    df.insert(0, "exp", [metadata['experiment']] * len(df), False)
+    df.insert(0, "exp", [experiment_no] * len(df), False)
     df.insert(1, "N", [len(eval(df.loc[1, 'puzzle']))-1] * len(df), False)    # N = 8, 15, etc..
-    df.insert(2, 'heuristic', [heuristics[metadata['h']].fordataframe] * len(df), False)
-    df.insert(3, 'timeout (min)', [metadata['timeout (min)']] * len(df), False)
+    heuristic_code = re.search('_(h\d)_', filename).group(1)
+    df.insert(2, 'heuristic', [heuristic_code] * len(df), False)
+    df.insert(3, 'timeout (min)', [timeout_min] * len(df), False)
     df['time (nodes)'] = df['nodes gen']
     df['space (nodes)'] = df['nodes gen'].where(df['algo'] == 'A*', df['search depth'])
-    df['h val'] = list(map(lambda puz: get_h_value(heuristics[metadata['h']].solverpy, puz), df['puzzle'].to_list() ))
+    df['h val'] = list(map(lambda puz: get_h_value(heuristics[heuristic_code].solverpy, puz), df['puzzle'].to_list() ))
 
 
     # convert sol length = -1 to null (for ability to easily query % non-null)
@@ -129,8 +140,12 @@ for metadata in to_process:
     pd.set_option('display.max_columns', None)
     print(df)
     print(df.info())
-  
 
-df.astype(cols).dtypes
+    algo = df['algo'][1]
+    df_nickname = algo.replace('*', '') + '_' + heuristic_code
+    data[df_nickname] = df.copy()
+
+df.to_pickle(f'data/exp{experiment_no}.pkl', protocol=0)
+  
 
     
