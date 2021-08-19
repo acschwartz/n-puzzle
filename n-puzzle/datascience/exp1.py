@@ -1,6 +1,7 @@
 from collections import namedtuple
 import numpy as np
 import pandas as pd
+import pickle as pkl
 import re
 
 # to be able to import from get_heuristic_value
@@ -144,8 +145,6 @@ for filename in input_filenames:
     algo = df['algo'][1]
     df_nickname = algo.replace('*', '') + '_' + heuristic_code
     data[df_nickname] = df.copy()
-
-df.to_pickle(f'data/exp{experiment_no}.pkl', protocol=0)
   
-
-    
+with open(f'exp{experiment_no}.pkl', 'wb') as f:
+    pkl.dump(data, f, protocol=0)
