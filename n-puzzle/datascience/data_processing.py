@@ -19,6 +19,10 @@ def calcEffectiveBranchingFactor(df, row_index):
         # solve for b*
         # values needed: N = nodes generated, d = max depth
 
+    if pd.isnull(df['sol length'][row_index]) or df['sol length'][row_index] == -1:
+        return pd.NA
+
+    else:
         # 1. get N and d  (for entry i)
         d = df['search depth'][row_index]
         N = df['nodes gen'][row_index]
@@ -40,8 +44,13 @@ def calcEffectiveBranchingFactor(df, row_index):
 
 def calcHeuristicPercentError(df, row_index):
     i = row_index
-    percent_error = np.abs( df['h val'][i] - df['sol length'][i] ) / df['sol length'][i] * 100
-    return np.around(percent_error, 1)
+
+    if pd.isnull(df['sol length'][i]) or df['sol length'][i] == -1:
+        return pd.NA
+    else:
+
+        percent_error = np.abs( df['h val'][i] - df['sol length'][i] ) / df['sol length'][i] * 100
+        return np.around(percent_error, 1)
 
 
 HeuristicNames = namedtuple('HeuristicNames', ['solverpy', 'fordataframe', 'desc'])
