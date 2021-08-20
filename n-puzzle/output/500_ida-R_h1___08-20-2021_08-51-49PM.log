@@ -1,0 +1,50 @@
+==========================================================================
+Run ID: 500_ida-R_h1___08-20-2021_08-51-49PM
+Input file: input/500_random_8puzzles.txt
+Result file: output/500_ida-R_h1___08-20-2021_08-51-49PM.json
+==========================================================================
+
+Puzzle: 8-puzzle
+
+SEARCH ALGORITHM: 	IDA*-R
+HEURISTIC: 		hamming
+Timeout: 		None
+
+Goal state: zero_first
+==========================================================================
+
+ 
+SYSTEM:
+{
+  "platform": "Linux",
+  "platform-release": "4.14.243-185.433.amzn2.x86_64",
+  "platform-version": "#1 SMP Mon Aug 9 05:55:52 UTC 2021",
+  "architecture": "x86_64",
+  "hostname": "ip-172-31-24-69.us-east-2.compute.internal",
+  "ip-address": "172.31.24.69",
+  "mac-address": "06:e0:ee:a0:36:a2",
+  "processor": "x86_64",
+  "cpu count (vCPUs):": "64",
+  "ram": "125 GB"
+}
+==========================================================================
+
+note:
+	for A*:
+	  - space complexity = nodes generated
+	  - time complexity = nodes generated
+		
+	for IDA*:
+	  - space complexity = max path length
+	  - time complexity: nodes generated
+
+==========================================================================
+
+ Processed <Synchronized wrapper for c_int(0)> inputs in  18.55 s
+................................................................................
+
+  <Synchronized wrapper for c_int(0)> or 500 inputs failed (had errors)
+  <Synchronized wrapper for c_int(0)> of 500 inputs processed successfully
+................................................................................
+Max RSS (of wrapper and all runs): 2.98MB
+Keep in mind all results are held in memory and are dumped to json at the end.  
