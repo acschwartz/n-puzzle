@@ -6,8 +6,8 @@
 import sys
 import sqlite3
 import resource
+import time
 import tracemalloc
-from time import perf_counter
 from random import shuffle
 
 
@@ -117,7 +117,7 @@ def verbose_info(args, puzzle, goal_state, size, PDB_CONNECTION):
 
 #########################################################################################
 
-def solver(arglist=None, returnHValueOnly=False):
+def solver(arglist=None, returnHValueOnly=False, parallel=False):
     try:
         global PDB_CONNECTION
     
@@ -202,11 +202,16 @@ def solver(arglist=None, returnHValueOnly=False):
         if returnHValueOnly:
             return HEURISTIC(puzzle, goal_state, size, PDB_CONNECTION)
 
-        verbose_info(args, puzzle, goal_state, size, PDB_CONNECTION)
+        if not parallel:
+            verbose_info(args, puzzle, goal_state, size, PDB_CONNECTION)
+        else:
+            # TODO: message when a search is started for paralel processing (TODO) TODO TODO TODO 
+            pass
 
         if not is_solvable(puzzle, goal_state, size):
             print(color('red','this puzzle is not solvable'))
             return (None, logheader, resultSet)
+        
         
         # code snippet for making IDA* memory profiling work on linux
         # problem: tracemalloc prohibitively slow, and maxrss doesn't capture it
@@ -223,7 +228,18 @@ def solver(arglist=None, returnHValueOnly=False):
     
 
         # -------- SEARCH --------- #
-        t_before_search = perf_counter()
+        # if parallel:
+        #     t_before_search = time.process_time()
+        #     # process_time() returns sum of the system and user CPU time of the current process.
+        #     # It does not include time elapsed during sleep. It is process-wide by definition.
+        # else:
+        #     t_before_search() = time.perf_counter()
+        #     # perf_counter includes time elapsed during sleep and is "system-wide"
+
+        t_before_search = resource.getrusage(resource.RUSAGE_SELF).ru_utime
+        # using time because afaiu, system time includes managing CPU resources as well -
+        # i.e. if a process is queued up waiting, that may include system time? not clear tbh.
+
         if args.tmin:
             TIMEOUT_SEC = minToSec(args.tmin)
             timeout.setAlarm(TIMEOUT_SEC)
@@ -261,7 +277,13 @@ def solver(arglist=None, returnHValueOnly=False):
                 print(f'Nodes generated: {a_star_nodes_generated}')
                 res = (False, None, {'space':a_star_nodes_generated, 'time':a_star_nodes_generated})
                 timeout.turnOffAlarm()
-        t_search = perf_counter() - t_before_search
+        # if parallel:
+        #     t_after_search = time.process_time()
+        # else:
+        #     t_after_search = time.perf_counter()
+        t_after_search = resource.getrusage(resource.RUSAGE_SELF).ru_utime
+
+        t_search = t_after_search - t_before_search
         
         success, steps, complexity = res
         from npuzzle.search import ida_star_nodes_generated, ida_star_max_path_length, a_star_nodes_generated
