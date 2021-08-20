@@ -117,7 +117,12 @@ def verbose_info(args, puzzle, goal_state, size, PDB_CONNECTION):
 
 #########################################################################################
 
-def solver(arglist=None, returnHValueOnly=False, parallel=False):
+def solver(arglist=None, returnHValueOnly=False, parallel=False, silent=False):
+    # NOTE: silent is poorly implemented ... not actually silent / hacked together to make parallel runs give desired output
+    # LESSON LEARNED: parallel=False is a crappy flag... should think about the desired behavior
+    # i.e. first I wanted certain prints to be suppressed for parallel runs only, then I realised
+    # there are other use cases for suppressing the prints... so parallel was a bad flag, that's the cause
+    # i should think about the desired EFFECT --> i.e. suppressed print / "silent"
     try:
         global PDB_CONNECTION
     
@@ -151,7 +156,8 @@ def solver(arglist=None, returnHValueOnly=False, parallel=False):
     #        sys.exit(exc)
         
         
-        puzzle, size, args = data    
+        puzzle, size, args = data
+        puzzle_stripped = str(puzzle).replace(',','').replace('(','').replace(')', '')
         
         #------------- SET UP LOG HEADER SCHEMA -----------#
         logheader = {
@@ -202,29 +208,27 @@ def solver(arglist=None, returnHValueOnly=False, parallel=False):
         if returnHValueOnly:
             return HEURISTIC(puzzle, goal_state, size, PDB_CONNECTION)
 
-        if not parallel:
-            verbose_info(args, puzzle, goal_state, size, PDB_CONNECTION)
-        else:
-            # TODO: message when a search is started for paralel processing (TODO) TODO TODO TODO 
-            pass
-
-        if not is_solvable(puzzle, goal_state, size):
-            print(color('red','this puzzle is not solvable'))
-            return (None, logheader, resultSet)
+        if not silent:
+            if not parallel:
+                verbose_info(args, puzzle, goal_state, size, PDB_CONNECTION)
+            if not is_solvable(puzzle, goal_state, size):
+                print(color('red','this puzzle is not solvable'))
+                return (None, logheader, resultSet)
         
         
+        # TODO: this memory workaround is hot crap, just scratch it. don't even need memory measurement. nodes enough.
         # code snippet for making IDA* memory profiling work on linux
         # problem: tracemalloc prohibitively slow, and maxrss doesn't capture it
         # NOTE: !!!!!! only implemented for 15-puzzle
     #    USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE = (size == 4) and (sys.platform == 'linux') and (args.ida)
-        USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE = False
+        # USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE = False
         
-        if not USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE:
-            if args.tracemalloc:
-                tracemalloc.start()
-            else:
-                maxrss_before_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-                print(color('white', 'max rss before search:'), maxrss_before_search)
+        # if not USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE and not silent:
+        #     if args.tracemalloc:
+        #         tracemalloc.start()
+        #     else:
+        #         maxrss_before_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #         print(color('white', 'max rss before search:'), maxrss_before_search)
     
 
         # -------- SEARCH --------- #
@@ -235,10 +239,12 @@ def solver(arglist=None, returnHValueOnly=False, parallel=False):
         # else:
         #     t_before_search() = time.perf_counter()
         #     # perf_counter includes time elapsed during sleep and is "system-wide"
+        #     # will definitely be a problem for queued up processes
 
-        t_before_search = resource.getrusage(resource.RUSAGE_SELF).ru_utime
+        t_before_search_user = resource.getrusage(resource.RUSAGE_SELF).ru_utime
         # using time because afaiu, system time includes managing CPU resources as well -
         # i.e. if a process is queued up waiting, that may include system time? not clear tbh.
+        t_before_search_process = time.process_time()   # system + user time
 
         if args.tmin:
             TIMEOUT_SEC = minToSec(args.tmin)
@@ -263,7 +269,9 @@ def solver(arglist=None, returnHValueOnly=False, parallel=False):
     #            timeOutMessage = color('red2', f' \N{ALARM CLOCK} Search timed out after {TIMEOUT_SEC} seconds ({secToMin(TIMEOUT_SEC)} mins !)')
     #            print(timeOutMessage)
                 from npuzzle.search import ida_star_nodes_generated, ida_star_max_path_length
-                print(f'Nodes generated: {ida_star_nodes_generated}')
+                if not silent:
+                    if not parallel:
+                        print(f'Nodes generated: {ida_star_nodes_generated}')
                 res = (False, None, {'space':ida_star_max_path_length, 'time':ida_star_nodes_generated})
                 timeout.turnOffAlarm()
         else:
@@ -274,16 +282,20 @@ def solver(arglist=None, returnHValueOnly=False, parallel=False):
                 searchTimedOut = True
     #            print(color('red2', f' \N{NO ENTRY SIGN}\N{STOPWATCH} Search timed out after {TIMEOUT_SEC} seconds ({secToMin(TIMEOUT_SEC)} mins !)'))
                 from npuzzle.search import a_star_nodes_generated
-                print(f'Nodes generated: {a_star_nodes_generated}')
+                if not silent:
+                    if not parallel:
+                        print(f'Nodes generated: {a_star_nodes_generated}')
                 res = (False, None, {'space':a_star_nodes_generated, 'time':a_star_nodes_generated})
                 timeout.turnOffAlarm()
         # if parallel:
         #     t_after_search = time.process_time()
         # else:
         #     t_after_search = time.perf_counter()
-        t_after_search = resource.getrusage(resource.RUSAGE_SELF).ru_utime
+        t_after_search_user = resource.getrusage(resource.RUSAGE_SELF).ru_utime
+        t_after_search_process = time.process_time()
 
-        t_search = t_after_search - t_before_search
+        t_search_user = t_after_search_user - t_before_search_user
+        t_search_process = t_after_search_process - t_before_search_process
         
         success, steps, complexity = res
         from npuzzle.search import ida_star_nodes_generated, ida_star_max_path_length, a_star_nodes_generated
@@ -293,23 +305,24 @@ def solver(arglist=None, returnHValueOnly=False, parallel=False):
             puzzle = decode(puzzle)
             steps = [decode(state) for state in steps]
         
-        if not USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE:
-            if args.tracemalloc:
-                peak = tracemalloc.get_traced_memory()[1]
-                tracemalloc.stop()
-                print(color('magenta', 'peak memory use (tracemalloc): '), prettyMemory(peak))
-                print(color('magenta', 'memory per node: '), f"{prettyMemory(peak/complexity['time'])}")
+        # TODO: more shitty workaround to just scrap... ew what a mess
+        # if not USING_LINUX_MEMORY_WORKAROUND_FOR_15PUZZLE and not silent:
+        #     if args.tracemalloc:
+        #         peak = tracemalloc.get_traced_memory()[1]
+        #         tracemalloc.stop()
+        #         print(color('magenta', 'peak memory use (tracemalloc): '), prettyMemory(peak))
+        #         print(color('magenta', 'memory per node: '), f"{prettyMemory(peak/complexity['time'])}")
     
-            else:
-                maxrss_after_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-                print(color('white', 'max rss after search: '), maxrss_after_search)
+        #     else:
+        #         maxrss_after_search = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        #         print(color('white', 'max rss after search: '), maxrss_after_search)
                 
-                # on macOS ('darwin'), max_rss reported in bytes
-                # on linux, in kB
-                maxrss_delta = maxrss_after_search-maxrss_before_search
-                maxrss_delta_pretty = prettyMemory(maxrss_delta)
-                print(color('magenta', 'peak memory use (Δ maxrss): '), maxrss_delta_pretty)
-                print(color('magenta', 'memory per node: '), f"{prettyMemory(maxrss_delta/complexity['time'])}")
+        #         # on macOS ('darwin'), max_rss reported in bytes
+        #         # on linux, in kB
+        #         maxrss_delta = maxrss_after_search-maxrss_before_search
+        #         maxrss_delta_pretty = prettyMemory(maxrss_delta)
+        #         print(color('magenta', 'peak memory use (Δ maxrss): '), maxrss_delta_pretty)
+        #         print(color('magenta', 'memory per node: '), f"{prettyMemory(maxrss_delta/complexity['time'])}")
     #    else:
     #        # NOTE: !!! only implemented for manhattan and LC heuristics
     #        peak = complexity['space']  # nodes in memory
@@ -323,37 +336,41 @@ def solver(arglist=None, returnHValueOnly=False, parallel=False):
     #            # should prob throw exception but this is thrown together ¯\_(ツ)_/¯
     #        peak *= nodesize
     #        print(color('red', 'peak memory use (calculated): '), bytes_to_human_readable_string(peak))
-        print(color('yellow2', f' \u231B search duration: {prettyTime(t_search)}'))
-        print(color('magenta2','space complexity:'), f"{complexity['space']:,}", 'nodes in memory')
-        print(color('green2','time complexity:'), f"{complexity['time']:,}", 'nodes generated')
-        print(f" {(t_search / max(complexity['time'],1)):.5f}")
-    #    fmt = '%d' + color('green2',' nodes generated, ') + '%.8f' + color('green',' second(s) per node')
-    #    print(fmt % (complexity['time'], t_search / max(complexity['time'],1) ))
-        
-        print('\n')
-        if searchTimedOut:
-            print(color('red2', f' \N{ALARM CLOCK} Search timed out after'),(color('white2', f'{prettyTime(TIMEOUT_SEC)} ')))
-        if success:
-            print(color('yellow', '\N{GLOWING STAR} solution found '))
-            print(color('yellow2','length of solution:'), max(len(steps) - 1, 0))
-            print(str(puzzle).replace(',','').replace('(','').replace(')',''))
-            if args.showsteps or args.p:
-                print(color('green', '\N{WORLD MAP} initial state and solution steps:'))  # or \N{FOOTPRINTS}
-                if args.p:
-                    pretty_print_steps(steps, size)
-                else:
-                    for s in steps:
-                        if args.f == 'pdb_8SubPrOf15':
-                            print(color('magenta', f'{s}'), '   <--->   ', color('yellow', f"{subprof15.PUZZLE_INFO['encode'](s)}"))
+        if not silent: 
+            if not parallel:
+                print(color('yellow2', f' \u231B search duration (user): {prettyTime(t_search_user)}'))
+                print(color('yellow', f' \u231B search duration (process=user+system): {prettyTime(t_search_process)}'))
+                print(color('magenta2','space complexity:'), f"{complexity['space']:,}", 'nodes in memory')
+                print(color('green2','time complexity:'), f"{complexity['time']:,}", 'nodes generated')
+            #    fmt = '%d' + color('green2',' nodes generated, ') + '%.8f' + color('green',' second(s) per node')
+            #    print(fmt % (complexity['time'], t_search / max(complexity['time'],1) ))
+                
+                print('\n')
+                if searchTimedOut:
+                    print(color('red2', f' \N{ALARM CLOCK} Search timed out after'),(color('white2', f'{prettyTime(TIMEOUT_SEC)} ')))
+                if success:
+                    print(color('yellow', '\N{GLOWING STAR} solution found '))
+                    print(color('yellow2','length of solution:'), max(len(steps) - 1, 0))
+                    print(str(puzzle).replace(',','').replace('(','').replace(')',''))
+                    if args.showsteps or args.p:
+                        print(color('green', '\N{WORLD MAP} initial state and solution steps:'))  # or \N{FOOTPRINTS}
+                        if args.p:
+                            pretty_print_steps(steps, size)
                         else:
-                            print(s)
-    
-        else:
-            print(color('red',' \N{THUMBS DOWN SIGN} solution not found'))
-    #    if success and args.v:
-    #        visualizer(steps, size)
+                            for s in steps:
+                                if args.f == 'pdb_8SubPrOf15':
+                                    print(color('magenta', f'{s}'), '   <--->   ', color('yellow', f"{subprof15.PUZZLE_INFO['encode'](s)}"))
+                                else:
+                                    print(s)
+            
+                else:
+                    print(color('red',' \N{THUMBS DOWN SIGN} solution not found'))
+                #    if success and args.v:
+                #        visualizer(steps, size)
         
-        if not receivedDBConnectionAsArgument:
+        if not receivedDBConnectionAsArgument and not parallel:
+            # for multiprocessing, appears that some processes share a connection.
+            # if connection is closed (below), throws error.
             try:
                 PDB_CONNECTION.close()
             except:
@@ -366,10 +383,11 @@ def solver(arglist=None, returnHValueOnly=False, parallel=False):
             sol_len = -1
         # -------- POPULATE RESULTSET --------#
         resultSet = {
-            'init': str(puzzle),
+            'init': puzzle_stripped,
             'foundSol': success,  # none if failed, False if not found, True if found
             'timedOut': searchTimedOut,
-            'runtime_sec': t_search,
+            't_search_user (sec)': t_search_user,
+            't_search_process (sys+user) (sec)': t_search_process,
             'nodes_gen': res[2]['time'],
             'algo': logheader['algo'], # for knowing which is time and space complexity
             'heuristic': logheader['heur'],
@@ -387,6 +405,9 @@ def solver(arglist=None, returnHValueOnly=False, parallel=False):
     #    print(color('white2', '\nlogheader:'), f'\n{logheader}')
     #    print(color('white2', '\nresultSet:'), f'\n{resultSet}')
         print('\n')
+
+        if parallel and not silent:
+            print(f"{resultSet},")
         
         return (success, logheader, resultSet)
     

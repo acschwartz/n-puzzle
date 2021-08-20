@@ -54,7 +54,10 @@ def printAndOrLog(line, log=None, doNotPrint=False):
     if not doNotPrint:
         print(line)
 
-def callSolver(args, silent=False):
+def callSolver(args, suppressHeader=False, silent=False, parallel=False):
+    if silent:
+        suppressHeader = True
+
     announcement = ''.join(
         ['\n', 
           st.center_by_padding( 
@@ -64,7 +67,7 @@ def callSolver(args, silent=False):
          '\n']
     )   
     
-    if not silent: 
+    if not suppressHeader: 
         print(color('magenta2', announcement))
     
     try:
@@ -72,7 +75,7 @@ def callSolver(args, silent=False):
 #                    f'DEBUG: wrapper | callSolver| line {lineno()} |'\
 #                    'calling solver ...')
 #        )
-        outcome = solver(args)
+        outcome = solver(args, silent=silent, parallel=parallel)
         
 #        print(color('yellow',
 #                    f'DEBUG: wrapper | callSolver| line {lineno()} |'\
@@ -734,6 +737,10 @@ if __name__ == '__main__':
                         
                         try:
 
+                            # for parallel processing, remove db connection from argslist - cannot be pickled
+                            if isinstance(ARGSLIST[0], sqlite3.Connection):
+                                ARGSLIST.pop(0)
+
                             num_lines = len(batchlines)
 
                             # attempt at Shared memory between mp Processes
@@ -764,8 +771,7 @@ if __name__ == '__main__':
                             argsThisRun.append('-ints')
                             argsThisRun.extend( str(easiest_puzzle).replace('(','').replace(')','').replace(',','').split())
 
-                            print(argsThisRun)
-                            _, logheader, _ = callSolver(argsThisRun, silent=True)
+                            _, logheader, _ = callSolver(argsThisRun, suppressHeader=True, silent=True, parallel=True)
                             logger.printLogHeader(log, RUN_ID, input_filename, output_filename, logheader['psize'], logheader['algo'], 
                                                     logheader['heur'], logheader['timeout_s'], logheader['goal'])
 

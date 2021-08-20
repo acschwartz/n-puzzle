@@ -1,6 +1,8 @@
 import multiprocessing as mp
 from solver import solver
 
+# FYI: multithreaded is different from multiprocess. this is incorrectly named. it's multiprocess :)
+
 # logging functionality removed to enable multithreading
 def process_batchline_multithreaded(line, argslist):
     argsThisRun = argslist.copy()
@@ -8,7 +10,7 @@ def process_batchline_multithreaded(line, argslist):
     puzzle = line.split()
     argsThisRun.extend(puzzle)
     
-    outcome = solver(argsThisRun, parallel=True)
+    outcome = solver(argsThisRun, parallel=True, silent=False)
 
     if outcome: 
         success, logheader, resultSet = outcome

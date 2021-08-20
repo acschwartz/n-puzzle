@@ -4,6 +4,7 @@
 #Shamelessly combined from google and other stackoverflow like sites to form a single function
 
 import platform,socket,re,uuid,json,psutil,logging
+import multiprocessing as mp
 
 def getSystemInfo():
 	try:
@@ -16,6 +17,7 @@ def getSystemInfo():
 		info['ip-address']=socket.gethostbyname(socket.gethostname())
 		info['mac-address']=':'.join(re.findall('..', '%012x' % uuid.getnode()))
 		info['processor']=platform.processor()
+		info['cpu count (vCPUs):']=mp.cpu_count()
 		info['ram']=str(round(psutil.virtual_memory().total / (1024.0 **3)))+" GB"
 		
 #		info_as_str = {str(key): str(value) for key, value in info.items()}
