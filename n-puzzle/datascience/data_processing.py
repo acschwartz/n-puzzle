@@ -93,11 +93,22 @@ def processJsonToDataframe(experiment_no, timeout_min, input_file_prefix, input_
         })
     
 
-    # populate new cols
+    # POPULATE NEW COLS
     df.insert(0, "exp", [experiment_no] * len(df), False)
-    df.insert(1, "N", [len(eval(df.loc[1, 'puzzle']))-1] * len(df), False)    # N = 8, 15, etc..
+
+    puzzle_string = df.loc[1, 'puzzle']  # "random" puzzle for purpose of calculating N of N-puzzle
+    try:
+        eval(puzzle_string)
+    except SyntaxError:
+        puzzle_string = str(list(map(int, re.findall('\d+', puzzle_string))))
+    finally:
+        df.insert(1, "N", [len(eval(puzzle_string))-1] * len(df), False)    # N = 8, 15, etc..
+
+
+
     heuristic_code = re.search('_(h\d)_', input_filename).group(1)
-    df.insert(2, 'heuristic', [heuristic_code] * len(df), False)
+    df['heuristic'] = [heuristic_code] * len(df)
+
     df.insert(3, 'timeout (min)', [timeout_min] * len(df), False)
     df['time (nodes)'] = df['nodes gen']
     df['space (nodes)'] = df['nodes gen'].where(df['algo'] == 'A*', df['search depth'])
