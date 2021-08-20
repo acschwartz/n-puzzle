@@ -8,7 +8,7 @@ def process_batchline_multithreaded(line, argslist):
     puzzle = line.split()
     argsThisRun.extend(puzzle)
     
-    outcome = solver(argsThisRun)
+    outcome = solver(argsThisRun, parallel=True)
 
     if outcome: 
         success, logheader, resultSet = outcome
