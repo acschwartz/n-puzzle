@@ -40,3 +40,9 @@ print(exp1.keys())
 
 # from pandasgui import show
 # show(exp1_all)
+
+
+# load from pkl file:with open('exp1.pkl', 'rb') as f:
+# with open('exp1_100.pkl', 'rb') as f:
+#     a = pkl.load(f)
+# print(a.keys())
