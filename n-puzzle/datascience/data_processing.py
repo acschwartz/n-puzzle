@@ -66,20 +66,34 @@ def processJsonToDataframe(experiment_no, timeout_min, input_file_prefix, input_
     df = pd.read_json(input_file_prefix+input_filename)
     df = df.transpose()
 
-    del df['foundSol']
-    del df['timedOut']
+    # delete unwanted cols
+    try:
+        del df['foundSol']
+    except KeyError:
+        pass
+    try:
+        del df['timedOut']
+    except KeyError:
+        pass
+    try:
+        del df['t_search_process (sys+user) (sec)']
+    except KeyError:
+        pass
 
+    # rename cols
     df = df.rename(columns={
         'algo': 'algo',
         'init': 'puzzle',
         'goal': 'goal',
         'max_path_len': 'search depth',
         'nodes_gen': 'nodes gen',
-        'runtime_sec': 'runtime (sec)',
         'sol_len': 'sol length',
+        'runtime_sec': 'runtime (sec)',
+        't_search_user (sec)': 'runtime (sec)' ,
         })
+    
 
-    # populate new fields
+    # populate new cols
     df.insert(0, "exp", [experiment_no] * len(df), False)
     df.insert(1, "N", [len(eval(df.loc[1, 'puzzle']))-1] * len(df), False)    # N = 8, 15, etc..
     heuristic_code = re.search('_(h\d)_', input_filename).group(1)
@@ -87,14 +101,19 @@ def processJsonToDataframe(experiment_no, timeout_min, input_file_prefix, input_
     df.insert(3, 'timeout (min)', [timeout_min] * len(df), False)
     df['time (nodes)'] = df['nodes gen']
     df['space (nodes)'] = df['nodes gen'].where(df['algo'] == 'A*', df['search depth'])
-    df['h val'] = list(map(lambda puz: get_h_value(heuristics[heuristic_code].solverpy, puz), df['puzzle'].to_list() ))
+
+    try:
+        df['h_val']
+        df = df.rename(columns={ 'h_val': 'h val' })
+    except KeyError:
+        df['h val'] = list(map(lambda puz: get_h_value(heuristics[heuristic_code].solverpy, puz), df['puzzle'].to_list() ))
 
 
     # convert sol length = -1 to null (for ability to easily query % non-null)
     df['sol length'] = df['sol length'].where(df['sol length'] > 0, pd.NA)
 
     # round runtimes
-    df['runtime (sec)'] = [np.around(df['runtime (sec)'][i], 1) for i in range(1, len(df)+1)]
+    # df['runtime (sec)'] = [np.around(df['runtime (sec)'][i], 1) for i in range(1, len(df)+1)]
     
     # calculate effective branching factor (b*)
     df['b*'] = [ calcEffectiveBranchingFactor(df, i) for i in range(1, len(df)+1) ]
@@ -116,9 +135,9 @@ def processJsonToDataframe(experiment_no, timeout_min, input_file_prefix, input_
         'b*': 'Float64',
         'nodes gen': 'Int64', 
         'search depth': 'Int64',
-        'puzzle': 'string',
         'N': 'Int64',
         'goal': 'string',
+        'puzzle': 'string',
     }
 
     # re-order columns
