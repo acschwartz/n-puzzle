@@ -314,7 +314,7 @@ def solver(arglist=None, returnHValueOnly=False):
         if success:
             print(color('yellow', '\N{GLOWING STAR} solution found '))
             print(color('yellow2','length of solution:'), max(len(steps) - 1, 0))
-            print(str(puzzle))
+            print(str(puzzle).replace(',','').replace('(','').replace(')',''))
             if args.showsteps or args.p:
                 print(color('green', '\N{WORLD MAP} initial state and solution steps:'))  # or \N{FOOTPRINTS}
                 if args.p:
