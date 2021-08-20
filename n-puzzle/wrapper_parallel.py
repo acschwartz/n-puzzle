@@ -1,15 +1,24 @@
 #!/usr/bin/env python3
 
+'''
+NOTE: this is very much hacked together, only meant to be used for batch input
+basically modified the batch input bit to run as multiple processes, just enough to make it run
+this also broke a bunch of other functonality, like saving partial runs if they are interrupted
+but it works for batch input. use only for that.
+'''
+
 import argparse
 import sqlite3
 import re
 import os
 import sys
 import json
+import multiprocessing as mp
 #import textwrap
 # TODO: https://programmer.help/blogs/python-3-standard-library-textwarp-text-wrapping-and-filling.html
 
 from copy import copy
+from functools import partial
 from math import ceil, floor
 from time import strftime, perf_counter
 
@@ -24,7 +33,7 @@ from npuzzle import logger
 from npuzzle import platform_info
 
 from solver import solver
-
+from process_batchline_multithreaded import process_batchline_multithreaded
 
 colors.enabled = True
 global RUN_ID
@@ -404,7 +413,7 @@ if __name__ == '__main__':
                         ['-f', ''.join(['pdb_', wrapperArgs.pdb])]
                     )
                 
-                wroteLogHeaderInfo = False
+                wroteLogHeaderInfo = mp.Value('b', False, lock=True)
                 # Log Header info for an input batch is collected
                 # when the first input is run, and is written once.
                 # (Since the contents of the header are the same for all
@@ -724,58 +733,45 @@ if __name__ == '__main__':
                             
                         
                         try:
+
                             num_lines = len(batchlines)
-                            n_processed = 0
-                            n_success = 0
-                            n_fail = 0
+
+                            # attempt at Shared memory between mp Processes
+                            # can't do that with p.map, so leaving so as not to break references to the vars
+                            n_processed = mp.Value('i', 0, lock=True)
+                            n_success = mp.Value('i', 0, lock=True)
+                            n_fail = mp.Value('i', 0, lock=True)
+
                             t_start = perf_counter()
                             
-                            for line in batchlines:
-                                
-                                argsThisRun = ARGSLIST.copy()
-                                argsThisRun.append('-ints')
-                                puzzle = line.split()
-                                argsThisRun.extend(puzzle)
-                                
-                                printRunHeader()
-                                
-#                                print(color('yellow',
-#                                            f'DEBUG: wrapper | wrapper|'\
-#                                            f'line {lineno()} |'\
-#                                            'calling callSolver,'\
-#                                            'expecting 3 return vals')
-#                                )
-                                outcome = callSolver(argsThisRun, silent=True)
-                                
-                                if outcome: 
-                                    success, logheader, resultSet = outcome
-                                
-                                    if log and \
-                                    resultSet and \
-                                    not wroteLogHeaderInfo:
-                                        logger.printLogHeader(log, RUN_ID, input_filename, output_filename, logheader['psize'], logheader['algo'], logheader['heur'], logheader['timeout_s'], logheader['goal'])
-#                                        print(color('yellow',
-#                                                    f'DEBUG: wrapper | wrapper| line {lineno()} |'\
-#                                                    'Wrote logheader to log file')
-#                                        )
-                                        wroteLogHeaderInfo = True
-                                else:
-                                    success = None
-                                    logheader = None
-                                    resultSet = None
-                                    
-                                n_processed += 1
-                                if success is not None:
-                                    n_success += 1
-                                else:
-                                    n_fail += 1
-                                
-                                if resultSet:
-                                    resultsDictionary[n_processed] = resultSet.copy()
-                                    # NOTE:  FAILED RUNS ARE NOT RECORDED TO LOG OR REUSLTS RN!
-                                print('\n')
+                            with mp.Pool() as p:
+                                resultsets_list = p.map(partial(process_batchline_multithreaded, argslist=ARGSLIST), batchlines)
+
+                            # populate results dict
+                            for i, result in enumerate(resultsets_list, 1):
+                                resultsDictionary[i] = result
                             
+                            # RUN ONE MORE TIME ON EASIEST PUZZLE TO GET INFO FOR LOG HEADER
+                            easiest_puzzle = []
+                            shortest_solution = 999
+
+                            for res in resultsets_list:
+                                if res['sol_len'] > 0 and res['sol_len'] < shortest_solution:
+                                    shortest_solution = res['sol_len']
+                                    easiest_puzzle = res['init']
+
+                            argsThisRun = ARGSLIST.copy()
+                            argsThisRun.append('-ints')
+                            argsThisRun.extend( str(easiest_puzzle).replace('(','').replace(')','').replace(',','').split())
+
+                            print(argsThisRun)
+                            _, logheader, _ = callSolver(argsThisRun, silent=True)
+                            logger.printLogHeader(log, RUN_ID, input_filename, output_filename, logheader['psize'], logheader['algo'], 
+                                                    logheader['heur'], logheader['timeout_s'], logheader['goal'])
+
+                            # write results dict to JSON file
                             writeOutput()
+
                             break
                         except Exception as exc:
                             printException(exc, lineno())
@@ -792,14 +788,15 @@ if __name__ == '__main__':
                             
                             success, logheader, resultSet = callSolver(ARGSLIST)
                             
-                            if log and not wroteLogHeaderInfo:
-                                log.printLogHeader(log, RUN_ID, input_filename, output_filename, logheader['psize'], logheader['algo'], logheader['heur'], logheader['timeout_s'], logheader['goal'])
-                                wroteLogHeaderInfo = True
-                                
-#                                print(color('yellow',
-#                                            f'DEBUG: wrapper | wrapper| line {lineno()} |'\
-#                                            'Wrote logheader to log file')
-#                                )
+                            with wroteLogHeaderInfo.get_lock():
+                                if log and not wroteLogHeaderInfo:
+                                    log.printLogHeader(log, RUN_ID, input_filename, output_filename, logheader['psize'], logheader['algo'], logheader['heur'], logheader['timeout_s'], logheader['goal'])
+                                    wroteLogHeaderInfo = True
+                                    
+    #                                print(color('yellow',
+    #                                            f'DEBUG: wrapper | wrapper| line {lineno()} |'\
+    #                                            'Wrote logheader to log file')
+    #                                )
                                 
                             continue
                         except Exception as exc:
