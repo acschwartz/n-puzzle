@@ -22,7 +22,7 @@ Time Complexity (nodes) | Runtime (measured)
 ## Heuristic Quality: &nbsp; % error, &nbsp;b\*
 ### Mean Effective Branching Factor (b\*)
 
- | h1 | h2 | h3
+&nbsp; | h1 | h2 | h3
 ------------ | ------------- | ------------ | -------------
 A\* | 1.45 | 1.29 | 1.26
 IDA\* | 1.56 | 1.31 | 1.26
