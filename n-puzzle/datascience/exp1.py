@@ -42,7 +42,7 @@ for filename in input_filenames:
     df_nickname = df['algo'][1].replace('*', '') + '_' + df['heuristic'][1]  # e.g. 'A_h1'
     dict_of_dataframes[df_nickname] = df.copy()
   
-with open(f'exp{experiment_no}_dict_of_dataframes.pkl', 'wb') as f:
+with open(f'exp{experiment_no}/exp{experiment_no}_dict_of_dataframes.pkl', 'wb') as f:
     pkl.dump(dict_of_dataframes, f, protocol=0)
 
 print('\ndict name:\texp1')
@@ -60,11 +60,11 @@ for k in dict_of_dataframes.keys():
     data = data.append(dict_of_dataframes[k])
     print(data.info())
 
-from pandasgui import show
-show(data)
+# from pandasgui import show
+# show(data)
 
-with open(f'exp{experiment_no}_all.pkl', 'wb') as f:
-    df.to_pickle(f)
+with open(f'exp{experiment_no}/exp{experiment_no}_all.pkl', 'wb') as f:
+    data.to_pickle(f)
 
 
 # load pickled Pandas DataFrame:
