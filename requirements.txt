@@ -11,12 +11,12 @@ jedi==0.18.0
 kiwisolver==1.3.1
 matplotlib==3.4.3
 matplotlib-inline==0.1.2
--e git+https://github.com/acschwartz/n-puzzle.git@959365ea4e668f4055ce3b130dfe07061aaad22b#egg=npuzzle&subdirectory=n-puzzle/npuzzle
+-e git+https://github.com/acschwartz/n-puzzle.git@8907e3ca6fd7cdec46ef00d7e06428fc20c27ea6#egg=npuzzle&subdirectory=n-puzzle/npuzzle
 numpy==1.21.1
 pandas==1.3.1
 pandasgui==0.2.13
 parso==0.8.2
--e git+https://github.com/acschwartz/n-puzzle.git@959365ea4e668f4055ce3b130dfe07061aaad22b#egg=patterngen&subdirectory=patterngen
+-e git+https://github.com/acschwartz/n-puzzle.git@8907e3ca6fd7cdec46ef00d7e06428fc20c27ea6#egg=patterngen&subdirectory=patterngen
 pexpect==4.8.0
 pickleshare==0.7.5
 Pillow==8.3.1
@@ -40,6 +40,8 @@ PyQtWebEngine-Qt5==5.15.2
 python-dateutil==2.8.2
 pytz==2021.1
 qtstylish==0.1.4
+scipy==1.7.1
+seaborn==0.11.2
 six==1.16.0
 tenacity==8.0.1
 toml==0.10.2
