@@ -5,6 +5,8 @@ Input: **500 8-puzzles**
 &nbsp;
 
 ## Algorithms and Heuristics: &nbsp; A\*, IDA* &nbsp;&times; &nbsp; h1, h2, h3
+h3 generates fewer nodes than h2, but runs slower (on the 8-puzzle) due to the 'slower' (more calculation intensive) heuristic
+
 ### A\*
 
 Time Complexity (nodes) | Runtime (measured)
@@ -19,7 +21,6 @@ Time Complexity (nodes) | Runtime (measured)
 ------------ | -------------
 ![IDA\* Time Complexity](img/ida_nodes_gen.png) | ![IDA\* Measured Runtime](img/ida_runtime_sec.png)
 
-h3 generates fewer nodes than h2, but runs slower (on the 8-puzzle) due to the 'slower' (more calculation intensive) heuristic
 
 &nbsp;
 
@@ -51,13 +52,13 @@ h3 | 30.8% | 10.3%
 &nbsp;
 
 ## IDA\*: Effect of Random Node Ordering
-(all heuristics: h1, h2, h3)
-
-Time Complexity (nodes) | Runtime (measured)
------------- | -------------
-![](img/ida_vs_ida-R_nodesgen_h1h2h3.png) | ![](img/ida_vs_ida-R_runtime_sec_h1h2h3.png)
+**(all heuristics: h1, h2, h3)**
 
 On 8-puzzle, random ordering performs comparably to (on average) or generates fewer nodes (in the worst case) than tabular node ordering, 
 ...but... IDA\*-R has a longer runtime in practice. 
 
 It seems that on the 8-puzzle, that extra line of code makes a significant difference. Curious to see how this differs on the 15-puzzle, a larger search space.
+
+Time Complexity (nodes) | Runtime (measured)
+------------ | -------------
+![](img/ida_vs_ida-R_nodesgen_h1h2h3.png) | ![](img/ida_vs_ida-R_runtime_sec_h1h2h3.png)
