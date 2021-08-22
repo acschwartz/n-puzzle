@@ -6,7 +6,6 @@ Input: **500 8-puzzles**
 
 ## Algorithms and Heuristics: &nbsp; A\*, IDA* &nbsp;&times; &nbsp; h1, h2, h3
 ### A\*
-h3 generates fewer nodes than h2, but runs slower (on the 8-puzzle) due to the 'slower' (more calculation intensive) heuristic
 
 Time Complexity (nodes) | Runtime (measured)
 ------------ | -------------
@@ -19,6 +18,8 @@ Time Complexity (nodes) | Runtime (measured)
 Time Complexity (nodes) | Runtime (measured)
 ------------ | -------------
 ![IDA\* Time Complexity](img/ida_nodes_gen.png) | ![IDA\* Measured Runtime](img/ida_runtime_sec.png)
+
+h3 generates fewer nodes than h2, but runs slower (on the 8-puzzle) due to the 'slower' (more calculation intensive) heuristic
 
 &nbsp;
 
