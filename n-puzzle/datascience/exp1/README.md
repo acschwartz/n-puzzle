@@ -38,9 +38,10 @@ h3 | 30.8% | 10.3%
 
 &nbsp;
 
+### Heuristic % Error vs. b*
+&nbsp; | &nbsp;
 ------------ | -------------
 ![](img/heuristics_%error_vs_bstar_all_obs.png) | ![](img/heuristics_%error_vs_bstar_by_heuristic.png) 
-
 ![](img/heuristics_%error_vs_bstar_by_algo.png) | ![](img/heuristics_%error_vs_bstar_by_algo&heur.png)
 
 
