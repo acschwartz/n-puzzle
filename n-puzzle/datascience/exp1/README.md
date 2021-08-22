@@ -2,6 +2,8 @@
 
 Input: **500 8-puzzles**
 
+&nbsp;
+
 ## Algorithms and Heuristics: &nbsp; A\*, IDA* &nbsp;&times; &nbsp; h1, h2, h3
 ### A\*
 h3 generates fewer nodes than h2, but runs slower (on the 8-puzzle) due to the 'slower' (more calculation intensive) heuristic
@@ -18,6 +20,7 @@ Time Complexity (nodes) | Runtime (measured)
 ------------ | -------------
 ![IDA\* Time Complexity](img/ida_nodes_gen.png) | ![IDA\* Measured Runtime](img/ida_runtime_sec.png)
 
+&nbsp;
 
 ## Heuristic Quality: &nbsp; % error, &nbsp;b\*
 ### Mean Effective Branching Factor (b\*)
@@ -44,6 +47,7 @@ h3 | 30.8% | 10.3%
 ![](img/heuristics_%25error_vs_bstar_all_obs.png) | ![](img/heuristics_%25error_vs_bstar_by_heuristic.png) 
 ![](img/heuristics_%25error_vs_bstar_by_algo.png) | ![](img/heuristics_%25error_vs_bstar_by_algo&heur.png)
 
+&nbsp;
 
 ## IDA\*: Effect of Random Node Ordering
 (all heuristics: h1, h2, h3)
