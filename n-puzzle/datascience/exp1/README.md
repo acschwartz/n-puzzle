@@ -46,7 +46,7 @@ h3 | 30.8% | 10.3%
 
 
 ## IDA\*: Effect of Random Node Ordering
-(all heuristics)
+(all heuristics: h1, h2, h3)
 
 Time Complexity (nodes) | Runtime (measured)
 ------------ | -------------
