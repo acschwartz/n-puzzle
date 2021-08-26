@@ -45,7 +45,7 @@ for filename in input_filenames:
 with open(f'exp{experiment_no}/exp{experiment_no}_dict_of_dataframes.pkl', 'wb') as f:
     pkl.dump(dict_of_dataframes, f, protocol=0)
 
-print('\ndict name:\texp1')
+print('\ndict name:\tdict_of_dataframes')
 print(dict_of_dataframes.keys())
 
 # load dict of DFs from pkl file:
