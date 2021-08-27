@@ -12,7 +12,7 @@ PUZZLE_INFO = {
 				'goal_state': 'zero_first',
 				'goal state repr': (0, 1, 2, 3, 4, 5, 6, 7, 8),
 				'empty tile': 0,
-				'dbfile': 'npuzzle/pdb/eightpuzzle/full8puzzle/full8puzzle_pdb_210510-122014.db',
+				'dbfile': 'npuzzle/pdb/eightpuzzle/full8puzzle/full8puzzle_pdb_210827-112025.db',
 				}
 
 

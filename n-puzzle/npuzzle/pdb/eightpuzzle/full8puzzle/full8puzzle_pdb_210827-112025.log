@@ -1,0 +1,33 @@
+==========================================================================
+Run ID: 210827-112025
+Database ID: full8puzzle_pdb_210827-112025
+Pattern type: full8puzzle
+==========================================================================
+
+
+==========================================================================
+	Stats
+==========================================================================
+database file : output/full8puzzle_pdb_210827-112025.db
+entries collected : 181440
+memory : 6.39MB
+memory_raw : 6701056
+platform : darwin
+time : 0.0 hours 0.0 mins 21.64 sec
+time_raw : 21.64
+==========================================================================
+Number tables: 9
+  Tables are separated by the location of the empty tile - it is imputed from the table number
+  i.e. table0 hold all entries where the empty tile is at location 0 in the puzzle, etc...
+
+Table names:
+   0     PatternCosts_EmptyTileLocation_0
+   1     PatternCosts_EmptyTileLocation_1
+   2     PatternCosts_EmptyTileLocation_2
+   3     PatternCosts_EmptyTileLocation_3
+   4     PatternCosts_EmptyTileLocation_4
+   5     PatternCosts_EmptyTileLocation_5
+   6     PatternCosts_EmptyTileLocation_6
+   7     PatternCosts_EmptyTileLocation_7
+   8     PatternCosts_EmptyTileLocation_8
+==========================================================================
