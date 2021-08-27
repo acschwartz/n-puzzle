@@ -6,19 +6,6 @@ from data_processing import *
 # INPUTS
 experiment_no = 1
 timeout_min = pd.NA
-# input_filename_prefix = 'data/Exp 1 (100 8-puzzles)/'
-# input_filenames = [
-#     '8puz_AStar_h1___May12-2021_02-37-50PM.json',
-#     '8puz_AStar_h2___May12-2021_02-38-57PM.json',
-#     '8puz_AStar_h3___May12-2021_02-39-18PM.json',
-#     '8puz_IDA-R_h1___May12-2021_02-54-58PM.json',
-#     '8puz_IDA-R_h2___May12-2021_02-57-21PM.json',
-#     '8puz_IDA-R_h3___May12-2021_02-57-44PM.json',
-#     '8puz_IDA_h1___May12-2021_02-46-49PM.json',
-#     '8puz_IDA_h2___May12-2021_02-49-36PM.json',
-#     '8puz_IDA_h3___May12-2021_02-50-13PM.json'
-# ]
-
 input_filename_prefix = 'data/Experiment 1 (500 8-puzzles)/'
 input_filenames = [
     '500_astar_h1___08-20-2021_08-48-56PM.json', 
@@ -49,7 +36,7 @@ print('\ndict name:\tdict_of_dataframes')
 print(dict_of_dataframes.keys())
 
 # load dict of DFs from pkl file:
-# with open('exp1_100.pkl', 'rb') as f:
+# with open('{FILENAME}.pkl', 'rb') as f:
     # a = pkl.load(f)
     # print(a.keys())
 
@@ -59,6 +46,8 @@ data = pd.DataFrame()
 for k in dict_of_dataframes.keys():
     data = data.append(dict_of_dataframes[k])
     print(data.info())
+
+df = data  # alternate name
 
 # from pandasgui import show
 # show(data)

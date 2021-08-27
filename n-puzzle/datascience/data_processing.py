@@ -109,9 +109,11 @@ def processJsonToDataframe(experiment_no, timeout_min, input_file_prefix, input_
     heuristic_code = re.search('_(h\d)_', input_filename).group(1)
     df['heuristic'] = [heuristic_code] * len(df)
 
-    df.insert(3, 'timeout (min)', [timeout_min] * len(df), False)
-    df['time (nodes)'] = df['nodes gen']
-    df['space (nodes)'] = df['nodes gen'].where(df['algo'] == 'A*', df['search depth'])
+    if not pd.isnull(timeout_min):
+        df.insert(3, 'timeout (min)', [timeout_min] * len(df), False)
+    
+    # df['time (nodes)'] = df['nodes gen']
+    # df['space (nodes)'] = df['nodes gen'].where(df['algo'] == 'A*', df['search depth'])
 
     try:
         df['h_val']
@@ -137,19 +139,35 @@ def processJsonToDataframe(experiment_no, timeout_min, input_file_prefix, input_
         'algo': 'string',
         'heuristic': 'string',
         'h val': 'Int64',
-        'sol length': 'Int64',
         'h % error': 'Float64',
-        'timeout (min)': 'Int64',
-        'runtime (sec)': 'Float64',
-        'time (nodes)': 'Int64',
-        'space (nodes)': 'Int64',
-        'b*': 'Float64',
+        'sol length': 'Int64',
         'nodes gen': 'Int64', 
+        'runtime (sec)': 'Float64',
+        'b*': 'Float64',
         'search depth': 'Int64',
         'N': 'Int64',
         'goal': 'string',
         'puzzle': 'string',
     }
+
+    try:
+        df['timeout (min)']
+        cols['timeout (min)'] = 'Int64'
+    except KeyError:
+        pass
+
+    try:
+        df['time (nodes)']
+        cols['time (nodes)'] = 'Int64'
+    except KeyError:
+        pass
+
+    try:
+        df['space (nodes)']
+        cols['space (nodes)'] = 'Int64'
+    except KeyError:
+        pass
+        
 
     # re-order columns
     df = df[list(cols.keys())]
