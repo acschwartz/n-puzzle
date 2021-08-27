@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from encoding import *
+from pdbgen.encoding import *
 
 ##==============================================================================================##
 PATTERN_INFO = {
